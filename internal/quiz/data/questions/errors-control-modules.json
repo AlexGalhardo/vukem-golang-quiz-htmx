@@ -348,8 +348,8 @@
 			"pt-BR": "O módulo `example.com/shop` contém o pacote `example.com/shop/internal/pricing`. Que código pode importá-lo?"
 		},
 		"explanation": {
-			"en": "A package in or below a directory named `internal` can be imported only by code rooted at the parent of that `internal` directory. Here the parent is `example.com/shop`, so `example.com/shop/...` packages may import it and anything outside that tree gets a `use of internal package ... not allowed` error. The rule is enforced by the `go` command.",
-			"pt-BR": "Um pacote dentro (ou abaixo) de um diretório chamado `internal` só pode ser importado por código que esteja sob o diretório pai desse `internal`. Aqui o pai é `example.com/shop`, então pacotes `example.com/shop/...` podem importá-lo e qualquer coisa fora dessa árvore recebe o erro `use of internal package ... not allowed`. A regra é aplicada pelo comando `go`."
+			"en": "A package in or below a directory named `internal` can be imported only by code rooted at the parent of that `internal` directory. Here the parent is `example.com/shop`, so the module root and every `example.com/shop/...` package may import it and anything outside that tree gets a `use of internal package ... not allowed` error. The rule is enforced by the `go` command.",
+			"pt-BR": "Um pacote dentro (ou abaixo) de um diretório chamado `internal` só pode ser importado por código que esteja sob o diretório pai desse `internal`. Aqui o pai é `example.com/shop`, então a raiz do módulo e todo pacote `example.com/shop/...` podem importá-lo e qualquer coisa fora dessa árvore recebe o erro `use of internal package ... not allowed`. A regra é aplicada pelo comando `go`."
 		},
 		"alternatives": [
 			{
@@ -371,7 +371,7 @@
 			{
 				"id": "c",
 				"correct": true,
-				"text": { "en": "Any package whose path starts with `example.com/shop/`", "pt-BR": "Qualquer pacote cujo caminho comece com `example.com/shop/`" }
+				"text": { "en": "`example.com/shop` itself and any package below it", "pt-BR": "O próprio `example.com/shop` e qualquer pacote abaixo dele" }
 			},
 			{
 				"id": "d",
@@ -444,7 +444,7 @@
 				"text": { "en": "It does not compile: `break` is not allowed in a `case`", "pt-BR": "Não compila: `break` não é permitido em um `case`" },
 				"why": {
 					"en": "`break` is valid in a `switch`; it is just redundant here because Go cases do not fall through.",
-					"pt-BR": "`break` é válido em um `switch`; só é redundante aqui porque os cases de Go não caem no próximo."
+					"pt-BR": "`break` é válido em um `switch`; só é redundante aqui porque em Go os cases não têm fallthrough automático."
 				}
 			}
 		],
@@ -470,8 +470,8 @@
 				"id": "a",
 				"text": { "en": "Each package may have at most one `init` function", "pt-BR": "Cada pacote pode ter no máximo uma função `init`" },
 				"why": {
-					"en": "`init` is special: it is the one identifier that can be declared many times in the same package.",
-					"pt-BR": "`init` é especial: é o único identificador que pode ser declarado várias vezes no mesmo pacote."
+					"en": "`init` is special: unlike every other function name, it can be declared many times in the same package, even in the same file.",
+					"pt-BR": "`init` é especial: ao contrário de qualquer outro nome de função, pode ser declarada várias vezes no mesmo pacote, até no mesmo arquivo."
 				}
 			},
 			{
@@ -957,7 +957,7 @@
 				"text": { "en": "The build fails until you pick one with a `replace` directive", "pt-BR": "O build falha até você escolher uma com a diretiva `replace`" },
 				"why": {
 					"en": "Differing minor requirements are not a conflict in MVS; the highest requirement is selected automatically.",
-					"pt-BR": "Requisitos de minor diferentes não são conflito na MVS; o maior requisito é escolhido automaticamente."
+					"pt-BR": "Requisitos com minor versions diferentes não são conflito na MVS; o maior requisito é escolhido automaticamente."
 				}
 			}
 		],
@@ -1013,8 +1013,8 @@
 				"id": "e",
 				"text": { "en": "The result depends on the scheduler: sometimes it recovers, sometimes it crashes", "pt-BR": "Depende do scheduler: às vezes recupera, às vezes cai" },
 				"why": {
-					"en": "Scheduling only changes when the panic happens; recovery from another goroutine is never possible.",
-					"pt-BR": "O scheduler só muda quando o panic acontece; recuperar a partir de outra goroutine nunca é possível."
+					"en": "Scheduling only affects the moment the panic happens; recovering it from another goroutine is never possible.",
+					"pt-BR": "O scheduler só afeta o momento em que o panic acontece; recuperá-lo a partir de outra goroutine nunca é possível."
 				}
 			}
 		],
@@ -1041,8 +1041,8 @@
 				"id": "a",
 				"text": { "en": "a + b\ntrue false\nfalse\n\"a\\nb\"", "pt-BR": "a + b\ntrue false\nfalse\n\"a\\nb\"" },
 				"why": {
-					"en": "That was the behavior before Go 1.20, when only one `%w` was allowed; now every `%w` operand is wrapped.",
-					"pt-BR": "Esse era o comportamento antes do Go 1.20, quando só um `%w` era permitido; agora todo operando de `%w` é encapsulado."
+					"en": "Since Go 1.20 every `%w` operand is wrapped, so `errors.Is` finds `ErrB` too; and the result has `Unwrap() []error`, not `Unwrap() error`, so `errors.Unwrap` returns nil.",
+					"pt-BR": "Desde o Go 1.20 todo operando de `%w` é encapsulado, então `errors.Is` também acha `ErrB`; e o resultado tem `Unwrap() []error`, não `Unwrap() error`, então `errors.Unwrap` retorna nil."
 				}
 			},
 			{
@@ -1251,7 +1251,7 @@
 		"sources": [
 			{ "title": "The Go Programming Language Specification: Comparison operators", "url": "https://go.dev/ref/spec#Comparison_operators", "kind": "spec" },
 			{ "title": "errors package: Is", "url": "https://pkg.go.dev/errors#Is", "kind": "doc" },
-			{ "title": "Dave Cheney: Don't just check errors, handle them gracefully", "url": "https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully", "kind": "article" }
+			{ "title": "Go source: errors/wrap.go (Is checks Comparable before ==)", "url": "https://github.com/golang/go/blob/master/src/errors/wrap.go", "kind": "source-code" }
 		]
 	}
 ]
