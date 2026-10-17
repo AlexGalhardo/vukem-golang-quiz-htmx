@@ -6,6 +6,8 @@ const baseURL = process.env.E2E_BASE_URL ?? "http://localhost:3000";
 
 export default defineConfig({
 	testDir: "e2e",
+	// The human-like QA suite has its own config (playwright.qa.config.ts).
+	testIgnore: "qa/**",
 	fullyParallel: true,
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 1 : 0,

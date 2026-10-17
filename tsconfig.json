@@ -11,5 +11,5 @@
 		"allowJs": false,
 		"types": ["node"]
 	},
-	"include": ["resources/js/**/*.ts", "e2e/**/*.ts", "playwright.config.ts", "commitlint.config.ts"]
+	"include": ["resources/js/**/*.ts", "e2e/**/*.ts", "playwright.config.ts", "playwright.qa.config.ts", "commitlint.config.ts"]
 }

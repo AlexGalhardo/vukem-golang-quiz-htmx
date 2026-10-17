@@ -10,6 +10,7 @@
 		"test:unit": "bun test resources/js",
 		"lint:md": "markdownlint-cli2",
 		"test:e2e": "playwright test",
+		"test:qa": "playwright test -c playwright.qa.config.ts",
 		"hooks": "lefthook install"
 	},
 	"devDependencies": {
