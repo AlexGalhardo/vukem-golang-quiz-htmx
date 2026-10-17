@@ -8,6 +8,7 @@ import (
 	"github.com/AlexGalhardo/vukem/vukemtest"
 
 	"github.com/AlexGalhardo/vukem-golang-quiz-htmx/bootstrap"
+	"github.com/AlexGalhardo/vukem-golang-quiz-htmx/internal/settings"
 )
 
 func TestSecurity_Headers_Present(t *testing.T) {
@@ -151,8 +152,7 @@ func TestSecurity_RateLimit_PerIP(t *testing.T) {
 	app.Client(t).Get("/up").AssertOK()
 }
 
-// rateLimitForTests mirrors routes.rateLimit (120 requests per minute).
-const rateLimitForTests = 120
+const rateLimitForTests = settings.DefaultRateLimit
 
 func TestSecurity_Oversized_Rejected(t *testing.T) {
 	t.Parallel()

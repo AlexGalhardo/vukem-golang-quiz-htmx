@@ -22,12 +22,8 @@ import (
 // anything larger than a few KiB is abuse.
 const maxBody = 16 << 10
 
-// Rate limit per client IP. A full quiz run is ~2 requests per question, so
-// 120/min leaves room for fast keyboard users while stopping scrapers.
-const (
-	rateLimit  = 120
-	rateWindow = time.Minute
-)
+// rateWindow is the rate limit window; the budget is settings.LoadRateLimit.
+const rateWindow = time.Minute
 
 // Web returns the route file. shuffle orders the alternatives (nil means
 // rand.Shuffle); tests pass a seeded one.
@@ -43,6 +39,11 @@ func Web(bank *quiz.Bank, shuffle quiz.Shuffler) func(r *router.Router, app *vuk
 		}
 
 		proxy, err := settings.LoadProxy(app.Source.Get)
+		if err != nil {
+			return err
+		}
+
+		rateLimit, err := settings.LoadRateLimit(app.Source.Get)
 		if err != nil {
 			return err
 		}

@@ -113,3 +113,32 @@ func TestLoadProxy(t *testing.T) {
 		}
 	}
 }
+
+func TestLoadRateLimit(t *testing.T) {
+	t.Parallel()
+
+	tests := []struct {
+		name    string
+		value   string
+		want    int
+		wantErr bool
+	}{
+		{"default", "", DefaultRateLimit, false},
+		{"custom", "600", 600, false},
+		{"spaces", " 30 ", 30, false},
+		{"zero", "0", 0, true},
+		{"negative", "-1", 0, true},
+		{"not a number", "lots", 0, true},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Parallel()
+
+			got, err := LoadRateLimit(env(map[string]string{"RATE_LIMIT_PER_MINUTE": tt.value}))
+			if (err != nil) != tt.wantErr || got != tt.want {
+				t.Errorf("LoadRateLimit(%q) = %d, %v; want %d, err %v", tt.value, got, err, tt.want, tt.wantErr)
+			}
+		})
+	}
+}

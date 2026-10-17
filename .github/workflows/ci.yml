@@ -104,6 +104,8 @@ jobs:
       APP_ENV: production
       APP_URL: http://localhost:3000
       E2E_BASE_URL: http://localhost:3000
+      # The whole suite shares one client IP.
+      RATE_LIMIT_PER_MINUTE: "10000"
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: oven-sh/setup-bun@v2.2.0
@@ -149,7 +151,7 @@ jobs:
           cache-to: type=gha,mode=max
       - name: run container and smoke test
         run: |
-          docker run -d --name quiz -p 8080:3000 -e APP_KEY="$APP_KEY" -e APP_URL=http://localhost:8080 vukem-quiz:ci
+          docker run -d --name quiz -p 8080:3000 -e APP_KEY="$APP_KEY" -e APP_URL=http://localhost:8080 -e RATE_LIMIT_PER_MINUTE=10000 vukem-quiz:ci
           for i in $(seq 1 30); do curl -fsS http://localhost:8080/up && break; sleep 1; done
           curl -fsS http://localhost:8080/up
           curl -fsS -o /dev/null http://localhost:8080/

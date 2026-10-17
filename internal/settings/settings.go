@@ -113,3 +113,24 @@ func LoadProxy(get Getter) (Proxy, error) {
 
 	return p, nil
 }
+
+// DefaultRateLimit is the per-IP budget per minute. A full quiz run is ~2
+// requests per question, so 120/min leaves room for fast keyboard users
+// while stopping scrapers.
+const DefaultRateLimit = 120
+
+// LoadRateLimit reads RATE_LIMIT_PER_MINUTE (requests per IP per minute).
+// CI raises it because the whole e2e suite shares one client IP.
+func LoadRateLimit(get Getter) (int, error) {
+	v := strings.TrimSpace(get("RATE_LIMIT_PER_MINUTE"))
+	if v == "" {
+		return DefaultRateLimit, nil
+	}
+
+	n, err := strconv.Atoi(v)
+	if err != nil || n <= 0 {
+		return 0, fmt.Errorf("RATE_LIMIT_PER_MINUTE %q must be a positive integer", v)
+	}
+
+	return n, nil
+}
