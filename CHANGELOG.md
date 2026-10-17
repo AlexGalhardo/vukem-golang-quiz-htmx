@@ -17,6 +17,9 @@ All notable changes to this project are documented here. The format follows [Kee
 - `TRUSTED_PROXIES`, `TRUST_FORWARDED_PROTO` and `RATE_LIMIT_PER_MINUTE` (default 120 per IP; `/up` exempt).
 - Tests: HTTP tests for every route and locale, security abuse suite (headers, no cookies, GET only, reflected XSS, path traversal, error pages, rate limit, oversized URLs), Playwright e2e for every button, link, shortcut and setting on desktop and mobile.
 
+- Accessibility: axe scan (`@axe-core/playwright` 4.14.0, dev dependency) in the e2e suite on every page state, light/dark, EN/PT-BR, desktop/mobile; serious or critical violations fail CI.
+- `scripts/smoke.sh <url>` smoke test (health, page, question fragment, answer, headers, 404), used by the CI DAST job; Nuclei medium+ findings and `internal/quiz` coverage below 85% fail CI.
+
 ### Changed
 
 - vukem bumped to v0.22.0, then v0.23.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
@@ -25,5 +28,6 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - Alternatives that differ only in punctuation (code literals) are no longer rejected as duplicates.
 - "Next" used a full page load because `htmx` was read before its deferred script ran; the settings panel now closes on Escape or an outside click; Back returns to the first question.
+- Overlapping question loads (fast setting changes) could finish out of order and leave a stale question on screen.
 
 [Unreleased]: https://github.com/AlexGalhardo/vukem-golang-quiz-htmx/commits/main
