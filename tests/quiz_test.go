@@ -198,17 +198,27 @@ func TestAnalytics(t *testing.T) {
 	t.Parallel()
 
 	off := vukemtest.New(t, bootstrap.New)
-	off.Client(t).Get("/").AssertDontSee("data-domain").AssertDontSee("data-website-id")
+	res := off.Client(t).Get("/").AssertDontSee("data-domain").AssertDontSee("data-website-id")
+
+	// Off by default: the CSP allows no third-party origin.
+	for _, d := range []string{"script-src", "connect-src"} {
+		if !strings.Contains(res.Header("Content-Security-Policy"), d+" 'self'") ||
+			strings.Contains(res.Header("Content-Security-Policy"), "https://") {
+			t.Errorf("CSP without analytics = %q, want only 'self' sources", res.Header("Content-Security-Policy"))
+		}
+	}
 
 	tests := []struct {
 		provider, script, attr string
 	}{
 		{"plausible", "https://plausible.io/js/script.js", `data-domain="quiz.vukem.com"`},
 		{"umami", "https://cloud.umami.is/script.js", `data-website-id="quiz.vukem.com"`},
+		// Self-hosted Umami used in production.
+		{"umami", "https://vukem-analytics.up.railway.app/script.js", `data-website-id="quiz.vukem.com"`},
 	}
 
 	for _, tt := range tests {
-		t.Run(tt.provider, func(t *testing.T) {
+		t.Run(tt.provider+" "+tt.script, func(t *testing.T) {
 			t.Parallel()
 
 			app := vukemtest.New(t, bootstrap.New, vukemtest.Options{Env: map[string]string{
