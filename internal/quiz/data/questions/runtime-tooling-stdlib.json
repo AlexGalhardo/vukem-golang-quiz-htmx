@@ -1,0 +1,1252 @@
+[
+	{
+		"id": "gofmt-canonical-formatting",
+		"difficulty": "very-easy",
+		"tags": ["tooling", "gofmt"],
+		"question": {
+			"en": "What does `gofmt` do to a Go source file?",
+			"pt-BR": "O que o `gofmt` faz com um arquivo de código Go?"
+		},
+		"explanation": {
+			"en": "`gofmt` reformats Go source into the single canonical style: tabs for indentation, aligned comments and fields, normalized spacing. It only changes layout, never behaviour, which is why Go code looks the same across projects and style debates disappear. `go fmt` runs `gofmt -l -w` on packages.",
+			"pt-BR": "O `gofmt` reformata o código Go no estilo canônico único: tabs para indentação, comentários e campos alinhados, espaçamento normalizado. Ele só muda a formatação, nunca o comportamento, e por isso código Go tem a mesma cara em qualquer projeto e as discussões de estilo somem. `go fmt` executa `gofmt -l -w` nos pacotes."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It reports suspicious constructs such as wrong Printf verbs", "pt-BR": "Aponta construções suspeitas, como verbos errados no Printf" },
+				"why": {
+					"en": "That is `go vet`. `gofmt` does not analyse correctness; it only rewrites layout.",
+					"pt-BR": "Isso é o `go vet`. O `gofmt` não analisa corretude; só reescreve a formatação."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It removes unused imports and adds missing ones", "pt-BR": "Remove imports não usados e adiciona os que faltam" },
+				"why": {
+					"en": "Managing imports is what the separate `goimports` tool does (on top of formatting); plain `gofmt` leaves imports alone apart from sorting them.",
+					"pt-BR": "Gerenciar imports é papel da ferramenta separada `goimports` (além de formatar); o `gofmt` puro não mexe nos imports, só os ordena."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "It rewrites the layout into the one canonical Go style", "pt-BR": "Reescreve a formatação no estilo canônico único de Go" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "It minifies the code to make compilation faster", "pt-BR": "Minifica o código para a compilação ficar mais rápida" },
+				"why": {
+					"en": "Formatting has no effect on compile speed or the binary; `gofmt` aims at readability, not size.",
+					"pt-BR": "Formatação não afeta a velocidade de compilação nem o binário; o `gofmt` busca legibilidade, não tamanho."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It applies the formatting rules configured in the project's config file", "pt-BR": "Aplica as regras de formatação configuradas no arquivo de configuração do projeto" },
+				"why": {
+					"en": "`gofmt` is deliberately not configurable: there is exactly one style, so there is no config file to read.",
+					"pt-BR": "O `gofmt` é propositalmente não configurável: existe um único estilo, então não há arquivo de configuração para ler."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "gofmt command documentation", "url": "https://pkg.go.dev/cmd/gofmt", "kind": "doc" },
+			{ "title": "The Go Blog: go fmt your code", "url": "https://go.dev/blog/go-fmt-your-code", "kind": "blog" },
+			{ "title": "Effective Go: Formatting", "url": "https://go.dev/doc/effective_go#formatting", "kind": "effective-go" }
+		]
+	},
+	{
+		"id": "test-function-naming",
+		"difficulty": "very-easy",
+		"tags": ["testing"],
+		"question": {
+			"en": "Which function will `go test` run as a test?",
+			"pt-BR": "Qual função o `go test` executa como teste?"
+		},
+		"explanation": {
+			"en": "`go test` looks for files ending in `_test.go` and runs every function named `TestXxx` (where `Xxx` does not start with a lowercase letter) with the signature `func(t *testing.T)`. Failures are reported through `t.Error`, `t.Fatal` and friends; there is no assertion library in the standard library.",
+			"pt-BR": "O `go test` procura arquivos terminados em `_test.go` e executa toda função chamada `TestXxx` (onde `Xxx` não começa com letra minúscula) com a assinatura `func(t *testing.T)`. Falhas são reportadas com `t.Error`, `t.Fatal` e similares; a biblioteca padrão não tem biblioteca de asserções."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "`func SumTest(t *testing.T)` in `sum_test.go`", "pt-BR": "`func SumTest(t *testing.T)` em `sum_test.go`" },
+				"why": {
+					"en": "The name must start with the `Test` prefix; `SumTest` is just an ordinary helper function that is never run on its own.",
+					"pt-BR": "O nome precisa começar com o prefixo `Test`; `SumTest` é só uma função auxiliar comum que nunca roda sozinha."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "`func TestSum(t *testing.T)` in `sum.go`", "pt-BR": "`func TestSum(t *testing.T)` em `sum.go`" },
+				"why": {
+					"en": "Tests are only collected from files whose names end in `_test.go`; in `sum.go` it is compiled as normal code and never run as a test.",
+					"pt-BR": "Testes só são coletados de arquivos cujo nome termina em `_test.go`; em `sum.go` ela é compilada como código normal e nunca roda como teste."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "`func TestSum() error` in `sum_test.go`", "pt-BR": "`func TestSum() error` em `sum_test.go`" },
+				"why": {
+					"en": "The signature must be exactly `func(t *testing.T)`; tests do not return errors, they report failures through `t`. `go vet` flags this signature as malformed.",
+					"pt-BR": "A assinatura precisa ser exatamente `func(t *testing.T)`; testes não retornam erro, reportam falhas via `t`. O `go vet` aponta essa assinatura como malformada."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "`func TestSum(t *testing.T)` in `sum_test.go`", "pt-BR": "`func TestSum(t *testing.T)` em `sum_test.go`" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "Any function annotated with `//go:test` in any file", "pt-BR": "Qualquer função anotada com `//go:test` em qualquer arquivo" },
+				"why": {
+					"en": "There is no `//go:test` directive; Go discovers tests purely by file name and function name convention.",
+					"pt-BR": "Não existe diretiva `//go:test`; Go descobre testes apenas pela convenção de nome do arquivo e da função."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Package testing", "url": "https://pkg.go.dev/testing", "kind": "doc" },
+			{ "title": "go command: Test packages", "url": "https://pkg.go.dev/cmd/go#hdr-Test_packages", "kind": "doc" }
+		]
+	},
+	{
+		"id": "fmt-verb-t-untyped-float",
+		"difficulty": "very-easy",
+		"tags": ["fmt", "types"],
+		"code": "fmt.Printf(\"%T\\n\", 3.0)",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "The `%T` verb prints the Go type of the value. `3.0` is an untyped floating-point constant; passed to a parameter of type `any`, it takes its default type, `float64`. The output is `float64`.",
+			"pt-BR": "O verbo `%T` imprime o tipo Go do valor. `3.0` é uma constante de ponto flutuante sem tipo; ao ser passada para um parâmetro do tipo `any`, recebe seu tipo padrão, `float64`. A saída é `float64`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "3", "pt-BR": "3" },
+				"why": {
+					"en": "`%T` prints the type, not the value; `%v` would print the value (`3`).",
+					"pt-BR": "`%T` imprime o tipo, não o valor; `%v` imprimiria o valor (`3`)."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "float64", "pt-BR": "float64" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "float32", "pt-BR": "float32" },
+				"why": {
+					"en": "The default type of an untyped floating-point constant is `float64`, never `float32`.",
+					"pt-BR": "O tipo padrão de uma constante de ponto flutuante sem tipo é `float64`, nunca `float32`."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "int", "pt-BR": "int" },
+				"why": {
+					"en": "`3.0` is a floating-point literal because of the decimal point, even though its value is integral.",
+					"pt-BR": "`3.0` é um literal de ponto flutuante por causa do ponto decimal, mesmo que o valor seja inteiro."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "untyped float", "pt-BR": "untyped float" },
+				"why": {
+					"en": "Untyped constants only exist at compile time; once converted to `any` the value has a concrete default type.",
+					"pt-BR": "Constantes sem tipo só existem em tempo de compilação; ao virar `any`, o valor recebe um tipo concreto padrão."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Package fmt: Printing", "url": "https://pkg.go.dev/fmt", "kind": "doc" },
+			{ "title": "The Go Programming Language Specification: Constants", "url": "https://go.dev/ref/spec#Constants", "kind": "spec" }
+		]
+	},
+	{
+		"id": "strings-builder-loop-concat",
+		"difficulty": "very-easy",
+		"tags": ["performance", "strings"],
+		"question": {
+			"en": "You need to build one large string from thousands of pieces inside a loop. What is the idiomatic, efficient choice?",
+			"pt-BR": "Você precisa montar uma string grande a partir de milhares de pedaços dentro de um loop. Qual é a escolha idiomática e eficiente?"
+		},
+		"explanation": {
+			"en": "Strings are immutable, so `s += piece` allocates a new string and copies everything built so far on each iteration, which is quadratic. `strings.Builder` appends into a growing byte buffer and `String()` returns the result without an extra copy. Calling `Grow` first avoids reallocations when the final size is known.",
+			"pt-BR": "Strings são imutáveis, então `s += piece` aloca uma nova string e copia tudo o que já foi montado a cada iteração, o que é quadrático. `strings.Builder` acrescenta em um buffer de bytes que cresce e `String()` devolve o resultado sem cópia extra. Chamar `Grow` antes evita realocações quando o tamanho final é conhecido."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "`s += piece`, because the compiler turns it into a buffer", "pt-BR": "`s += piece`, porque o compilador transforma isso em buffer" },
+				"why": {
+					"en": "The compiler does not rewrite a loop of `+=` into a builder; each iteration allocates and copies a new string.",
+					"pt-BR": "O compilador não reescreve um loop de `+=` em um builder; cada iteração aloca e copia uma nova string."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "`fmt.Sprintf(\"%s%s\", s, piece)` on each iteration", "pt-BR": "`fmt.Sprintf(\"%s%s\", s, piece)` a cada iteração" },
+				"why": {
+					"en": "This has the same quadratic copying as `+=` plus the cost of parsing the format string and boxing arguments.",
+					"pt-BR": "Isso tem a mesma cópia quadrática do `+=`, somada ao custo de interpretar o formato e empacotar os argumentos."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Append to a `[]string` and convert it with `string(parts)`", "pt-BR": "Adicionar em um `[]string` e converter com `string(parts)`" },
+				"why": {
+					"en": "A `[]string` cannot be converted to `string`; you would need `strings.Join`, which is fine but not what this option says.",
+					"pt-BR": "Um `[]string` não pode ser convertido para `string`; seria preciso `strings.Join`, que funciona, mas não é o que esta opção diz."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Use a `map[int]string` and concatenate at the end", "pt-BR": "Usar um `map[int]string` e concatenar no final" },
+				"why": {
+					"en": "A map adds hashing overhead and has no iteration order, so the pieces could come out shuffled.",
+					"pt-BR": "Um map adiciona custo de hashing e não tem ordem de iteração, então os pedaços poderiam sair embaralhados."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "`strings.Builder` with `WriteString`, optionally calling `Grow` first", "pt-BR": "`strings.Builder` com `WriteString`, chamando `Grow` antes se possível" }
+			}
+		],
+		"sources": [
+			{ "title": "Package strings: Builder", "url": "https://pkg.go.dev/strings#Builder", "kind": "doc" },
+			{ "title": "100 Go Mistakes: #39 Under-optimized string concatenation", "url": "https://100go.co/", "kind": "book" }
+		]
+	},
+	{
+		"id": "json-unexported-field-skipped",
+		"difficulty": "easy",
+		"tags": ["encoding-json", "struct-tags"],
+		"code": "type User struct {\n\tName  string\n\temail string\n\tAge   int `json:\"age\"`\n}\n\nb, _ := json.Marshal(User{Name: \"Ana\", email: \"a@x.com\", Age: 30})\nfmt.Println(string(b))",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "`encoding/json` uses reflection and can only see exported fields, so the lowercase `email` is silently skipped. Fields without a tag use the Go field name as the key (`Name`), while the tag `json:\"age\"` renames `Age` to `age`. The output is `{\"Name\":\"Ana\",\"age\":30}`.",
+			"pt-BR": "O `encoding/json` usa reflection e só enxerga campos exportados, então o `email` minúsculo é ignorado sem aviso. Campos sem tag usam o nome do campo em Go como chave (`Name`), enquanto a tag `json:\"age\"` renomeia `Age` para `age`. A saída é `{\"Name\":\"Ana\",\"age\":30}`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "{\"Name\":\"Ana\",\"age\":30}", "pt-BR": "{\"Name\":\"Ana\",\"age\":30}" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "{\"Name\":\"Ana\",\"email\":\"a@x.com\",\"age\":30}", "pt-BR": "{\"Name\":\"Ana\",\"email\":\"a@x.com\",\"age\":30}" },
+				"why": {
+					"en": "Unexported fields are invisible to the `encoding/json` package, so `email` is never marshaled.",
+					"pt-BR": "Campos não exportados são invisíveis para o pacote `encoding/json`, então `email` nunca é serializado."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "{\"Name\":\"Ana\",\"email\":\"\",\"age\":30}", "pt-BR": "{\"Name\":\"Ana\",\"email\":\"\",\"age\":30}" },
+				"why": {
+					"en": "Unexported fields are not encoded at all, not even as an empty value; the key is simply absent.",
+					"pt-BR": "Campos não exportados não são codificados de jeito nenhum, nem como valor vazio; a chave simplesmente não aparece."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "{\"Name\":\"Ana\",\"age\":\"30\"}", "pt-BR": "{\"Name\":\"Ana\",\"age\":\"30\"}" },
+				"why": {
+					"en": "An `int` is encoded as a JSON number; it would only be quoted with the `,string` tag option.",
+					"pt-BR": "Um `int` é codificado como número JSON; só sairia entre aspas com a opção de tag `,string`."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It returns an error because email is unexported", "pt-BR": "Retorna erro porque email não é exportado" },
+				"why": {
+					"en": "Unexported fields are not an error; they are simply ignored, which is a common source of \"missing field\" bugs.",
+					"pt-BR": "Campos não exportados não geram erro; são apenas ignorados, o que é fonte comum de bugs de \"campo sumido\"."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Package encoding/json: Marshal", "url": "https://pkg.go.dev/encoding/json#Marshal", "kind": "doc" }
+		]
+	},
+	{
+		"id": "http-default-client-no-timeout",
+		"difficulty": "easy",
+		"tags": ["net-http", "timeouts"],
+		"question": {
+			"en": "A service calls a slow third-party API with `http.Get(url)`. What is the timeout of that request?",
+			"pt-BR": "Um serviço chama uma API externa lenta com `http.Get(url)`. Qual é o timeout dessa requisição?"
+		},
+		"explanation": {
+			"en": "`http.Get` uses `http.DefaultClient`, whose `Timeout` field is zero, and a zero `Timeout` means no timeout. A server that never answers can hang the goroutine forever. Use your own `&http.Client{Timeout: ...}` or a request built with `http.NewRequestWithContext` and a context deadline.",
+			"pt-BR": "O `http.Get` usa o `http.DefaultClient`, cujo campo `Timeout` é zero, e `Timeout` zero significa sem timeout. Um servidor que nunca responde pode travar a goroutine para sempre. Use seu próprio `&http.Client{Timeout: ...}` ou uma requisição criada com `http.NewRequestWithContext` e um contexto com deadline."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "30 seconds, the default of `http.DefaultClient`", "pt-BR": "30 segundos, o padrão do `http.DefaultClient`" },
+				"why": {
+					"en": "`http.DefaultClient` is a zero-value `http.Client`; it has no built-in timeout at all.",
+					"pt-BR": "O `http.DefaultClient` é um `http.Client` com zero value; não tem timeout embutido nenhum."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "Whatever the operating system's TCP timeout is, about 2 seconds", "pt-BR": "O timeout de TCP do sistema operacional, cerca de 2 segundos" },
+				"why": {
+					"en": "The default transport has a dial timeout, but once connected nothing limits how long the server takes to send the response.",
+					"pt-BR": "O transport padrão tem timeout de conexão, mas depois de conectado nada limita quanto tempo o servidor leva para enviar a resposta."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "None: the default client can wait forever", "pt-BR": "Nenhum: o client padrão pode esperar para sempre" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "It inherits the `WriteTimeout` of the local `http.Server`", "pt-BR": "Herda o `WriteTimeout` do `http.Server` local" },
+				"why": {
+					"en": "Server timeouts and client timeouts are unrelated; an outgoing request does not know about any server in the same process.",
+					"pt-BR": "Timeouts de servidor e de client não têm relação; uma requisição de saída não sabe de nenhum servidor no mesmo processo."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "60 seconds, configured by `GODEBUG=httptimeout`", "pt-BR": "60 segundos, configurado por `GODEBUG=httptimeout`" },
+				"why": {
+					"en": "There is no such GODEBUG setting; the timeout must be set explicitly on the client or through a context.",
+					"pt-BR": "Essa configuração de GODEBUG não existe; o timeout precisa ser definido explicitamente no client ou via contexto."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Package net/http: Client", "url": "https://pkg.go.dev/net/http#Client", "kind": "doc" },
+			{ "title": "Cloudflare: The complete guide to Go net/http timeouts", "url": "https://blog.cloudflare.com/the-complete-guide-to-golang-net-http-timeouts/", "kind": "article" }
+		]
+	},
+	{
+		"id": "http-response-body-close",
+		"difficulty": "easy",
+		"tags": ["net-http", "resource-leaks"],
+		"code": "resp, err := http.Get(url)\nif err != nil {\n\treturn err\n}\nif resp.StatusCode != http.StatusOK {\n\treturn fmt.Errorf(\"status %d\", resp.StatusCode)\n}\ndefer resp.Body.Close()",
+		"question": {
+			"en": "What is wrong with this client code?",
+			"pt-BR": "O que está errado neste código de client?"
+		},
+		"explanation": {
+			"en": "When `err` is nil the caller must close `resp.Body`, whatever the status code. Here the early return on a non-200 status skips the `defer`, so the body is never closed and the underlying connection cannot be reused, leaking connections and goroutines. Put `defer resp.Body.Close()` right after the error check.",
+			"pt-BR": "Quando `err` é nil, quem chamou precisa fechar `resp.Body`, qualquer que seja o status. Aqui o return antecipado em status diferente de 200 pula o `defer`, então o body nunca é fechado e a conexão não pode ser reaproveitada, vazando conexões e goroutines. Coloque `defer resp.Body.Close()` logo após checar o erro."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "Nothing: the body is closed automatically when `resp` is garbage collected", "pt-BR": "Nada: o body é fechado automaticamente quando `resp` é coletado pelo garbage collector" },
+				"why": {
+					"en": "The documentation requires the caller to close the body; there is no finalizer you can rely on to release the connection.",
+					"pt-BR": "A documentação exige que quem chamou feche o body; não há finalizer confiável para liberar a conexão."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "`resp.Body` is nil on non-200 responses, so the defer would panic", "pt-BR": "`resp.Body` é nil em respostas diferentes de 200, então o defer causaria panic" },
+				"why": {
+					"en": "The body is always non-nil when `err` is nil, even for 4xx/5xx responses, and it must be closed.",
+					"pt-BR": "O body é sempre não nil quando `err` é nil, mesmo em respostas 4xx/5xx, e precisa ser fechado."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "`defer` must come before the `err` check", "pt-BR": "O `defer` precisa vir antes da checagem de `err`" },
+				"why": {
+					"en": "When `err` is non-nil, `resp` may be nil, so deferring `resp.Body.Close()` before the check can panic.",
+					"pt-BR": "Quando `err` não é nil, `resp` pode ser nil, então adiar `resp.Body.Close()` antes da checagem pode causar panic."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "The non-200 return skips closing the body, leaking the connection", "pt-BR": "O return em status diferente de 200 pula o fechamento do body e vaza a conexão" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "`http.Get` returns an error for non-200 statuses, so that check is dead code", "pt-BR": "`http.Get` retorna erro para status diferente de 200, então essa checagem é código morto" },
+				"why": {
+					"en": "A non-2xx status is not an error for the client; `err` only reports transport problems such as DNS or connection failures.",
+					"pt-BR": "Um status fora de 2xx não é erro para o client; `err` só indica problemas de transporte, como DNS ou falha de conexão."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Package net/http: Get", "url": "https://pkg.go.dev/net/http#Get", "kind": "doc" },
+			{ "title": "Package net/http: Clients and Transports", "url": "https://pkg.go.dev/net/http#hdr-Clients_and_Transports", "kind": "doc" }
+		]
+	},
+	{
+		"id": "fmt-verbs-v-plus-v-sharp-v",
+		"difficulty": "easy",
+		"tags": ["fmt"],
+		"code": "type P struct {\n\tX int\n\tY string\n}\n\np := P{1, \"a\"}\nfmt.Printf(\"%v|%+v|%#v\\n\", p, p, p)",
+		"question": {
+			"en": "This code is in package `main`. What does it print?",
+			"pt-BR": "Este código está no pacote `main`. O que ele imprime?"
+		},
+		"explanation": {
+			"en": "`%v` prints only the field values, `%+v` adds field names, and `%#v` prints Go-syntax representation including the package-qualified type and quoted strings. The output is `{1 a}|{X:1 Y:a}|main.P{X:1, Y:\"a\"}`.",
+			"pt-BR": "`%v` imprime só os valores dos campos, `%+v` acrescenta os nomes dos campos e `%#v` imprime a representação em sintaxe Go, com o tipo qualificado pelo pacote e strings entre aspas. A saída é `{1 a}|{X:1 Y:a}|main.P{X:1, Y:\"a\"}`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "{1 a}|{X:1 Y:a}|{X:1, Y:\"a\"}", "pt-BR": "{1 a}|{X:1 Y:a}|{X:1, Y:\"a\"}" },
+				"why": {
+					"en": "`%#v` includes the type name `main.P`, so the value could be pasted back as a Go literal.",
+					"pt-BR": "`%#v` inclui o nome do tipo `main.P`, de forma que o valor poderia ser colado de volta como literal Go."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "{1 a}|{X:1 Y:a}|main.P{X:1, Y:\"a\"}", "pt-BR": "{1 a}|{X:1 Y:a}|main.P{X:1, Y:\"a\"}" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "{X:1 Y:a}|{X:1 Y:a}|main.P{X:1, Y:\"a\"}", "pt-BR": "{X:1 Y:a}|{X:1 Y:a}|main.P{X:1, Y:\"a\"}" },
+				"why": {
+					"en": "Plain `%v` omits the field names; only the `+` flag adds them.",
+					"pt-BR": "O `%v` simples omite os nomes dos campos; só a flag `+` os acrescenta."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "{1 a}|{1 a}|P{X:1, Y:a}", "pt-BR": "{1 a}|{1 a}|P{X:1, Y:a}" },
+				"why": {
+					"en": "`%+v` does print field names for structs, and `%#v` qualifies the type with its package and quotes strings.",
+					"pt-BR": "`%+v` imprime sim os nomes dos campos em structs, e `%#v` qualifica o tipo com o pacote e coloca strings entre aspas."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "{1 a}|{X:1 Y:a}|main.P", "pt-BR": "{1 a}|{X:1 Y:a}|main.P" },
+				"why": {
+					"en": "Printing only the type name is what `%T` does; `%#v` prints the type and the field values.",
+					"pt-BR": "Imprimir só o nome do tipo é o que `%T` faz; `%#v` imprime o tipo e os valores dos campos."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Package fmt: Printing", "url": "https://pkg.go.dev/fmt", "kind": "doc" }
+		]
+	},
+	{
+		"id": "go-test-cache-count-1",
+		"difficulty": "easy",
+		"tags": ["testing", "tooling", "test-cache"],
+		"question": {
+			"en": "You run `go test ./...` twice without changing any code, and the second run shows `(cached)`. How do you force the tests to actually run again?",
+			"pt-BR": "Você roda `go test ./...` duas vezes sem mudar o código, e a segunda execução mostra `(cached)`. Como forçar os testes a rodarem de verdade de novo?"
+		},
+		"explanation": {
+			"en": "In package list mode, `go test` caches successful results and replays them when the test binary, flags, files and environment variables it read are unchanged. Only \"cacheable\" flags allow caching, and the idiomatic way to disable it explicitly is `-count=1`. `go clean -testcache` also works, but removes every cached result.",
+			"pt-BR": "No modo de lista de pacotes, o `go test` guarda em cache resultados bem-sucedidos e os repete quando o binário de teste, as flags, os arquivos e as variáveis de ambiente lidos não mudaram. Só flags \"cacheáveis\" permitem cache, e a forma idiomática de desativá-lo explicitamente é `-count=1`. `go clean -testcache` também funciona, mas apaga todos os resultados em cache."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "`go test -v ./...`", "pt-BR": "`go test -v ./...`" },
+				"why": {
+					"en": "`-v` is a cacheable flag: it changes the output, but a cached run is still replayed with verbose output.",
+					"pt-BR": "`-v` é uma flag cacheável: muda a saída, mas uma execução em cache continua sendo repetida, agora com saída detalhada."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "`go test -fresh ./...`", "pt-BR": "`go test -fresh ./...`" },
+				"why": {
+					"en": "There is no `-fresh` flag in `go test`.",
+					"pt-BR": "Não existe flag `-fresh` no `go test`."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Set `GOCACHE=off`", "pt-BR": "Definir `GOCACHE=off`" },
+				"why": {
+					"en": "The build cache is mandatory since Go 1.12; `GOCACHE=off` makes the go command fail instead of disabling caching.",
+					"pt-BR": "O build cache é obrigatório desde o Go 1.12; `GOCACHE=off` faz o comando go falhar em vez de desativar o cache."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Nothing: cached results are only used inside CI", "pt-BR": "Nada: resultados em cache só são usados no CI" },
+				"why": {
+					"en": "Test caching is a feature of the go command everywhere, local machines included.",
+					"pt-BR": "O cache de testes é um recurso do comando go em qualquer lugar, inclusive na máquina local."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "`go test -count=1 ./...`", "pt-BR": "`go test -count=1 ./...`" }
+			}
+		],
+		"sources": [
+			{ "title": "go command: Test packages", "url": "https://pkg.go.dev/cmd/go#hdr-Test_packages", "kind": "doc" },
+			{ "title": "go command: Build and test caching", "url": "https://pkg.go.dev/cmd/go#hdr-Build_and_test_caching", "kind": "doc" }
+		]
+	},
+	{
+		"id": "json-interface-number-float64",
+		"difficulty": "medium",
+		"tags": ["encoding-json", "interfaces"],
+		"code": "var v interface{}\njson.Unmarshal([]byte(`{\"n\": 1}`), &v)\nm := v.(map[string]interface{})\nfmt.Printf(\"%T %v\\n\", m[\"n\"], m[\"n\"])",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "When decoding into an `interface{}`, `encoding/json` maps JSON objects to `map[string]interface{}` and every JSON number to `float64`, even integral ones. So the output is `float64 1`. Large integer IDs can lose precision this way; use `Decoder.UseNumber` to get a `json.Number` or decode into a typed struct.",
+			"pt-BR": "Ao decodificar em um `interface{}`, o `encoding/json` transforma objetos JSON em `map[string]interface{}` e todo número JSON em `float64`, mesmo os inteiros. Por isso a saída é `float64 1`. IDs inteiros grandes podem perder precisão assim; use `Decoder.UseNumber` para obter um `json.Number` ou decodifique em uma struct tipada."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "int 1", "pt-BR": "int 1" },
+				"why": {
+					"en": "JSON has a single number type and the decoder does not inspect whether it looks integral; it always picks `float64` for `interface{}`.",
+					"pt-BR": "JSON tem um único tipo numérico e o decoder não verifica se ele parece inteiro; para `interface{}` sempre escolhe `float64`."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "json.Number 1", "pt-BR": "json.Number 1" },
+				"why": {
+					"en": "`json.Number` is only produced when you opt in with `Decoder.UseNumber`; `Unmarshal` uses `float64`.",
+					"pt-BR": "`json.Number` só aparece quando você ativa `Decoder.UseNumber`; o `Unmarshal` usa `float64`."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "float64 1", "pt-BR": "float64 1" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "int64 1", "pt-BR": "int64 1" },
+				"why": {
+					"en": "The decoder never chooses an integer type for an empty interface target, regardless of the value.",
+					"pt-BR": "O decoder nunca escolhe um tipo inteiro para um destino interface vazia, qualquer que seja o valor."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It panics: the type assertion to map fails", "pt-BR": "Ocorre panic: a type assertion para map falha" },
+				"why": {
+					"en": "JSON objects decoded into `interface{}` are always `map[string]interface{}`, so the assertion succeeds.",
+					"pt-BR": "Objetos JSON decodificados em `interface{}` são sempre `map[string]interface{}`, então a assertion funciona."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Package encoding/json: Unmarshal", "url": "https://pkg.go.dev/encoding/json#Unmarshal", "kind": "doc" },
+			{ "title": "Package encoding/json: Number", "url": "https://pkg.go.dev/encoding/json#Number", "kind": "doc" }
+		]
+	},
+	{
+		"id": "t-cleanup-lifo-after-subtests",
+		"difficulty": "medium",
+		"tags": ["testing", "cleanup"],
+		"code": "func TestCleanup(t *testing.T) {\n\tt.Cleanup(func() { fmt.Println(\"cleanup 1\") })\n\tt.Cleanup(func() { fmt.Println(\"cleanup 2\") })\n\tt.Run(\"sub\", func(t *testing.T) {\n\t\tfmt.Println(\"sub\")\n\t})\n\tfmt.Println(\"body end\")\n}",
+		"question": {
+			"en": "In which order are the lines printed when this test runs?",
+			"pt-BR": "Em que ordem as linhas são impressas quando este teste roda?"
+		},
+		"explanation": {
+			"en": "`t.Run` runs the subtest synchronously (it is not parallel), so `sub` prints first, then the rest of the body. Cleanup functions run after the test and all its subtests complete, in last-added, first-called order, like `defer`. Output: `sub`, `body end`, `cleanup 2`, `cleanup 1`.",
+			"pt-BR": "O `t.Run` executa o subteste de forma síncrona (ele não é paralelo), então `sub` é impresso primeiro e depois o resto do corpo. As funções de cleanup rodam depois que o teste e todos os subtestes terminam, na ordem última adicionada, primeira chamada, como `defer`. Saída: `sub`, `body end`, `cleanup 2`, `cleanup 1`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "sub, body end, cleanup 2, cleanup 1", "pt-BR": "sub, body end, cleanup 2, cleanup 1" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "sub, body end, cleanup 1, cleanup 2", "pt-BR": "sub, body end, cleanup 1, cleanup 2" },
+				"why": {
+					"en": "Cleanups run in LIFO order, like deferred calls, so the last registered runs first.",
+					"pt-BR": "Os cleanups rodam em ordem LIFO, como chamadas adiadas, então o último registrado roda primeiro."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "body end, sub, cleanup 2, cleanup 1", "pt-BR": "body end, sub, cleanup 2, cleanup 1" },
+				"why": {
+					"en": "A subtest only runs after the parent body when it calls `t.Parallel`; otherwise `t.Run` blocks until the subtest finishes.",
+					"pt-BR": "Um subteste só roda depois do corpo do pai se chamar `t.Parallel`; caso contrário, o `t.Run` bloqueia até o subteste terminar."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "cleanup 1, cleanup 2, sub, body end", "pt-BR": "cleanup 1, cleanup 2, sub, body end" },
+				"why": {
+					"en": "`t.Cleanup` only registers the function; it is not called at registration time.",
+					"pt-BR": "O `t.Cleanup` apenas registra a função; ela não é chamada no momento do registro."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "sub, cleanup 2, cleanup 1, body end", "pt-BR": "sub, cleanup 2, cleanup 1, body end" },
+				"why": {
+					"en": "The parent's cleanups belong to the parent test, so they wait for its whole body, not just for the subtest.",
+					"pt-BR": "Os cleanups do pai pertencem ao teste pai, então esperam o corpo inteiro dele, não só o subteste."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Package testing: T.Cleanup", "url": "https://pkg.go.dev/testing#T.Cleanup", "kind": "doc" },
+			{ "title": "Package testing: T.Run", "url": "https://pkg.go.dev/testing#T.Run", "kind": "doc" }
+		]
+	},
+	{
+		"id": "servemux-method-pattern-405",
+		"difficulty": "medium",
+		"tags": ["net-http", "servemux", "go1-22"],
+		"code": "mux := http.NewServeMux()\nmux.HandleFunc(\"GET /items/{id}\", func(w http.ResponseWriter, r *http.Request) {\n\tfmt.Fprint(w, \"item \", r.PathValue(\"id\"))\n})\n\nrec := httptest.NewRecorder()\nmux.ServeHTTP(rec, httptest.NewRequest(\"POST\", \"/items/42\", nil))\nfmt.Println(rec.Code)",
+		"question": {
+			"en": "Since Go 1.22, what does this print?",
+			"pt-BR": "A partir do Go 1.22, o que isto imprime?"
+		},
+		"explanation": {
+			"en": "Go 1.22 added methods and wildcards to `http.ServeMux` patterns. `GET /items/{id}` matches GET (and HEAD) requests, and `r.PathValue(\"id\")` returns the matched segment. When the path matches a pattern but the method does not, the mux replies `405 Method Not Allowed` with an `Allow` header, so this prints `405`. A GET to the same path would return `item 42`.",
+			"pt-BR": "O Go 1.22 adicionou métodos e wildcards aos padrões do `http.ServeMux`. `GET /items/{id}` casa requisições GET (e HEAD), e `r.PathValue(\"id\")` devolve o segmento capturado. Quando o caminho casa com um padrão mas o método não, o mux responde `405 Method Not Allowed` com um header `Allow`, então isto imprime `405`. Um GET no mesmo caminho devolveria `item 42`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "200", "pt-BR": "200" },
+				"why": {
+					"en": "With a method in the pattern the handler is restricted to GET and HEAD; a POST never reaches it.",
+					"pt-BR": "Com método no padrão, o handler fica restrito a GET e HEAD; um POST nunca chega até ele."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "404", "pt-BR": "404" },
+				"why": {
+					"en": "The mux distinguishes \"no pattern matches the path\" (404) from \"the path matches but the method does not\" (405).",
+					"pt-BR": "O mux diferencia \"nenhum padrão casa com o caminho\" (404) de \"o caminho casa, mas o método não\" (405)."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It panics: patterns cannot contain a method or spaces", "pt-BR": "Ocorre panic: padrões não podem conter método nem espaços" },
+				"why": {
+					"en": "That was true before Go 1.22, when such a string was a literal path; since 1.22 the method prefix and `{id}` wildcard are valid syntax.",
+					"pt-BR": "Isso valia antes do Go 1.22, quando essa string era um caminho literal; desde o 1.22 o prefixo de método e o wildcard `{id}` são sintaxe válida."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "405", "pt-BR": "405" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "400", "pt-BR": "400" },
+				"why": {
+					"en": "Nothing is wrong with the request itself; the mux reports a method mismatch, not a bad request.",
+					"pt-BR": "Não há nada de errado com a requisição em si; o mux indica método não permitido, não requisição inválida."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Blog: Routing Enhancements for Go 1.22", "url": "https://go.dev/blog/routing-enhancements", "kind": "blog" },
+			{ "title": "Package net/http: ServeMux", "url": "https://pkg.go.dev/net/http#ServeMux", "kind": "doc" }
+		]
+	},
+	{
+		"id": "time-equal-vs-double-equals",
+		"difficulty": "medium",
+		"tags": ["time", "monotonic-clock"],
+		"code": "t := time.Now()\nu := t.Round(0)\nfmt.Println(t == u, t.Equal(u))",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "`time.Now()` carries a monotonic clock reading in addition to the wall clock. `t.Round(0)` returns the same instant with the monotonic reading stripped. `==` compares the struct fields (wall, monotonic, location), so it reports `false`, while `Equal` compares the instant and reports `true`. Output: `false true`. Prefer `Equal` for `time.Time`.",
+			"pt-BR": "O `time.Now()` carrega uma leitura do relógio monotônico além do relógio de parede. `t.Round(0)` devolve o mesmo instante sem a leitura monotônica. O `==` compara os campos da struct (wall, monotônico, location), então dá `false`, enquanto o `Equal` compara o instante e dá `true`. Saída: `false true`. Prefira `Equal` para `time.Time`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "true true", "pt-BR": "true true" },
+				"why": {
+					"en": "`Round(0)` changes the struct by removing the monotonic reading, so field-by-field `==` no longer matches.",
+					"pt-BR": "O `Round(0)` altera a struct ao remover a leitura monotônica, então a comparação campo a campo com `==` deixa de bater."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "false true", "pt-BR": "false true" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "true false", "pt-BR": "true false" },
+				"why": {
+					"en": "`Equal` ignores the monotonic reading and the location; it only asks whether both values are the same instant.",
+					"pt-BR": "O `Equal` ignora a leitura monotônica e a location; só verifica se os dois valores são o mesmo instante."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "false false", "pt-BR": "false false" },
+				"why": {
+					"en": "`Round(0)` does not round the time to anything; it only strips the monotonic reading, so the instant is unchanged.",
+					"pt-BR": "O `Round(0)` não arredonda o tempo; só remove a leitura monotônica, então o instante não muda."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It does not compile: time.Time cannot be compared with ==", "pt-BR": "Não compila: time.Time não pode ser comparado com ==" },
+				"why": {
+					"en": "`time.Time` is a comparable struct, so `==` compiles; it just compares representation, not the instant.",
+					"pt-BR": "`time.Time` é uma struct comparável, então `==` compila; só compara a representação, não o instante."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Package time: Monotonic Clocks", "url": "https://pkg.go.dev/time#hdr-Monotonic_Clocks", "kind": "doc" },
+			{ "title": "Package time: Time.Equal", "url": "https://pkg.go.dev/time#Time.Equal", "kind": "doc" }
+		]
+	},
+	{
+		"id": "benchmark-b-loop",
+		"difficulty": "medium",
+		"tags": ["testing", "benchmarks", "go1-24"],
+		"code": "func BenchmarkParse(b *testing.B) {\n\tdata := loadFixture()\n\tfor b.Loop() {\n\t\tparse(data)\n\t}\n}",
+		"question": {
+			"en": "Compared with the classic `for i := 0; i < b.N; i++` loop, what does `b.Loop` (Go 1.24) guarantee in this benchmark?",
+			"pt-BR": "Comparado com o loop clássico `for i := 0; i < b.N; i++`, o que o `b.Loop` (Go 1.24) garante neste benchmark?"
+		},
+		"explanation": {
+			"en": "`b.Loop` resets the timer on its first call, so setup like `loadFixture()` is not measured without calling `b.ResetTimer`, and it stops the timer when it returns false. Inside the loop, call arguments and results are kept alive, so the compiler cannot optimize `parse(data)` away. The benchmark function body is also called only once, instead of being re-invoked with growing `b.N`.",
+			"pt-BR": "O `b.Loop` zera o timer na primeira chamada, então setup como `loadFixture()` não é medido sem precisar de `b.ResetTimer`, e para o timer quando retorna false. Dentro do loop, argumentos e resultados de chamadas são mantidos vivos, então o compilador não consegue eliminar `parse(data)`. Além disso, o corpo da função de benchmark é chamado uma única vez, em vez de ser reexecutado com `b.N` crescente."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It runs iterations in parallel on all CPUs", "pt-BR": "Executa as iterações em paralelo em todas as CPUs" },
+				"why": {
+					"en": "Parallel benchmarks use `b.RunParallel`; `b.Loop` runs iterations sequentially in one goroutine.",
+					"pt-BR": "Benchmarks paralelos usam `b.RunParallel`; o `b.Loop` executa as iterações em sequência em uma goroutine."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It reports allocations automatically, replacing `-benchmem`", "pt-BR": "Reporta alocações automaticamente, substituindo `-benchmem`" },
+				"why": {
+					"en": "Allocation reporting still needs `-benchmem` or `b.ReportAllocs`; `b.Loop` is about timing and keeping work alive.",
+					"pt-BR": "Reportar alocações ainda exige `-benchmem` ou `b.ReportAllocs`; o `b.Loop` trata de cronometragem e de manter o trabalho vivo."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It runs a fixed 1,000,000 iterations for stable results", "pt-BR": "Executa um número fixo de 1.000.000 de iterações para resultados estáveis" },
+				"why": {
+					"en": "The iteration count is still chosen adaptively from `-benchtime`; there is no fixed count.",
+					"pt-BR": "O número de iterações continua sendo escolhido de forma adaptativa a partir de `-benchtime`; não há contagem fixa."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Nothing new: it is an alias for `i < b.N` with a nicer name", "pt-BR": "Nada novo: é um apelido para `i < b.N` com nome mais bonito" },
+				"why": {
+					"en": "With `b.N` the setup is timed unless you reset the timer, and unused results can be optimized away; `b.Loop` fixes both.",
+					"pt-BR": "Com `b.N` o setup é cronometrado a menos que você zere o timer, e resultados não usados podem ser eliminados; o `b.Loop` resolve os dois."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "Setup before the loop is not timed and the loop body is not optimized away", "pt-BR": "O setup antes do loop não é cronometrado e o corpo do loop não é eliminado pelo compilador" }
+			}
+		],
+		"sources": [
+			{ "title": "Package testing: B.Loop", "url": "https://pkg.go.dev/testing#B.Loop", "kind": "doc" },
+			{ "title": "The Go Blog: More predictable benchmarking with testing.B.Loop", "url": "https://go.dev/blog/testing-b-loop", "kind": "blog" },
+			{ "title": "Go 1.24 Release Notes", "url": "https://go.dev/doc/go1.24", "kind": "doc" }
+		]
+	},
+	{
+		"id": "gc-concurrent-non-moving",
+		"difficulty": "hard",
+		"tags": ["runtime", "garbage-collector", "gogc"],
+		"question": {
+			"en": "Which statement correctly describes Go's garbage collector (gc toolchain, Go 1.27)?",
+			"pt-BR": "Qual afirmação descreve corretamente o garbage collector do Go (toolchain gc, Go 1.27)?"
+		},
+		"explanation": {
+			"en": "Go uses a concurrent, tri-color mark-and-sweep collector that runs mostly alongside the program with short stop-the-world phases. It is non-moving (objects are never relocated or compacted) and non-generational. Its pacing is controlled by `GOGC` (default 100: the next cycle starts when the heap grows by roughly 100% of the live heap plus roots) and by the soft `GOMEMLIMIT` memory limit added in Go 1.19.",
+			"pt-BR": "Go usa um coletor concorrente mark-and-sweep tricolor, que roda quase todo o tempo junto com o programa, com fases curtas de stop-the-world. Ele não move objetos (nada é realocado nem compactado) e não é geracional. O ritmo é controlado pelo `GOGC` (padrão 100: o próximo ciclo começa quando o heap cresce cerca de 100% do heap vivo mais as raízes) e pelo limite flexível `GOMEMLIMIT`, adicionado no Go 1.19."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "Concurrent tri-color mark-sweep, non-moving, paced by GOGC and GOMEMLIMIT", "pt-BR": "Mark-sweep tricolor concorrente, sem mover objetos, ritmado por GOGC e GOMEMLIMIT" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "Generational: young objects are collected often, old ones rarely", "pt-BR": "Geracional: objetos jovens são coletados com frequência, os antigos raramente" },
+				"why": {
+					"en": "Go's GC is not generational; the Go team experimented with it and rejected it, relying on escape analysis to keep short-lived values on the stack.",
+					"pt-BR": "O GC do Go não é geracional; o time do Go testou essa abordagem e a descartou, contando com a escape analysis para manter valores de vida curta na stack."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Compacting: it moves live objects together to defragment the heap", "pt-BR": "Compactador: move objetos vivos para desfragmentar o heap" },
+				"why": {
+					"en": "The GC guide states explicitly that Go has a non-moving GC; heap objects keep their addresses.",
+					"pt-BR": "O guia do GC diz explicitamente que Go tem um GC que não move objetos; objetos no heap mantêm o endereço."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Reference counting with a cycle detector, like CPython", "pt-BR": "Contagem de referências com detector de ciclos, como no CPython" },
+				"why": {
+					"en": "Go uses a tracing collector that marks from roots; there are no per-object reference counts.",
+					"pt-BR": "Go usa um coletor por rastreamento que marca a partir das raízes; não há contadores de referência por objeto."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "Stop-the-world for the whole cycle; GOMEMLIMIT is a hard limit that triggers OOM", "pt-BR": "Stop-the-world durante o ciclo todo; GOMEMLIMIT é um limite rígido que gera OOM" },
+				"why": {
+					"en": "Marking and sweeping run concurrently with the program, and `GOMEMLIMIT` is a soft limit the GC tries to respect, not a hard cap.",
+					"pt-BR": "Marcação e varredura rodam concorrentemente com o programa, e `GOMEMLIMIT` é um limite flexível que o GC tenta respeitar, não um teto rígido."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "A Guide to the Go Garbage Collector", "url": "https://go.dev/doc/gc-guide", "kind": "doc" },
+			{ "title": "The Go Blog: Getting to Go: The Journey of Go's Garbage Collector", "url": "https://go.dev/blog/ismmkeynote", "kind": "blog" },
+			{ "title": "Go FAQ: Why do garbage collection?", "url": "https://go.dev/doc/faq#garbage_collection", "kind": "faq" }
+		]
+	},
+	{
+		"id": "json-omitzero-vs-omitempty-time",
+		"difficulty": "hard",
+		"tags": ["encoding-json", "struct-tags", "go1-24"],
+		"code": "type Event struct {\n\tA time.Time `json:\"a,omitempty\"`\n\tB time.Time `json:\"b,omitzero\"`\n}\n\nb, _ := json.Marshal(Event{})\nfmt.Println(string(b))",
+		"question": {
+			"en": "With Go 1.24 or later, what does this code print?",
+			"pt-BR": "Com Go 1.24 ou posterior, o que este código imprime?"
+		},
+		"explanation": {
+			"en": "`omitempty` only omits false, 0, nil pointers/interfaces and empty arrays, slices, maps and strings; a struct like `time.Time` is never \"empty\", so `A` is encoded as `0001-01-01T00:00:00Z`. Go 1.24 added `omitzero`, which omits a field when it is the zero value of its type, or when its `IsZero() bool` method returns true, as `time.Time` has. Output: `{\"a\":\"0001-01-01T00:00:00Z\"}`.",
+			"pt-BR": "O `omitempty` só omite false, 0, ponteiros/interfaces nil e arrays, slices, maps e strings vazios; uma struct como `time.Time` nunca é \"vazia\", então `A` é codificado como `0001-01-01T00:00:00Z`. O Go 1.24 adicionou o `omitzero`, que omite o campo quando ele é o zero value do tipo, ou quando o método `IsZero() bool` retorna true, como o `time.Time` tem. Saída: `{\"a\":\"0001-01-01T00:00:00Z\"}`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "{}", "pt-BR": "{}" },
+				"why": {
+					"en": "`omitempty` does not consider struct values empty, so the zero `time.Time` in `A` is still encoded.",
+					"pt-BR": "O `omitempty` não considera valores struct vazios, então o `time.Time` zero em `A` continua sendo codificado."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "{\"b\":\"0001-01-01T00:00:00Z\"}", "pt-BR": "{\"b\":\"0001-01-01T00:00:00Z\"}" },
+				"why": {
+					"en": "This swaps the two options: `omitzero` is the one that drops a zero `time.Time`.",
+					"pt-BR": "Isso inverte as duas opções: é o `omitzero` que descarta um `time.Time` zero."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "{\"a\":\"0001-01-01T00:00:00Z\"}", "pt-BR": "{\"a\":\"0001-01-01T00:00:00Z\"}" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "{\"a\":\"0001-01-01T00:00:00Z\",\"b\":\"0001-01-01T00:00:00Z\"}", "pt-BR": "{\"a\":\"0001-01-01T00:00:00Z\",\"b\":\"0001-01-01T00:00:00Z\"}" },
+				"why": {
+					"en": "That was the result before Go 1.24, when the unknown `omitzero` option was ignored; since 1.24 it omits `B`.",
+					"pt-BR": "Esse era o resultado antes do Go 1.24, quando a opção desconhecida `omitzero` era ignorada; desde o 1.24 ela omite `B`."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "{\"a\":null}", "pt-BR": "{\"a\":null}" },
+				"why": {
+					"en": "A `time.Time` value is never null; its `MarshalJSON` always produces an RFC 3339 string.",
+					"pt-BR": "Um valor `time.Time` nunca é null; o `MarshalJSON` dele sempre produz uma string RFC 3339."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Go 1.24 Release Notes: encoding/json", "url": "https://go.dev/doc/go1.24", "kind": "doc" },
+			{ "title": "Package encoding/json: Marshal", "url": "https://pkg.go.dev/encoding/json#Marshal", "kind": "doc" }
+		]
+	},
+	{
+		"id": "struct-padding-sizeof",
+		"difficulty": "hard",
+		"tags": ["unsafe", "memory-layout", "performance"],
+		"code": "type A struct {\n\ta bool\n\tb int64\n\tc bool\n}\n\ntype B struct {\n\tb int64\n\ta bool\n\tc bool\n}\n\nfmt.Println(unsafe.Sizeof(A{}), unsafe.Sizeof(B{}))",
+		"question": {
+			"en": "On a 64-bit platform (amd64/arm64), what does this print?",
+			"pt-BR": "Em uma plataforma 64 bits (amd64/arm64), o que isto imprime?"
+		},
+		"explanation": {
+			"en": "Fields are laid out in declaration order and each must sit at an offset that is a multiple of its alignment. In `A`, `a` is followed by 7 bytes of padding so `b` (alignment 8) starts at offset 8, then `c` at 16, and the size is rounded up to a multiple of 8: 24. In `B`, the two bools fit right after `b` at offsets 8 and 9, and the size rounds up to 16. Output: `24 16`.",
+			"pt-BR": "Os campos são dispostos na ordem de declaração e cada um precisa ficar em um offset múltiplo do seu alinhamento. Em `A`, `a` é seguido de 7 bytes de padding para `b` (alinhamento 8) começar no offset 8, depois `c` no 16, e o tamanho é arredondado para múltiplo de 8: 24. Em `B`, os dois bools cabem logo após `b`, nos offsets 8 e 9, e o tamanho arredonda para 16. Saída: `24 16`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "10 10", "pt-BR": "10 10" },
+				"why": {
+					"en": "That is the sum of field sizes without padding; Go aligns fields and rounds the struct size up to its alignment.",
+					"pt-BR": "Essa é a soma dos tamanhos dos campos sem padding; Go alinha os campos e arredonda o tamanho da struct para o alinhamento."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "16 16", "pt-BR": "16 16" },
+				"why": {
+					"en": "The Go compiler never reorders struct fields, so `A` keeps its padding between `a` and `b` and after `c`.",
+					"pt-BR": "O compilador Go nunca reordena campos de struct, então `A` mantém o padding entre `a` e `b` e depois de `c`."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "24 24", "pt-BR": "24 24" },
+				"why": {
+					"en": "Small fields placed together share one 8-byte word; padding is only needed once at the end of `B`.",
+					"pt-BR": "Campos pequenos colocados juntos compartilham uma palavra de 8 bytes; em `B` o padding só é necessário uma vez no final."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "24 16", "pt-BR": "24 16" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "17 10", "pt-BR": "17 10" },
+				"why": {
+					"en": "The struct size is always a multiple of its alignment (8 here) so that arrays of it keep every element aligned.",
+					"pt-BR": "O tamanho da struct é sempre múltiplo do seu alinhamento (8 aqui) para que arrays dela mantenham todos os elementos alinhados."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Size and alignment guarantees", "url": "https://go.dev/ref/spec#Size_and_alignment_guarantees", "kind": "spec" },
+			{ "title": "Package unsafe", "url": "https://pkg.go.dev/unsafe", "kind": "doc" }
+		]
+	},
+	{
+		"id": "go-embed-directive-rules",
+		"difficulty": "hard",
+		"tags": ["tooling", "embed"],
+		"question": {
+			"en": "Which statement about `//go:embed` is true?",
+			"pt-BR": "Qual afirmação sobre `//go:embed` é verdadeira?"
+		},
+		"explanation": {
+			"en": "When a pattern names a directory, files whose names start with `.` or `_` are excluded while walking it; prefixing the pattern with `all:` includes them. Other rules: `//go:embed` only works on package-level variables of type `string`, `[]byte` or `embed.FS`, the file importing `embed` is required, and patterns cannot reach outside the module or contain `..`.",
+			"pt-BR": "Quando um padrão aponta para um diretório, arquivos cujo nome começa com `.` ou `_` são excluídos ao percorrê-lo; prefixar o padrão com `all:` os inclui. Outras regras: `//go:embed` só funciona em variáveis de nível de pacote do tipo `string`, `[]byte` ou `embed.FS`, o arquivo precisa importar `embed`, e os padrões não podem sair do módulo nem conter `..`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It can be placed on a local variable inside a function", "pt-BR": "Pode ser usado em uma variável local dentro de uma função" },
+				"why": {
+					"en": "The `embed` docs say the directive can only be used with variables at package scope, not local variables.",
+					"pt-BR": "A documentação do `embed` diz que a diretiva só pode ser usada com variáveis no escopo do pacote, não com variáveis locais."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "Embedding a directory skips files starting with `.` or `_` unless the pattern uses `all:`", "pt-BR": "Embutir um diretório ignora arquivos que começam com `.` ou `_`, a menos que o padrão use `all:`" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "A pattern like `../shared/config.json` embeds a file from a sibling directory", "pt-BR": "Um padrão como `../shared/config.json` embute um arquivo de um diretório irmão" },
+				"why": {
+					"en": "Patterns are relative to the package directory and may not contain `..` or reach outside the module.",
+					"pt-BR": "Os padrões são relativos ao diretório do pacote e não podem conter `..` nem sair do módulo."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Files are read from disk on the first access at run time", "pt-BR": "Os arquivos são lidos do disco no primeiro acesso, em tempo de execução" },
+				"why": {
+					"en": "Embedded content is copied into the binary at build time; the files do not need to exist when the program runs.",
+					"pt-BR": "O conteúdo embutido é copiado para o binário em tempo de build; os arquivos não precisam existir quando o programa roda."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It works on variables of any type, decoding JSON files into structs", "pt-BR": "Funciona em variáveis de qualquer tipo, decodificando arquivos JSON em structs" },
+				"why": {
+					"en": "Only `string`, `[]byte` and `embed.FS` are allowed; decoding is your job at run time.",
+					"pt-BR": "Só `string`, `[]byte` e `embed.FS` são permitidos; decodificar é responsabilidade sua em tempo de execução."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Package embed: Directives", "url": "https://pkg.go.dev/embed#hdr-Directives", "kind": "doc" }
+		]
+	},
+	{
+		"id": "escape-analysis-gcflags-m",
+		"difficulty": "very-hard",
+		"tags": ["runtime", "escape-analysis", "performance"],
+		"code": "func a() int {\n\tx := 42\n\treturn x\n}\n\nfunc b() *int {\n\tx := 42\n\treturn &x\n}\n\nfunc c(n int) []int {\n\treturn make([]int, n)\n}\n\nfunc d() int {\n\ts := make([]int, 8)\n\treturn len(s)\n}",
+		"question": {
+			"en": "Built with `go build -gcflags=-m` (Go 1.27), which functions does the compiler report as heap-allocating in their own bodies?",
+			"pt-BR": "Compilando com `go build -gcflags=-m` (Go 1.27), quais funções o compilador reporta como alocando no heap no próprio corpo?"
+		},
+		"explanation": {
+			"en": "Escape analysis keeps a value on the stack only if the compiler can prove it does not outlive the frame and its size is known. In `b`, `&x` is returned, so it reports `moved to heap: x`. In `c`, the size `n` is not a compile-time constant, so `make([]int, n) escapes to heap`. In `a` the value is copied out, and in `d` the constant-size slice never leaves the function (`does not escape`).",
+			"pt-BR": "A escape analysis só mantém um valor na stack se o compilador provar que ele não sobrevive ao frame e que o tamanho é conhecido. Em `b`, `&x` é retornado, então aparece `moved to heap: x`. Em `c`, o tamanho `n` não é constante de compilação, então `make([]int, n) escapes to heap`. Em `a` o valor é copiado para fora, e em `d` o slice de tamanho constante nunca sai da função (`does not escape`)."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "None: Go always allocates locals on the stack", "pt-BR": "Nenhuma: Go sempre aloca variáveis locais na stack" },
+				"why": {
+					"en": "Go decides by escape analysis, not by where a variable is declared; a local whose address outlives the call is moved to the heap.",
+					"pt-BR": "Go decide pela escape analysis, não pelo local da declaração; uma variável local cujo endereço sobrevive à chamada vai para o heap."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "`c` and `d`, because `make` always allocates on the heap", "pt-BR": "`c` e `d`, porque `make` sempre aloca no heap" },
+				"why": {
+					"en": "`make` with a small constant size that does not escape, as in `d`, is placed on the stack.",
+					"pt-BR": "Um `make` com tamanho constante pequeno que não escapa, como em `d`, é colocado na stack."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Only `b`", "pt-BR": "Só `b`" },
+				"why": {
+					"en": "In `c` the slice is returned and its length is only known at run time, so its backing array escapes too.",
+					"pt-BR": "Em `c` o slice é retornado e o tamanho só é conhecido em tempo de execução, então o array subjacente também escapa."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "All four, since every function returns a value", "pt-BR": "As quatro, já que toda função retorna um valor" },
+				"why": {
+					"en": "Returning a value copies it to the caller; only returning a pointer or reference to local memory forces an escape.",
+					"pt-BR": "Retornar um valor o copia para quem chamou; só retornar ponteiro ou referência para memória local força o escape."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "`b` and `c`", "pt-BR": "`b` e `c`" }
+			}
+		],
+		"sources": [
+			{ "title": "A Guide to the Go Garbage Collector: Escape analysis", "url": "https://go.dev/doc/gc-guide#Escape_analysis", "kind": "doc" },
+			{ "title": "Go FAQ: How do I know whether a variable is allocated on the heap or the stack?", "url": "https://go.dev/doc/faq#stack_or_heap", "kind": "faq" },
+			{ "title": "Dave Cheney: High Performance Go Workshop", "url": "https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html", "kind": "article" }
+		]
+	},
+	{
+		"id": "async-preemption-tight-loop",
+		"difficulty": "very-hard",
+		"tags": ["runtime", "scheduler", "preemption"],
+		"code": "func main() {\n\truntime.GOMAXPROCS(1)\n\tgo func() {\n\t\tfor {\n\t\t}\n\t}()\n\ttime.Sleep(10 * time.Millisecond)\n\tfmt.Println(\"done\")\n}",
+		"question": {
+			"en": "With Go 1.27 on a common platform such as linux/amd64 or windows/amd64, what happens?",
+			"pt-BR": "Com Go 1.27 em uma plataforma comum como linux/amd64 ou windows/amd64, o que acontece?"
+		},
+		"explanation": {
+			"en": "With one P, the spinning goroutine takes the only processor while `main` sleeps. Before Go 1.14, preemption only happened at function-call safe points, so a call-free `for {}` could starve `main` forever. Since Go 1.14 the runtime preempts goroutines asynchronously (via signals on Unix, thread suspension on Windows), so after the sleep `main` is scheduled again, prints `done` and the program exits.",
+			"pt-BR": "Com um único P, a goroutine em loop ocupa o único processador enquanto `main` dorme. Antes do Go 1.14, a preempção só ocorria em pontos seguros de chamada de função, então um `for {}` sem chamadas podia deixar `main` sem CPU para sempre. Desde o Go 1.14 o runtime faz preempção assíncrona (via sinais no Unix, suspensão de thread no Windows), então depois do sleep `main` volta a ser escalonada, imprime `done` e o programa termina."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It hangs forever: the loop never yields the only P", "pt-BR": "Trava para sempre: o loop nunca libera o único P" },
+				"why": {
+					"en": "That was the behaviour before Go 1.14; asynchronous preemption now interrupts loops without function calls.",
+					"pt-BR": "Esse era o comportamento antes do Go 1.14; a preempção assíncrona agora interrompe loops sem chamadas de função."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It fails with \"fatal error: all goroutines are asleep - deadlock!\"", "pt-BR": "Falha com \"fatal error: all goroutines are asleep - deadlock!\"" },
+				"why": {
+					"en": "The spinning goroutine is running, not blocked, so the deadlock detector never fires.",
+					"pt-BR": "A goroutine em loop está executando, não bloqueada, então o detector de deadlock nunca dispara."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "It prints done and exits", "pt-BR": "Imprime done e termina" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "It prints done only if the loop body calls runtime.Gosched()", "pt-BR": "Só imprime done se o corpo do loop chamar runtime.Gosched()" },
+				"why": {
+					"en": "`runtime.Gosched` was the old workaround; since 1.14 the scheduler preempts the loop on its own.",
+					"pt-BR": "O `runtime.Gosched` era o contorno antigo; desde o 1.14 o escalonador faz a preempção do loop sozinho."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It does not compile: an empty infinite loop is rejected by vet", "pt-BR": "Não compila: um loop infinito vazio é rejeitado pelo vet" },
+				"why": {
+					"en": "`for {}` is valid Go, and `go vet` is not part of compilation anyway.",
+					"pt-BR": "`for {}` é Go válido, e o `go vet` nem faz parte da compilação."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Go 1.14 Release Notes: Runtime", "url": "https://go.dev/doc/go1.14#runtime", "kind": "doc" },
+			{ "title": "Ardan Labs: Scheduling In Go, Part II: Go Scheduler", "url": "https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part2.html", "kind": "article" },
+			{ "title": "Package runtime: Gosched", "url": "https://pkg.go.dev/runtime#Gosched", "kind": "doc" }
+		]
+	},
+	{
+		"id": "unsafe-pointer-uintptr-arithmetic",
+		"difficulty": "very-hard",
+		"tags": ["unsafe", "runtime"],
+		"code": "type S struct {\n\tA int64\n\tB int64\n}\n\nvar s S\n\n// (1)\npb := (*int64)(unsafe.Pointer(uintptr(unsafe.Pointer(&s)) + unsafe.Offsetof(s.B)))\n\n// (2)\nu := uintptr(unsafe.Pointer(&s))\npb2 := (*int64)(unsafe.Pointer(u + unsafe.Offsetof(s.B)))\n\n*pb, *pb2 = 1, 2",
+		"question": {
+			"en": "According to the `unsafe.Pointer` rules, which snippet is valid?",
+			"pt-BR": "Segundo as regras de `unsafe.Pointer`, qual trecho é válido?"
+		},
+		"explanation": {
+			"en": "Pattern (3) of the `unsafe` docs allows converting a Pointer to `uintptr`, adding an offset and converting back, but only in a single expression. A `uintptr` is just an integer: the GC does not treat it as a reference and the runtime may move goroutine stacks, so a `uintptr` kept in a variable like `u` may no longer point to the object when converted back. So (1) is valid and (2) is not. `go vet` reports possible misuse of `unsafe.Pointer` for such code.",
+			"pt-BR": "O padrão (3) da documentação do `unsafe` permite converter um Pointer para `uintptr`, somar um offset e converter de volta, mas só em uma única expressão. Um `uintptr` é apenas um inteiro: o GC não o trata como referência e o runtime pode mover stacks de goroutines, então um `uintptr` guardado em uma variável como `u` pode não apontar mais para o objeto ao ser convertido de volta. Logo, (1) é válido e (2) não. O `go vet` aponta possível uso indevido de `unsafe.Pointer` nesse tipo de código."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "Only (1)", "pt-BR": "Só (1)" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "Only (2), because the intermediate variable makes it clearer", "pt-BR": "Só (2), porque a variável intermediária deixa mais claro" },
+				"why": {
+					"en": "Storing the address as `uintptr` drops the GC reference; the conversion back must happen in the same expression.",
+					"pt-BR": "Guardar o endereço como `uintptr` perde a referência para o GC; a conversão de volta precisa ocorrer na mesma expressão."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Both, since Go's GC never moves memory", "pt-BR": "Os dois, já que o GC do Go nunca move memória" },
+				"why": {
+					"en": "Heap objects are not moved, but goroutine stacks are copied when they grow, and `s` may live on a stack; the rule also lets the compiler and GC treat `uintptr` as a plain integer.",
+					"pt-BR": "Objetos do heap não são movidos, mas stacks de goroutines são copiadas quando crescem, e `s` pode estar na stack; a regra também permite ao compilador e ao GC tratar `uintptr` como um inteiro qualquer."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Neither: pointer arithmetic is forbidden even with unsafe", "pt-BR": "Nenhum: aritmética de ponteiros é proibida mesmo com unsafe" },
+				"why": {
+					"en": "The `unsafe` docs list this exact Pointer → uintptr → Pointer pattern as valid; `unsafe.Add` (Go 1.17) is a shorter equivalent.",
+					"pt-BR": "A documentação do `unsafe` lista exatamente esse padrão Pointer → uintptr → Pointer como válido; `unsafe.Add` (Go 1.17) é um equivalente mais curto."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "Neither compiles: `unsafe.Offsetof` needs a type, not a value", "pt-BR": "Nenhum compila: `unsafe.Offsetof` precisa de um tipo, não de um valor" },
+				"why": {
+					"en": "`unsafe.Offsetof` takes a selector expression like `s.B`, not a type, and both snippets compile.",
+					"pt-BR": "`unsafe.Offsetof` recebe uma expressão seletora como `s.B`, não um tipo, e os dois trechos compilam."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Package unsafe: Pointer", "url": "https://pkg.go.dev/unsafe#Pointer", "kind": "doc" },
+			{ "title": "The Go Programming Language Specification: Package unsafe", "url": "https://go.dev/ref/spec#Package_unsafe", "kind": "spec" }
+		]
+	},
+	{
+		"id": "synctest-fake-clock-sleep",
+		"difficulty": "very-hard",
+		"tags": ["testing", "synctest", "go1-25"],
+		"code": "func TestSleep(t *testing.T) {\n\tsynctest.Test(t, func(t *testing.T) {\n\t\tstart := time.Now()\n\t\ttime.Sleep(time.Hour)\n\t\tfmt.Println(time.Since(start))\n\t})\n}",
+		"question": {
+			"en": "With Go 1.25 or later, what happens when this test runs?",
+			"pt-BR": "Com Go 1.25 ou posterior, o que acontece quando este teste roda?"
+		},
+		"explanation": {
+			"en": "`synctest.Test` runs the function in an isolated bubble with a fake clock. When every goroutine in the bubble is durably blocked (here, the only one is sleeping), time jumps forward to the next timer instantly. The test finishes in milliseconds of real time and prints `1h0m0s`, exactly, because the fake clock does not drift.",
+			"pt-BR": "O `synctest.Test` executa a função em uma bolha isolada com relógio falso. Quando todas as goroutines da bolha estão bloqueadas de forma durável (aqui, a única está dormindo), o tempo avança instantaneamente até o próximo timer. O teste termina em milissegundos de tempo real e imprime exatamente `1h0m0s`, porque o relógio falso não tem desvio."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It really sleeps for an hour and then fails because of the default 10-minute timeout", "pt-BR": "Dorme de verdade por uma hora e falha pelo timeout padrão de 10 minutos" },
+				"why": {
+					"en": "Inside the bubble `time.Sleep` uses the fake clock, so no real time is spent waiting.",
+					"pt-BR": "Dentro da bolha o `time.Sleep` usa o relógio falso, então não se gasta tempo real esperando."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It returns immediately and prints 0s", "pt-BR": "Retorna imediatamente e imprime 0s" },
+				"why": {
+					"en": "The sleep is not skipped: the fake clock advances by the full hour, so `time.Since` sees exactly one hour.",
+					"pt-BR": "O sleep não é pulado: o relógio falso avança a hora inteira, então o `time.Since` vê exatamente uma hora."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It panics: time.Sleep is not allowed inside a synctest bubble", "pt-BR": "Ocorre panic: time.Sleep não é permitido dentro de uma bolha do synctest" },
+				"why": {
+					"en": "Sleeping is the main use case; it is a durably blocking operation that lets the fake clock advance.",
+					"pt-BR": "Dormir é justamente o caso de uso principal; é uma operação de bloqueio durável que deixa o relógio falso avançar."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "It finishes almost instantly and prints 1h0m0s", "pt-BR": "Termina quase instantaneamente e imprime 1h0m0s" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "It reports a deadlock because the only goroutine is blocked", "pt-BR": "Reporta deadlock porque a única goroutine está bloqueada" },
+				"why": {
+					"en": "A goroutine blocked on a timer is not deadlocked: the bubble advances the clock to wake it. Deadlock is reported only when no timer can unblock anyone.",
+					"pt-BR": "Uma goroutine bloqueada em timer não está em deadlock: a bolha avança o relógio para acordá-la. Deadlock só é reportado quando nenhum timer pode desbloquear ninguém."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Package testing/synctest", "url": "https://pkg.go.dev/testing/synctest", "kind": "doc" },
+			{ "title": "The Go Blog: Testing concurrent code with testing/synctest", "url": "https://go.dev/blog/synctest", "kind": "blog" },
+			{ "title": "Go 1.25 Release Notes", "url": "https://go.dev/doc/go1.25", "kind": "doc" }
+		]
+	}
+]

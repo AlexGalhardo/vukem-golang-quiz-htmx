@@ -1,0 +1,1268 @@
+[
+	{
+		"id": "implicit-interface-satisfaction",
+		"difficulty": "very-easy",
+		"tags": ["interfaces"],
+		"question": {
+			"en": "How does a concrete type implement an interface in Go?",
+			"pt-BR": "Como um tipo concreto implementa uma interface em Go?"
+		},
+		"explanation": {
+			"en": "Interfaces are satisfied implicitly: a type implements an interface as soon as its method set contains every method of the interface with matching names and signatures. There is no `implements` keyword, which decouples the definition of an interface from its implementations, even across packages.",
+			"pt-BR": "Interfaces são satisfeitas de forma implícita: um tipo implementa uma interface assim que seu method set contém todos os métodos da interface, com os mesmos nomes e assinaturas. Não existe a palavra-chave `implements`, o que desacopla a definição da interface das implementações, inclusive entre pacotes."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "By declaring `type T struct{...} implements I`", "pt-BR": "Declarando `type T struct{...} implements I`" },
+				"why": {
+					"en": "Go has no `implements` clause; that is Java or C# syntax and does not compile in Go.",
+					"pt-BR": "Go não tem cláusula `implements`; essa é a sintaxe de Java ou C# e não compila em Go."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "By having all of the interface's methods, with no explicit declaration", "pt-BR": "Tendo todos os métodos da interface, sem nenhuma declaração explícita" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "By registering the type with the interface in an `init` function", "pt-BR": "Registrando o tipo na interface dentro de uma função `init`" },
+				"why": {
+					"en": "There is no registry: satisfaction is checked statically by the compiler from the method set alone.",
+					"pt-BR": "Não existe registro: a satisfação é verificada estaticamente pelo compilador, só pelo method set."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "By converting a value with `I(v)` at least once in the package", "pt-BR": "Convertendo um valor com `I(v)` pelo menos uma vez no pacote" },
+				"why": {
+					"en": "A conversion only compiles if the type already implements the interface; it does not create the relationship.",
+					"pt-BR": "Uma conversão só compila se o tipo já implementa a interface; ela não cria essa relação."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "Only types declared in the interface's own package can implement it", "pt-BR": "Só tipos declarados no mesmo pacote da interface podem implementá-la" },
+				"why": {
+					"en": "Any type from any package can satisfy an interface; `io.Writer` is implemented by countless types outside package `io`.",
+					"pt-BR": "Qualquer tipo de qualquer pacote pode satisfazer uma interface; `io.Writer` é implementada por inúmeros tipos fora do pacote `io`."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "A Tour of Go: Interfaces are implemented implicitly", "url": "https://go.dev/tour/methods/10", "kind": "doc" },
+			{ "title": "The Go Programming Language Specification: Implementing an interface", "url": "https://go.dev/ref/spec#Implementing_an_interface", "kind": "spec" },
+			{ "title": "Go FAQ: How can I guarantee my type satisfies an interface?", "url": "https://go.dev/doc/faq#implements_interface", "kind": "faq" }
+		]
+	},
+	{
+		"id": "any-alias-empty-interface",
+		"difficulty": "very-easy",
+		"tags": ["interfaces", "any"],
+		"question": {
+			"en": "What is `any` in Go?",
+			"pt-BR": "O que é `any` em Go?"
+		},
+		"explanation": {
+			"en": "Since Go 1.18, `any` is a predeclared alias for `interface{}`, the empty interface. Every type implements it because it requires no methods. The two spellings are identical and interchangeable, and using the value still requires a type assertion or type switch.",
+			"pt-BR": "Desde o Go 1.18, `any` é um alias predeclarado para `interface{}`, a interface vazia. Todo tipo a implementa porque ela não exige nenhum método. As duas formas são idênticas e intercambiáveis, e para usar o valor ainda é preciso um type assertion ou type switch."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "A constraint that can only appear in type parameter lists", "pt-BR": "Uma constraint que só pode aparecer em listas de type parameters" },
+				"why": {
+					"en": "`any` arrived with generics, but it is an ordinary type alias usable anywhere: variables, parameters, map values.",
+					"pt-BR": "`any` chegou junto com generics, mas é um alias de tipo comum, usável em qualquer lugar: variáveis, parâmetros, valores de map."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "A dynamic type that turns off compile-time type checking", "pt-BR": "Um tipo dinâmico que desliga a checagem de tipos em compilação" },
+				"why": {
+					"en": "Unlike TypeScript's `any`, you cannot call methods or use operators on it directly; you must assert the concrete type first.",
+					"pt-BR": "Diferente do `any` do TypeScript, não dá para chamar métodos ou usar operadores diretamente; é preciso fazer type assertion antes."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "A new type distinct from `interface{}` and not assignable to it", "pt-BR": "Um tipo novo, distinto de `interface{}` e não atribuível a ele" },
+				"why": {
+					"en": "An alias denotes the very same type; `any` and `interface{}` are identical.",
+					"pt-BR": "Um alias denota exatamente o mesmo tipo; `any` e `interface{}` são idênticos."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "A predeclared alias for `interface{}`, satisfied by every type", "pt-BR": "Um alias predeclarado para `interface{}`, satisfeito por todo tipo" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "A shorthand for the `comparable` constraint", "pt-BR": "Uma abreviação da constraint `comparable`" },
+				"why": {
+					"en": "`comparable` is a separate predeclared interface limited to types that support `==`; `any` includes slices, maps and functions too.",
+					"pt-BR": "`comparable` é outra interface predeclarada, restrita a tipos que suportam `==`; `any` inclui também slices, maps e funções."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Interface types", "url": "https://go.dev/ref/spec#Interface_types", "kind": "spec" },
+			{ "title": "Go 1.18 Release Notes: Generics", "url": "https://go.dev/doc/go1.18#generics", "kind": "doc" },
+			{ "title": "A Tour of Go: The empty interface", "url": "https://go.dev/tour/methods/14", "kind": "doc" }
+		]
+	},
+	{
+		"id": "type-assertion-comma-ok",
+		"difficulty": "very-easy",
+		"tags": ["interfaces", "type-assertions"],
+		"code": "var i any = \"go\"\nn, ok := i.(int)\nfmt.Println(n, ok)",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "The two-value form `v, ok := i.(T)` never panics. When the dynamic type is not `T`, `ok` is false and `v` is the zero value of `T`, here `0`. Only the single-value form `i.(int)` panics on a mismatch.",
+			"pt-BR": "A forma com dois valores `v, ok := i.(T)` nunca causa panic. Quando o tipo dinâmico não é `T`, `ok` é false e `v` recebe o zero value de `T`, aqui `0`. Só a forma de um valor, `i.(int)`, causa panic quando o tipo não bate."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "0 false", "pt-BR": "0 false" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "panic: interface conversion: interface {} is string, not int", "pt-BR": "panic: interface conversion: interface {} is string, not int" },
+				"why": {
+					"en": "That panic comes from the single-value form; the comma-ok form reports failure through `ok` instead.",
+					"pt-BR": "Esse panic vem da forma de um valor só; a forma comma-ok reporta a falha pelo `ok`."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "<nil> false", "pt-BR": "<nil> false" },
+				"why": {
+					"en": "`n` has static type `int`, so on failure it holds the int zero value `0`, never nil.",
+					"pt-BR": "`n` tem tipo estático `int`, então na falha recebe o zero value de int, `0`, nunca nil."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: `any` cannot be asserted to `int`", "pt-BR": "Não compila: `any` não pode sofrer assertion para `int`" },
+				"why": {
+					"en": "Asserting an interface value to any concrete type is valid; the check happens at run time.",
+					"pt-BR": "Fazer assertion de uma interface para qualquer tipo concreto é válido; a verificação acontece em tempo de execução."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "0 true", "pt-BR": "0 true" },
+				"why": {
+					"en": "Go never converts a string to an int in an assertion; the dynamic type must match exactly, so `ok` is false.",
+					"pt-BR": "Go nunca converte string em int numa assertion; o tipo dinâmico precisa bater exatamente, então `ok` é false."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Type assertions", "url": "https://go.dev/ref/spec#Type_assertions", "kind": "spec" },
+			{ "title": "A Tour of Go: Type assertions", "url": "https://go.dev/tour/methods/15", "kind": "doc" }
+		]
+	},
+	{
+		"id": "stringer-value-receiver-fmt",
+		"difficulty": "very-easy",
+		"tags": ["interfaces", "fmt", "stringer", "methods"],
+		"code": "type Point struct{ X, Y int }\n\nfunc (p Point) String() string {\n\treturn fmt.Sprintf(\"P(%d,%d)\", p.X, p.Y)\n}\n\nfunc main() {\n\tp := Point{1, 2}\n\tfmt.Println(p, &p)\n}",
+		"question": {
+			"en": "What does this program print?",
+			"pt-BR": "O que este programa imprime?"
+		},
+		"explanation": {
+			"en": "`fmt` checks whether an operand implements `fmt.Stringer` and, if so, prints the result of `String()`. A method with a value receiver belongs to the method set of both `Point` and `*Point`, so both `p` and `&p` are Stringers and print `P(1,2)`.",
+			"pt-BR": "O `fmt` verifica se o operando implementa `fmt.Stringer` e, se sim, imprime o resultado de `String()`. Um método com value receiver pertence ao method set de `Point` e de `*Point`, então tanto `p` quanto `&p` são Stringers e imprimem `P(1,2)`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "{1 2} &{1 2}", "pt-BR": "{1 2} &{1 2}" },
+				"why": {
+					"en": "That is the default struct formatting, used only when the value does not implement `fmt.Stringer`.",
+					"pt-BR": "Essa é a formatação padrão de struct, usada só quando o valor não implementa `fmt.Stringer`."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "P(1,2) &{1 2}", "pt-BR": "P(1,2) &{1 2}" },
+				"why": {
+					"en": "The method set of `*Point` includes methods declared with receiver `Point`, so the pointer is a Stringer too.",
+					"pt-BR": "O method set de `*Point` inclui os métodos declarados com receiver `Point`, então o ponteiro também é um Stringer."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "{1 2} P(1,2)", "pt-BR": "{1 2} P(1,2)" },
+				"why": {
+					"en": "This would be the result with a pointer receiver `func (p *Point) String()`; with a value receiver the value itself is a Stringer.",
+					"pt-BR": "Esse seria o resultado com pointer receiver `func (p *Point) String()`; com value receiver, o próprio valor é um Stringer."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "P(1,2) 0xc000012345", "pt-BR": "P(1,2) 0xc000012345" },
+				"why": {
+					"en": "`fmt` does not print a raw address for a pointer whose type has a `String` method; it calls the method.",
+					"pt-BR": "O `fmt` não imprime o endereço de um ponteiro cujo tipo tem método `String`; ele chama o método."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "P(1,2) P(1,2)", "pt-BR": "P(1,2) P(1,2)" }
+			}
+		],
+		"sources": [
+			{ "title": "fmt package: Stringer", "url": "https://pkg.go.dev/fmt#Stringer", "kind": "doc" },
+			{ "title": "A Tour of Go: Stringers", "url": "https://go.dev/tour/methods/17", "kind": "doc" },
+			{ "title": "The Go Programming Language Specification: Method sets", "url": "https://go.dev/ref/spec#Method_sets", "kind": "spec" }
+		]
+	},
+	{
+		"id": "value-receiver-does-not-mutate",
+		"difficulty": "easy",
+		"tags": ["methods", "receivers"],
+		"code": "type Counter struct{ n int }\n\nfunc (c Counter) Inc() { c.n++ }\n\nfunc main() {\n\tvar c Counter\n\tc.Inc()\n\tc.Inc()\n\tfmt.Println(c.n)\n}",
+		"question": {
+			"en": "What does this program print?",
+			"pt-BR": "O que este programa imprime?"
+		},
+		"explanation": {
+			"en": "A value receiver is a copy of the value the method is called on, just like any other argument. `Inc` increments the copy's field and the copy is discarded, so `c.n` stays `0`. To mutate the caller's value, declare the method with a pointer receiver: `func (c *Counter) Inc()`.",
+			"pt-BR": "Um value receiver é uma cópia do valor sobre o qual o método é chamado, como qualquer outro argumento. `Inc` incrementa o campo da cópia, que é descartada, então `c.n` continua `0`. Para alterar o valor de quem chama, declare o método com pointer receiver: `func (c *Counter) Inc()`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "2", "pt-BR": "2" },
+				"why": {
+					"en": "Go does not pass receivers by reference implicitly; with a value receiver each call works on its own copy.",
+					"pt-BR": "Go não passa o receiver por referência de forma implícita; com value receiver, cada chamada trabalha na própria cópia."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "1", "pt-BR": "1" },
+				"why": {
+					"en": "Both calls get a fresh copy of the unchanged `c`, but neither copy is ever written back, so not even one increment survives.",
+					"pt-BR": "As duas chamadas recebem uma cópia nova do `c` inalterado, mas nenhuma cópia é gravada de volta, então nem um incremento sobrevive."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "0", "pt-BR": "0" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: a value receiver cannot modify its fields", "pt-BR": "Não compila: um value receiver não pode alterar seus campos" },
+				"why": {
+					"en": "Modifying the receiver copy is legal; the compiler accepts it even though the change is invisible to the caller (linters may warn).",
+					"pt-BR": "Alterar a cópia do receiver é legal; o compilador aceita, mesmo que a mudança fique invisível para quem chamou (linters podem avisar)."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It panics: methods cannot be called on a zero-value struct", "pt-BR": "Ocorre panic: não dá para chamar métodos em uma struct com zero value" },
+				"why": {
+					"en": "A zero-value struct is a perfectly valid value; calling methods on it is safe.",
+					"pt-BR": "Uma struct com zero value é um valor perfeitamente válido; chamar métodos nela é seguro."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "A Tour of Go: Pointer receivers", "url": "https://go.dev/tour/methods/4", "kind": "doc" },
+			{ "title": "Go FAQ: Should I define methods on values or pointers?", "url": "https://go.dev/doc/faq#methods_on_values_or_pointers", "kind": "faq" },
+			{ "title": "Effective Go: Pointers vs. Values", "url": "https://go.dev/doc/effective_go#pointers_vs_values", "kind": "effective-go" }
+		]
+	},
+	{
+		"id": "type-switch-multi-type-case",
+		"difficulty": "easy",
+		"tags": ["interfaces", "type-switches"],
+		"code": "func describe(v any) string {\n\tswitch x := v.(type) {\n\tcase int, int64:\n\t\treturn fmt.Sprintf(\"integer %v\", x)\n\tcase string:\n\t\treturn \"string of len \" + fmt.Sprint(len(x))\n\tcase nil:\n\t\treturn \"nil\"\n\tdefault:\n\t\treturn fmt.Sprintf(\"other %T\", x)\n\t}\n}\n\nfunc main() {\n\tfmt.Println(describe(int64(7)))\n\tfmt.Println(describe(3.5))\n\tfmt.Println(describe(nil))\n}",
+		"question": {
+			"en": "What are the three lines printed?",
+			"pt-BR": "Quais são as três linhas impressas?"
+		},
+		"explanation": {
+			"en": "`int64(7)` matches the `case int, int64` clause; in a clause listing several types `x` keeps the interface type `any`, which `%v` prints fine. The untyped constant `3.5` becomes a `float64`, so it falls to `default`. A nil interface value matches `case nil`. Output: `integer 7`, `other float64`, `nil`.",
+			"pt-BR": "`int64(7)` cai no `case int, int64`; numa cláusula com vários tipos, `x` mantém o tipo de interface `any`, que o `%v` imprime sem problema. A constante sem tipo `3.5` vira `float64`, então cai no `default`. Uma interface nil cai no `case nil`. Saída: `integer 7`, `other float64`, `nil`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "other int64 / other float64 / nil", "pt-BR": "other int64 / other float64 / nil" },
+				"why": {
+					"en": "A case listing several types matches any of them; `int64` is listed, so it does not reach `default`.",
+					"pt-BR": "Um case com vários tipos casa com qualquer um deles; `int64` está listado, então não chega ao `default`."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "integer 7 / other float64 / nil", "pt-BR": "integer 7 / other float64 / nil" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "integer 7 / other float64 / other <nil>", "pt-BR": "integer 7 / other float64 / other <nil>" },
+				"why": {
+					"en": "A type switch may have a `case nil`, which is selected when the interface value itself is nil.",
+					"pt-BR": "Um type switch pode ter `case nil`, escolhido quando o próprio valor da interface é nil."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: `x` has no single type in `case int, int64`", "pt-BR": "Não compila: `x` não tem um tipo único em `case int, int64`" },
+				"why": {
+					"en": "It compiles: in a multi-type clause `x` simply has the type of the switched expression (`any`), which `Sprintf` accepts.",
+					"pt-BR": "Compila: numa cláusula com vários tipos, `x` apenas tem o tipo da expressão do switch (`any`), que o `Sprintf` aceita."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "integer 7 / integer 3 / nil", "pt-BR": "integer 7 / integer 3 / nil" },
+				"why": {
+					"en": "Type switches compare dynamic types and never convert values; `3.5` is a `float64`.",
+					"pt-BR": "Type switches comparam tipos dinâmicos e nunca convertem valores; `3.5` é um `float64`."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Type switches", "url": "https://go.dev/ref/spec#Type_switches", "kind": "spec" },
+			{ "title": "A Tour of Go: Type switches", "url": "https://go.dev/tour/methods/16", "kind": "doc" }
+		]
+	},
+	{
+		"id": "generic-max-needs-cmp-ordered",
+		"difficulty": "easy",
+		"tags": ["generics", "constraints", "cmp"],
+		"code": "func Max[T comparable](a, b T) T {\n\tif a > b {\n\t\treturn a\n\t}\n\treturn b\n}\n\nfunc main() {\n\tfmt.Println(Max(3, 7))\n}\n\n// invalid operation: a > b (type parameter T cannot use operator >)",
+		"question": {
+			"en": "Why does this fail to compile, and what is the fix?",
+			"pt-BR": "Por que isto não compila, e qual é a correção?"
+		},
+		"explanation": {
+			"en": "Inside a generic function you may only use operations allowed by every type in the constraint's type set. `comparable` only guarantees `==` and `!=`, not `<` or `>`. `cmp.Ordered` (Go 1.21) is the constraint for types that support ordering: `func Max[T cmp.Ordered](a, b T) T`. The builtin `max` also exists since Go 1.21.",
+			"pt-BR": "Dentro de uma função genérica só dá para usar operações permitidas por todos os tipos do type set da constraint. `comparable` só garante `==` e `!=`, não `<` ou `>`. `cmp.Ordered` (Go 1.21) é a constraint para tipos ordenáveis: `func Max[T cmp.Ordered](a, b T) T`. O builtin `max` também existe desde o Go 1.21."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It actually compiles and prints 7", "pt-BR": "Na verdade compila e imprime 7" },
+				"why": {
+					"en": "The compiler checks the body against the constraint, not against the concrete type `int` used at the call site.",
+					"pt-BR": "O compilador verifica o corpo contra a constraint, não contra o tipo concreto `int` usado na chamada."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "Type inference fails for untyped constants; call `Max[int](3, 7)`", "pt-BR": "A inferência de tipos falha com constantes sem tipo; chame `Max[int](3, 7)`" },
+				"why": {
+					"en": "Inference works here (T becomes `int`); the error is in the function body, which is invalid for any instantiation.",
+					"pt-BR": "A inferência funciona aqui (T vira `int`); o erro está no corpo da função, inválido para qualquer instanciação."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Generic code cannot use operators at all; pass a `less` function", "pt-BR": "Código genérico não pode usar operadores; passe uma função `less`" },
+				"why": {
+					"en": "Operators are allowed when the constraint's type set supports them, e.g. `<` with `cmp.Ordered` or `+` with a numeric union.",
+					"pt-BR": "Operadores são permitidos quando o type set da constraint os suporta, como `<` com `cmp.Ordered` ou `+` com uma união numérica."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Use `T any`, which is broader than `comparable`", "pt-BR": "Use `T any`, que é mais amplo que `comparable`" },
+				"why": {
+					"en": "A broader type set allows fewer operations: with `any` even `==` is not permitted.",
+					"pt-BR": "Um type set mais amplo permite menos operações: com `any` nem `==` é permitido."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "`comparable` only allows `==`/`!=`; use `cmp.Ordered`", "pt-BR": "`comparable` só permite `==`/`!=`; use `cmp.Ordered`" }
+			}
+		],
+		"sources": [
+			{ "title": "cmp package: Ordered", "url": "https://pkg.go.dev/cmp#Ordered", "kind": "doc" },
+			{ "title": "The Go Programming Language Specification: Type constraints", "url": "https://go.dev/ref/spec#Type_constraints", "kind": "spec" },
+			{ "title": "An Introduction To Generics (The Go Blog)", "url": "https://go.dev/blog/intro-generics", "kind": "blog" }
+		]
+	},
+	{
+		"id": "embedding-method-promotion",
+		"difficulty": "easy",
+		"tags": ["embedding", "methods", "structs"],
+		"code": "type Logger struct{ prefix string }\n\nfunc (l Logger) Log(msg string) { fmt.Println(l.prefix + msg) }\n\ntype Server struct {\n\tLogger\n\taddr string\n}\n\nfunc main() {\n\ts := Server{Logger{\"[srv] \"}, \":8080\"}\n\ts.Log(\"started on \" + s.addr)\n}",
+		"question": {
+			"en": "What does this program print?",
+			"pt-BR": "O que este programa imprime?"
+		},
+		"explanation": {
+			"en": "`Logger` is an embedded field, so its fields and methods are promoted to `Server`. `s.Log(...)` is shorthand for `s.Logger.Log(...)` and the receiver is the embedded `Logger` with prefix `[srv] `, printing `[srv] started on :8080`.",
+			"pt-BR": "`Logger` é um campo embutido (embedded), então seus campos e métodos são promovidos para `Server`. `s.Log(...)` é um atalho para `s.Logger.Log(...)`, e o receiver é o `Logger` embutido com prefixo `[srv] `, imprimindo `[srv] started on :8080`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It does not compile: `Server` has no method `Log`; call `s.Logger.Log`", "pt-BR": "Não compila: `Server` não tem método `Log`; chame `s.Logger.Log`" },
+				"why": {
+					"en": "Methods of embedded fields are promoted, so `s.Log` is a valid selector; `s.Logger.Log` is the explicit equivalent.",
+					"pt-BR": "Métodos de campos embutidos são promovidos, então `s.Log` é um seletor válido; `s.Logger.Log` é o equivalente explícito."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "started on :8080", "pt-BR": "started on :8080" },
+				"why": {
+					"en": "The promoted method runs on the embedded `Logger` value, which carries the `[srv] ` prefix set in the literal.",
+					"pt-BR": "O método promovido roda no `Logger` embutido, que carrega o prefixo `[srv] ` definido no literal."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It does not compile: ambiguous selector `s.Log`", "pt-BR": "Não compila: seletor ambíguo `s.Log`" },
+				"why": {
+					"en": "Ambiguity only arises when two embedded fields at the same depth provide `Log`; here there is just one.",
+					"pt-BR": "Ambiguidade só ocorre quando dois campos embutidos na mesma profundidade fornecem `Log`; aqui só há um."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "[srv] started on :8080", "pt-BR": "[srv] started on :8080" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "It panics: the embedded `Logger` is nil", "pt-BR": "Ocorre panic: o `Logger` embutido é nil" },
+				"why": {
+					"en": "`Logger` is embedded by value, not as a pointer, so it can never be nil.",
+					"pt-BR": "`Logger` está embutido por valor, não como ponteiro, então nunca pode ser nil."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Struct types (promoted fields and methods)", "url": "https://go.dev/ref/spec#Struct_types", "kind": "spec" },
+			{ "title": "Effective Go: Embedding", "url": "https://go.dev/doc/effective_go#embedding", "kind": "effective-go" }
+		]
+	},
+	{
+		"id": "compile-time-interface-assertion",
+		"difficulty": "easy",
+		"tags": ["interfaces", "idioms"],
+		"code": "var _ io.Writer = (*Buffer)(nil)",
+		"question": {
+			"en": "What is the purpose of this package-level declaration?",
+			"pt-BR": "Qual é o propósito desta declaração em nível de pacote?"
+		},
+		"explanation": {
+			"en": "Assigning a typed nil `*Buffer` to a blank variable of type `io.Writer` forces the compiler to check that `*Buffer` implements `io.Writer`. If a method is removed or its signature changes, the build fails right there. The blank identifier discards the value, so nothing is allocated or used at run time.",
+			"pt-BR": "Atribuir um `*Buffer` nil tipado a uma variável blank do tipo `io.Writer` obriga o compilador a verificar que `*Buffer` implementa `io.Writer`. Se um método for removido ou mudar de assinatura, o build quebra ali mesmo. O blank identifier descarta o valor, então nada é alocado ou usado em tempo de execução."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "A compile-time check that `*Buffer` implements `io.Writer`", "pt-BR": "Uma verificação em compilação de que `*Buffer` implementa `io.Writer`" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "It registers `*Buffer` so `io` can discover it via reflection", "pt-BR": "Registra `*Buffer` para que o pacote `io` o descubra via reflection" },
+				"why": {
+					"en": "Go has no interface registry; the declaration only exists for the type checker.",
+					"pt-BR": "Go não tem registro de interfaces; a declaração só existe para o type checker."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It creates a default nil `io.Writer` other code can use", "pt-BR": "Cria um `io.Writer` nil padrão que outro código pode usar" },
+				"why": {
+					"en": "A variable named `_` cannot be referenced; the value is discarded.",
+					"pt-BR": "Uma variável chamada `_` não pode ser referenciada; o valor é descartado."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It forces the compiler to inline the methods of `*Buffer`", "pt-BR": "Obriga o compilador a fazer inline dos métodos de `*Buffer`" },
+				"why": {
+					"en": "Inlining is decided by the compiler's heuristics and is unrelated to interface assignments.",
+					"pt-BR": "Inlining é decidido pelas heurísticas do compilador e não tem relação com atribuições a interfaces."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "Without it, `*Buffer` could not be passed where an `io.Writer` is expected", "pt-BR": "Sem ela, `*Buffer` não poderia ser passado onde se espera um `io.Writer`" },
+				"why": {
+					"en": "Satisfaction is implicit; the line only documents and enforces it, it is never required.",
+					"pt-BR": "A satisfação é implícita; a linha só documenta e garante isso, nunca é obrigatória."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Effective Go: Interface checks", "url": "https://go.dev/doc/effective_go#blank_implements", "kind": "effective-go" },
+			{ "title": "Go FAQ: How can I guarantee my type satisfies an interface?", "url": "https://go.dev/doc/faq#guarantee_satisfies_interface", "kind": "faq" }
+		]
+	},
+	{
+		"id": "pointer-method-not-in-value-method-set",
+		"difficulty": "medium",
+		"tags": ["method-sets", "interfaces", "receivers"],
+		"code": "type Shape interface{ Area() float64 }\n\ntype Square struct{ side float64 }\n\nfunc (s *Square) Area() float64 { return s.side * s.side }\n\nfunc main() {\n\tvar sh Shape = Square{2}\n\tfmt.Println(sh.Area())\n}",
+		"question": {
+			"en": "What happens when you build this program?",
+			"pt-BR": "O que acontece ao compilar este programa?"
+		},
+		"explanation": {
+			"en": "The method set of `Square` contains only methods with receiver `Square`; `Area` has receiver `*Square`, so only `*Square` implements `Shape`. The compiler reports `Square does not implement Shape (method Area has pointer receiver)`. Use `var sh Shape = &Square{2}`. The automatic `&` in `v.Area()` only applies to calls on addressable values, not to interface assignment.",
+			"pt-BR": "O method set de `Square` contém só os métodos com receiver `Square`; `Area` tem receiver `*Square`, então só `*Square` implementa `Shape`. O compilador reporta `Square does not implement Shape (method Area has pointer receiver)`. Use `var sh Shape = &Square{2}`. O `&` automático em `v.Area()` vale só para chamadas em valores endereçáveis, não para atribuição a interfaces."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It prints 4", "pt-BR": "Imprime 4" },
+				"why": {
+					"en": "An interface value stores a copy, which is not addressable, so Go cannot take its address to call a pointer method; the assignment is rejected.",
+					"pt-BR": "Uma interface guarda uma cópia, que não é endereçável, então Go não pode pegar seu endereço para chamar um método de ponteiro; a atribuição é rejeitada."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It compiles but panics with a nil pointer dereference", "pt-BR": "Compila, mas causa panic de nil pointer dereference" },
+				"why": {
+					"en": "The problem is caught statically; no program is produced.",
+					"pt-BR": "O problema é detectado estaticamente; nenhum programa é gerado."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "Compile error: Square does not implement Shape (method Area has pointer receiver)", "pt-BR": "Erro de compilação: Square does not implement Shape (method Area has pointer receiver)" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "It prints 0 because the method works on a copy", "pt-BR": "Imprime 0 porque o método trabalha numa cópia" },
+				"why": {
+					"en": "The code never runs; and even with a copy, `side` would still be 2, giving 4.",
+					"pt-BR": "O código nem roda; e mesmo numa cópia, `side` continuaria 2, resultando em 4."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It compiles because Go takes `&Square{2}` automatically", "pt-BR": "Compila porque Go faz `&Square{2}` automaticamente" },
+				"why": {
+					"en": "Implicit address-taking happens only for method calls on addressable operands, never in assignments to interfaces.",
+					"pt-BR": "O endereço implícito só acontece em chamadas de método sobre operandos endereçáveis, nunca em atribuições a interfaces."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Method sets", "url": "https://go.dev/ref/spec#Method_sets", "kind": "spec" },
+			{ "title": "Go FAQ: Why do T and *T have different method sets?", "url": "https://go.dev/doc/faq#different_method_sets", "kind": "faq" },
+			{ "title": "Go Wiki: Method Sets", "url": "https://go.dev/wiki/MethodSets", "kind": "doc" }
+		]
+	},
+	{
+		"id": "embedding-no-virtual-dispatch",
+		"difficulty": "medium",
+		"tags": ["embedding", "methods", "shadowing"],
+		"code": "type Animal struct{}\n\nfunc (Animal) Name() string    { return \"animal\" }\nfunc (a Animal) Greet() string { return \"I am: \" + a.Name() }\n\ntype Dog struct{ Animal }\n\nfunc (Dog) Name() string { return \"dog\" }\n\nfunc main() {\n\td := Dog{}\n\tfmt.Println(d.Name())\n\tfmt.Println(d.Greet())\n}",
+		"question": {
+			"en": "What does this program print?",
+			"pt-BR": "O que este programa imprime?"
+		},
+		"explanation": {
+			"en": "`Dog.Name` shadows the promoted `Animal.Name`, so `d.Name()` returns `dog`. But `d.Greet()` is `d.Animal.Greet()`: its receiver is the inner `Animal`, which knows nothing about `Dog`, so `a.Name()` resolves statically to `Animal.Name`. Embedding is composition, not inheritance: there is no virtual dispatch. Output: `dog` and `I am: animal`.",
+			"pt-BR": "`Dog.Name` faz shadowing do `Animal.Name` promovido, então `d.Name()` retorna `dog`. Mas `d.Greet()` é `d.Animal.Greet()`: o receiver é o `Animal` interno, que não sabe nada sobre `Dog`, então `a.Name()` é resolvido estaticamente para `Animal.Name`. Embedding é composição, não herança: não existe dispatch virtual. Saída: `dog` e `I am: animal`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "dog / I am: dog", "pt-BR": "dog / I am: dog" },
+				"why": {
+					"en": "That is how overriding works in class-based languages; in Go the promoted `Greet` runs with an `Animal` receiver and calls `Animal.Name`.",
+					"pt-BR": "É assim que override funciona em linguagens com classes; em Go o `Greet` promovido roda com receiver `Animal` e chama `Animal.Name`."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "animal / I am: animal", "pt-BR": "animal / I am: animal" },
+				"why": {
+					"en": "A method declared on the outer type takes precedence over a promoted one with the same name, so `d.Name()` is `dog`.",
+					"pt-BR": "Um método declarado no tipo externo tem precedência sobre um promovido com o mesmo nome, então `d.Name()` é `dog`."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It does not compile: ambiguous selector `d.Name`", "pt-BR": "Não compila: seletor ambíguo `d.Name`" },
+				"why": {
+					"en": "The two `Name` methods are at different depths (0 and 1); the shallower one wins without ambiguity.",
+					"pt-BR": "Os dois métodos `Name` estão em profundidades diferentes (0 e 1); o mais raso vence sem ambiguidade."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: `Dog` must redeclare `Greet`", "pt-BR": "Não compila: `Dog` precisa redeclarar `Greet`" },
+				"why": {
+					"en": "`Greet` is promoted from `Animal` and callable on `Dog` without any redeclaration.",
+					"pt-BR": "`Greet` é promovido de `Animal` e pode ser chamado em `Dog` sem nenhuma redeclaração."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "dog / I am: animal", "pt-BR": "dog / I am: animal" }
+			}
+		],
+		"sources": [
+			{ "title": "Effective Go: Embedding", "url": "https://go.dev/doc/effective_go#embedding", "kind": "effective-go" },
+			{ "title": "The Go Programming Language Specification: Selectors", "url": "https://go.dev/ref/spec#Selectors", "kind": "spec" }
+		]
+	},
+	{
+		"id": "union-constraint-missing-tilde",
+		"difficulty": "medium",
+		"tags": ["generics", "constraints", "type-sets"],
+		"code": "type Number interface{ int | float64 }\n\nfunc Sum[T Number](xs []T) T {\n\tvar s T\n\tfor _, x := range xs {\n\t\ts += x\n\t}\n\treturn s\n}\n\ntype Celsius float64\n\nfunc main() {\n\ttemps := []Celsius{20.5, 21}\n\tfmt.Println(Sum(temps))\n}",
+		"question": {
+			"en": "What happens when you build this program?",
+			"pt-BR": "O que acontece ao compilar este programa?"
+		},
+		"explanation": {
+			"en": "The type set of `int | float64` contains exactly those two types. `Celsius` is a distinct defined type whose underlying type is `float64`, so it is not in the set and the compiler says `Celsius does not satisfy Number (possibly missing ~ for float64 in Number)`. Writing `~int | ~float64` includes every type whose underlying type is `int` or `float64`.",
+			"pt-BR": "O type set de `int | float64` contém exatamente esses dois tipos. `Celsius` é um tipo definido distinto cujo underlying type é `float64`, então não está no conjunto e o compilador diz `Celsius does not satisfy Number (possibly missing ~ for float64 in Number)`. Escrever `~int | ~float64` inclui todo tipo cujo underlying type seja `int` ou `float64`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It prints 41.5", "pt-BR": "Imprime 41.5" },
+				"why": {
+					"en": "That would require `~float64`; without the tilde the constraint matches only `float64` itself.",
+					"pt-BR": "Isso exigiria `~float64`; sem o til, a constraint aceita só o próprio `float64`."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "Compile error: Celsius does not satisfy Number (possibly missing ~ for float64 in Number)", "pt-BR": "Erro de compilação: Celsius does not satisfy Number (possibly missing ~ for float64 in Number)" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "Compile error: cannot infer T", "pt-BR": "Erro de compilação: cannot infer T" },
+				"why": {
+					"en": "Inference succeeds (T is `Celsius`, taken from the argument); the failure is in checking T against the constraint.",
+					"pt-BR": "A inferência funciona (T é `Celsius`, vindo do argumento); a falha está na verificação de T contra a constraint."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It prints 41.5 after converting `Celsius` to `float64`", "pt-BR": "Imprime 41.5 após converter `Celsius` para `float64`" },
+				"why": {
+					"en": "Go never converts type arguments implicitly; a type argument either satisfies the constraint or the call is rejected.",
+					"pt-BR": "Go nunca converte type arguments implicitamente; ou o tipo satisfaz a constraint ou a chamada é rejeitada."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "Compile error: operator += not defined on T", "pt-BR": "Erro de compilação: operator += not defined on T" },
+				"why": {
+					"en": "Every type in `int | float64` supports `+`, so the body of `Sum` is valid.",
+					"pt-BR": "Todo tipo em `int | float64` suporta `+`, então o corpo de `Sum` é válido."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Interface types (general interfaces, ~T)", "url": "https://go.dev/ref/spec#Interface_types", "kind": "spec" },
+			{ "title": "The Go Programming Language Specification: Satisfying a type constraint", "url": "https://go.dev/ref/spec#Satisfying_a_type_constraint", "kind": "spec" },
+			{ "title": "An Introduction To Generics (The Go Blog)", "url": "https://go.dev/blog/intro-generics", "kind": "blog" }
+		]
+	},
+	{
+		"id": "range-over-func-break-yield-false",
+		"difficulty": "medium",
+		"tags": ["iterators", "range-over-func", "iter"],
+		"code": "func Count(n int) iter.Seq[int] {\n\treturn func(yield func(int) bool) {\n\t\tfor i := range n {\n\t\t\tfmt.Print(\"y\", i, \" \")\n\t\t\tif !yield(i) {\n\t\t\t\tfmt.Print(\"stop \")\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t\tfmt.Print(\"done \")\n\t}\n}\n\nfunc main() {\n\tfor v := range Count(5) {\n\t\tif v == 2 {\n\t\t\tbreak\n\t\t}\n\t\tfmt.Print(\"v\", v, \" \")\n\t}\n\tfmt.Println()\n}",
+		"question": {
+			"en": "What does this program print (Go 1.23+)?",
+			"pt-BR": "O que este programa imprime (Go 1.23+)?"
+		},
+		"explanation": {
+			"en": "With range over a function, the loop body becomes the `yield` callback. Each `yield(i)` runs the body once and returns true to continue. When the body executes `break` for `v == 2`, `yield` returns false; the iterator is not killed, it resumes, sees false, prints `stop ` and returns. Output: `y0 v0 y1 v1 y2 stop`.",
+			"pt-BR": "No range sobre função, o corpo do loop vira o callback `yield`. Cada `yield(i)` roda o corpo uma vez e retorna true para continuar. Quando o corpo executa `break` em `v == 2`, `yield` retorna false; o iterador não é interrompido à força, ele continua, vê o false, imprime `stop ` e retorna. Saída: `y0 v0 y1 v1 y2 stop`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "y0 v0 y1 v1 y2 stop", "pt-BR": "y0 v0 y1 v1 y2 stop" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "y0 v0 y1 v1 y2 y3 y4 done", "pt-BR": "y0 v0 y1 v1 y2 y3 y4 done" },
+				"why": {
+					"en": "`break` is communicated to the iterator through `yield` returning false; this iterator checks it and stops.",
+					"pt-BR": "O `break` é comunicado ao iterador pelo `yield` retornando false; este iterador verifica isso e para."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "y0 v0 y1 v1 done", "pt-BR": "y0 v0 y1 v1 done" },
+				"why": {
+					"en": "The iterator prints `y2` before calling `yield(2)`, and it takes the `stop` path, not the end of the loop.",
+					"pt-BR": "O iterador imprime `y2` antes de chamar `yield(2)`, e segue pelo caminho `stop`, não pelo fim do loop."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "y0 v0 y1 v1 y2", "pt-BR": "y0 v0 y1 v1 y2" },
+				"why": {
+					"en": "The iterator function is not aborted on `break`; control returns into it from `yield` so it can clean up.",
+					"pt-BR": "A função iteradora não é abortada no `break`; o controle volta para ela pelo retorno de `yield`, permitindo limpeza."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "y0 y1 y2 y3 y4 done v0 v1", "pt-BR": "y0 y1 y2 y3 y4 done v0 v1" },
+				"why": {
+					"en": "Range over func is push-based and interleaved: values are not collected first, the body runs inside each `yield` call.",
+					"pt-BR": "Range sobre função é baseado em push e intercalado: os valores não são coletados antes, o corpo roda dentro de cada chamada de `yield`."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Range Over Function Types (The Go Blog)", "url": "https://go.dev/blog/range-functions", "kind": "blog" },
+			{ "title": "The Go Programming Language Specification: For statements with range clause", "url": "https://go.dev/ref/spec#For_range", "kind": "spec" },
+			{ "title": "iter package", "url": "https://pkg.go.dev/iter", "kind": "doc" }
+		]
+	},
+	{
+		"id": "stringer-sprintf-infinite-recursion",
+		"difficulty": "medium",
+		"tags": ["stringer", "fmt", "methods"],
+		"code": "type ID int\n\nfunc (id ID) String() string {\n\treturn fmt.Sprintf(\"ID(%v)\", id)\n}\n\nfunc main() {\n\tfmt.Println(ID(7))\n}",
+		"question": {
+			"en": "What happens when this program runs?",
+			"pt-BR": "O que acontece quando este programa roda?"
+		},
+		"explanation": {
+			"en": "`%v` on a value that implements `fmt.Stringer` calls its `String` method, so `String` calls `Sprintf`, which calls `String` again, forever. The goroutine stack grows until the runtime aborts with `fatal error: stack overflow`. Convert to the underlying type to break the cycle: `fmt.Sprintf(\"ID(%d)\", int(id))`.",
+			"pt-BR": "`%v` num valor que implementa `fmt.Stringer` chama o método `String`, então `String` chama `Sprintf`, que chama `String` de novo, para sempre. A stack da goroutine cresce até o runtime abortar com `fatal error: stack overflow`. Converta para o tipo subjacente para quebrar o ciclo: `fmt.Sprintf(\"ID(%d)\", int(id))`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It prints ID(7)", "pt-BR": "Imprime ID(7)" },
+				"why": {
+					"en": "`fmt` does not know it is already inside `String`; `id` still has type `ID`, so `%v` calls `String` again.",
+					"pt-BR": "O `fmt` não sabe que já está dentro de `String`; `id` continua com tipo `ID`, então `%v` chama `String` de novo."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It prints ID(ID(7))", "pt-BR": "Imprime ID(ID(7))" },
+				"why": {
+					"en": "There is no depth limit that stops after one level; the recursion never reaches a base case.",
+					"pt-BR": "Não existe limite de profundidade que pare após um nível; a recursão nunca chega a um caso base."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It does not compile: recursive `String` method", "pt-BR": "Não compila: método `String` recursivo" },
+				"why": {
+					"en": "The compiler cannot see the recursion, which goes through `fmt`'s dynamic interface check; `go vet` may warn about it.",
+					"pt-BR": "O compilador não enxerga a recursão, que passa pela verificação dinâmica de interface do `fmt`; o `go vet` pode avisar."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "It crashes with fatal error: stack overflow", "pt-BR": "Quebra com fatal error: stack overflow" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "It prints 7", "pt-BR": "Imprime 7" },
+				"why": {
+					"en": "`fmt.Println` prefers the `String` method over the underlying int, so it never prints the bare number.",
+					"pt-BR": "`fmt.Println` prefere o método `String` ao int subjacente, então nunca imprime o número puro."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Effective Go: Printing", "url": "https://go.dev/doc/effective_go#printing", "kind": "effective-go" },
+			{ "title": "fmt package: Stringer", "url": "https://pkg.go.dev/fmt#Stringer", "kind": "doc" }
+		]
+	},
+	{
+		"id": "nil-interface-typed-nil-pointer",
+		"difficulty": "hard",
+		"tags": ["interfaces", "nil", "errors"],
+		"code": "type MyErr struct{}\n\nfunc (*MyErr) Error() string { return \"boom\" }\n\nfunc check(fail bool) error {\n\tvar p *MyErr\n\tif fail {\n\t\tp = &MyErr{}\n\t}\n\treturn p\n}\n\nfunc main() {\n\terr := check(false)\n\tfmt.Println(err == nil)\n}",
+		"question": {
+			"en": "What does this program print?",
+			"pt-BR": "O que este programa imprime?"
+		},
+		"explanation": {
+			"en": "An interface value is a pair (dynamic type, value) and is nil only when both are unset. Returning the nil `*MyErr` stores the pair `(*MyErr, nil)` in the `error`, which is not equal to `nil`, so it prints `false`. Return a literal `nil` on the success path instead of a typed nil pointer.",
+			"pt-BR": "Um valor de interface é um par (tipo dinâmico, valor) e só é nil quando os dois estão vazios. Retornar o `*MyErr` nil guarda o par `(*MyErr, nil)` no `error`, que é diferente de `nil`, então imprime `false`. No caminho de sucesso, retorne o literal `nil` em vez de um ponteiro nil tipado."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "true", "pt-BR": "true" },
+				"why": {
+					"en": "The pointer is nil, but the interface also records its dynamic type `*MyErr`, so the interface itself is not nil.",
+					"pt-BR": "O ponteiro é nil, mas a interface também registra o tipo dinâmico `*MyErr`, então a interface em si não é nil."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It does not compile: `*MyErr` cannot be returned as `error`", "pt-BR": "Não compila: `*MyErr` não pode ser retornado como `error`" },
+				"why": {
+					"en": "`Error` has a pointer receiver, so `*MyErr` is exactly the type that implements `error`.",
+					"pt-BR": "`Error` tem pointer receiver, então `*MyErr` é justamente o tipo que implementa `error`."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "false", "pt-BR": "false" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "It panics with a nil pointer dereference", "pt-BR": "Ocorre panic de nil pointer dereference" },
+				"why": {
+					"en": "Comparing an interface with nil does not dereference anything; and `Error` does not even read its receiver.",
+					"pt-BR": "Comparar uma interface com nil não desreferencia nada; e `Error` nem lê o seu receiver."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It prints `true` only with optimizations disabled", "pt-BR": "Imprime `true` só com otimizações desligadas" },
+				"why": {
+					"en": "The result is defined by the language semantics of interface values, not by compiler optimizations.",
+					"pt-BR": "O resultado é definido pela semântica de valores de interface da linguagem, não por otimizações do compilador."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Go FAQ: Why is my nil error value not equal to nil?", "url": "https://go.dev/doc/faq#nil_error", "kind": "faq" },
+			{ "title": "The Go Programming Language Specification: Comparison operators", "url": "https://go.dev/ref/spec#Comparison_operators", "kind": "spec" },
+			{ "title": "Dave Cheney: Typed nils in Go 2", "url": "https://dave.cheney.net/2017/08/09/typed-nils-in-go-2", "kind": "article" }
+		]
+	},
+	{
+		"id": "pointer-method-on-map-element",
+		"difficulty": "hard",
+		"tags": ["methods", "addressability", "maps", "receivers"],
+		"code": "type Counter struct{ n int }\n\nfunc (c *Counter) Inc() { c.n++ }\n\nfunc main() {\n\tm := map[string]Counter{\"a\": {}}\n\tm[\"a\"].Inc()\n\tfmt.Println(m[\"a\"].n)\n}",
+		"question": {
+			"en": "What happens when you build this program?",
+			"pt-BR": "O que acontece ao compilar este programa?"
+		},
+		"explanation": {
+			"en": "`x.Inc()` with a pointer receiver is shorthand for `(&x).Inc()`, which requires `x` to be addressable. Map elements are not addressable, because the map may move them when it grows, so the compiler reports `cannot call pointer method Inc on Counter`. Use `map[string]*Counter`, or copy the value, modify it, and store it back.",
+			"pt-BR": "`x.Inc()` com pointer receiver é um atalho para `(&x).Inc()`, o que exige que `x` seja endereçável. Elementos de map não são endereçáveis, porque o map pode movê-los ao crescer, então o compilador reporta `cannot call pointer method Inc on Counter`. Use `map[string]*Counter`, ou copie o valor, altere e grave de volta."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It prints 1", "pt-BR": "Imprime 1" },
+				"why": {
+					"en": "That would require taking the address of the element inside the map, which Go forbids.",
+					"pt-BR": "Isso exigiria pegar o endereço do elemento dentro do map, o que Go proíbe."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It prints 0 because `Inc` updates a temporary copy", "pt-BR": "Imprime 0 porque `Inc` altera uma cópia temporária" },
+				"why": {
+					"en": "Go does not silently create an addressable temporary for a pointer method call; it rejects the call at compile time.",
+					"pt-BR": "Go não cria silenciosamente uma cópia temporária endereçável para chamar um método de ponteiro; rejeita a chamada na compilação."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It compiles but panics at run time", "pt-BR": "Compila, mas causa panic em tempo de execução" },
+				"why": {
+					"en": "Addressability is a static property, so the error is reported by the compiler.",
+					"pt-BR": "Endereçabilidade é uma propriedade estática, então o erro é reportado pelo compilador."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Compile error: Counter does not implement Inc (method has pointer receiver)", "pt-BR": "Erro de compilação: Counter does not implement Inc (method has pointer receiver)" },
+				"why": {
+					"en": "That style of message is for interface satisfaction; no interface is involved here, the issue is addressability of `m[\"a\"]`.",
+					"pt-BR": "Esse estilo de mensagem é de satisfação de interface; aqui não há interface, o problema é a endereçabilidade de `m[\"a\"]`."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "Compile error: cannot call pointer method Inc on Counter", "pt-BR": "Erro de compilação: cannot call pointer method Inc on Counter" }
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Calls", "url": "https://go.dev/ref/spec#Calls", "kind": "spec" },
+			{ "title": "The Go Programming Language Specification: Address operators", "url": "https://go.dev/ref/spec#Address_operators", "kind": "spec" },
+			{ "title": "Go Wiki: Method Sets", "url": "https://go.dev/wiki/MethodSets", "kind": "doc" }
+		]
+	},
+	{
+		"id": "method-value-binds-receiver",
+		"difficulty": "hard",
+		"tags": ["methods", "method-values", "receivers"],
+		"code": "type T struct{ n int }\n\nfunc (t T) Val()  { fmt.Print(t.n, \" \") }\nfunc (t *T) Ptr() { fmt.Print(t.n, \" \") }\n\nfunc main() {\n\tt := T{1}\n\tv := t.Val\n\tp := t.Ptr\n\tt.n = 2\n\tv()\n\tp()\n\tfmt.Println()\n}",
+		"question": {
+			"en": "What does this program print?",
+			"pt-BR": "O que este programa imprime?"
+		},
+		"explanation": {
+			"en": "A method value `x.M` evaluates and saves its receiver when the expression is evaluated. For the value receiver, `t.Val` saves a copy of `t` with `n == 1`. For the pointer receiver, `t.Ptr` is `(&t).Ptr`, saving a pointer to `t`, which sees the later write. Output: `1 2`. The same rule matters for `defer t.Val()` and `go t.Val()`.",
+			"pt-BR": "Um method value `x.M` avalia e guarda o receiver no momento em que a expressão é avaliada. Com value receiver, `t.Val` guarda uma cópia de `t` com `n == 1`. Com pointer receiver, `t.Ptr` vira `(&t).Ptr`, guardando um ponteiro para `t`, que enxerga a escrita posterior. Saída: `1 2`. A mesma regra vale para `defer t.Val()` e `go t.Val()`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "2 2", "pt-BR": "2 2" },
+				"why": {
+					"en": "A method value is not a lazy reference to the variable; for a value receiver it captures a copy at creation time.",
+					"pt-BR": "Um method value não é uma referência preguiçosa à variável; com value receiver ele captura uma cópia na criação."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "1 2", "pt-BR": "1 2" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "1 1", "pt-BR": "1 1" },
+				"why": {
+					"en": "With a pointer receiver the saved receiver is `&t`, so the call observes `t.n = 2`.",
+					"pt-BR": "Com pointer receiver o receiver guardado é `&t`, então a chamada enxerga `t.n = 2`."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "2 1", "pt-BR": "2 1" },
+				"why": {
+					"en": "This swaps the semantics: copies come from value receivers, shared state from pointer receivers.",
+					"pt-BR": "Isso inverte a semântica: cópias vêm de value receivers, estado compartilhado vem de pointer receivers."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It does not compile: `t.Ptr` needs `(&t).Ptr`", "pt-BR": "Não compila: `t.Ptr` precisa de `(&t).Ptr`" },
+				"why": {
+					"en": "`t` is an addressable variable, so `t.Ptr` is automatically `(&t).Ptr`, just like in a call.",
+					"pt-BR": "`t` é uma variável endereçável, então `t.Ptr` vira automaticamente `(&t).Ptr`, como numa chamada."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Method values", "url": "https://go.dev/ref/spec#Method_values", "kind": "spec" },
+			{ "title": "The Go Programming Language Specification: Method sets", "url": "https://go.dev/ref/spec#Method_sets", "kind": "spec" }
+		]
+	},
+	{
+		"id": "generic-method-cannot-implement-interface",
+		"difficulty": "hard",
+		"tags": ["generics", "generic-methods", "interfaces", "go-1-27"],
+		"code": "type Box struct{ v any }\n\nfunc (b Box) Get[T any]() T { return b.v.(T) }\n\ntype IntGetter interface{ Get() int }\n\nfunc main() {\n\tvar g IntGetter = Box{1}\n\tfmt.Println(g)\n}",
+		"question": {
+			"en": "With Go 1.27, what happens when you build this program?",
+			"pt-BR": "No Go 1.27, o que acontece ao compilar este programa?"
+		},
+		"explanation": {
+			"en": "Go 1.27 allows methods to declare their own type parameters, so `Box.Get[T any]` is valid. However, interface methods cannot have type parameters, and an interface method can never be implemented by a generic method. The compiler reports `Box does not implement IntGetter (wrong type for method Get)` with `have Get[T any]() T` / `want Get() int`. Before Go 1.27 the method declaration itself was an error.",
+			"pt-BR": "O Go 1.27 permite que métodos declarem seus próprios type parameters, então `Box.Get[T any]` é válido. Porém, métodos de interface não podem ter type parameters, e um método de interface nunca pode ser implementado por um método genérico. O compilador reporta `Box does not implement IntGetter (wrong type for method Get)` com `have Get[T any]() T` / `want Get() int`. Antes do Go 1.27 a própria declaração do método era erro."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It prints {1}, inferring T = int from the interface", "pt-BR": "Imprime {1}, inferindo T = int a partir da interface" },
+				"why": {
+					"en": "Generic methods are not instantiated to match interfaces; satisfaction requires a non-generic method with an identical signature.",
+					"pt-BR": "Métodos genéricos não são instanciados para casar com interfaces; a satisfação exige um método não genérico com assinatura idêntica."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "Compile error: methods cannot have type parameters", "pt-BR": "Erro de compilação: methods cannot have type parameters" },
+				"why": {
+					"en": "That was true up to Go 1.26; Go 1.27 accepts generic method declarations.",
+					"pt-BR": "Isso valia até o Go 1.26; o Go 1.27 aceita declarações de métodos genéricos."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It compiles, but calling `g.Get()` would panic", "pt-BR": "Compila, mas chamar `g.Get()` causaria panic" },
+				"why": {
+					"en": "The assignment itself is rejected statically; no program is produced.",
+					"pt-BR": "A própria atribuição é rejeitada estaticamente; nenhum programa é gerado."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "Compile error: Box does not implement IntGetter (wrong type for method Get)", "pt-BR": "Erro de compilação: Box does not implement IntGetter (wrong type for method Get)" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "It would compile if `IntGetter` declared `Get[T any]() T`", "pt-BR": "Compilaria se `IntGetter` declarasse `Get[T any]() T`" },
+				"why": {
+					"en": "Interface methods still cannot declare type parameters: `interface method must have no type parameters`.",
+					"pt-BR": "Métodos de interface continuam sem poder declarar type parameters: `interface method must have no type parameters`."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Go 1.27 Release Notes: Changes to the language", "url": "https://go.dev/doc/go1.27#language", "kind": "doc" },
+			{ "title": "Go issue 77273: generic methods", "url": "https://go.dev/issue/77273", "kind": "issue" },
+			{ "title": "The Go Programming Language Specification: Method declarations", "url": "https://go.dev/ref/spec#Method_declarations", "kind": "spec" }
+		]
+	},
+	{
+		"id": "reflect-value-not-settable",
+		"difficulty": "very-hard",
+		"tags": ["reflection", "addressability"],
+		"code": "x := 3.4\nv := reflect.ValueOf(x)\nfmt.Println(v.CanSet())\nv.SetFloat(7.1)\nfmt.Println(x)",
+		"question": {
+			"en": "What happens when this code runs?",
+			"pt-BR": "O que acontece quando este código roda?"
+		},
+		"explanation": {
+			"en": "`reflect.ValueOf(x)` receives a copy of `x` inside an interface, so the `Value` is not addressable and therefore not settable: `CanSet()` prints `false`. Calling `SetFloat` on it panics with `reflect: reflect.Value.SetFloat using unaddressable value`. This is the third law of reflection: to modify a value, reflect on a pointer and use `Elem()`: `reflect.ValueOf(&x).Elem().SetFloat(7.1)`.",
+			"pt-BR": "`reflect.ValueOf(x)` recebe uma cópia de `x` dentro de uma interface, então o `Value` não é endereçável e portanto não é settable: `CanSet()` imprime `false`. Chamar `SetFloat` nele causa panic com `reflect: reflect.Value.SetFloat using unaddressable value`. É a terceira lei da reflection: para modificar um valor, use reflection sobre um ponteiro e `Elem()`: `reflect.ValueOf(&x).Elem().SetFloat(7.1)`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "Prints false, then panics: reflect.Value.SetFloat using unaddressable value", "pt-BR": "Imprime false, depois panic: reflect.Value.SetFloat using unaddressable value" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "Prints false, then 3.4 (the set is silently ignored)", "pt-BR": "Imprime false, depois 3.4 (o set é ignorado em silêncio)" },
+				"why": {
+					"en": "reflect does not ignore invalid operations; setting a non-settable Value panics.",
+					"pt-BR": "O reflect não ignora operações inválidas; alterar um Value não settable causa panic."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Prints true, then 7.1", "pt-BR": "Imprime true, depois 7.1" },
+				"why": {
+					"en": "`ValueOf` gets a copy, not the variable; only a Value obtained through a pointer's `Elem()` refers to `x` itself.",
+					"pt-BR": "`ValueOf` recebe uma cópia, não a variável; só um Value obtido via `Elem()` de um ponteiro se refere ao próprio `x`."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Prints true, then 3.4 (only the copy changes)", "pt-BR": "Imprime true, depois 3.4 (só a cópia muda)" },
+				"why": {
+					"en": "reflect forbids exactly this confusing case: setting a copy is reported as not settable instead of quietly changing it.",
+					"pt-BR": "O reflect proíbe justamente esse caso confuso: alterar uma cópia é reportado como não settable em vez de mudar em silêncio."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It does not compile: SetFloat requires a *float64", "pt-BR": "Não compila: SetFloat exige um *float64" },
+				"why": {
+					"en": "`SetFloat` is a method on `reflect.Value` taking a `float64`; settability is checked at run time.",
+					"pt-BR": "`SetFloat` é um método de `reflect.Value` que recebe `float64`; a settability é verificada em tempo de execução."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Laws of Reflection (The Go Blog)", "url": "https://go.dev/blog/laws-of-reflection", "kind": "blog" },
+			{ "title": "reflect package: Value.CanSet", "url": "https://pkg.go.dev/reflect#Value.CanSet", "kind": "doc" }
+		]
+	},
+	{
+		"id": "iterator-ignores-yield-false",
+		"difficulty": "very-hard",
+		"tags": ["iterators", "range-over-func", "panics"],
+		"code": "func All(yield func(int) bool) {\n\tfor i := range 3 {\n\t\tyield(i)\n\t}\n}\n\nfunc main() {\n\tfor v := range All {\n\t\tfmt.Println(v)\n\t\tbreak\n\t}\n\tfmt.Println(\"end\")\n}",
+		"question": {
+			"en": "This iterator ignores the result of `yield`. What happens when it runs?",
+			"pt-BR": "Este iterador ignora o resultado de `yield`. O que acontece ao rodar?"
+		},
+		"explanation": {
+			"en": "The spec says that once `yield` returns false the iterator must not call it again. After `break`, `yield(0)` returns false, but `All` calls `yield(1)` anyway; the compiler-generated loop body detects this and panics with `runtime error: range function continued iteration after function for loop body returned false`. So the program prints `0` and then panics; `end` is never printed. Correct iterators check `if !yield(i) { return }`.",
+			"pt-BR": "A spec diz que, depois que `yield` retorna false, o iterador não pode chamá-lo de novo. Após o `break`, `yield(0)` retorna false, mas `All` chama `yield(1)` mesmo assim; o corpo do loop gerado pelo compilador detecta isso e causa panic com `runtime error: range function continued iteration after function for loop body returned false`. Então o programa imprime `0` e depois entra em panic; `end` nunca é impresso. Iteradores corretos verificam `if !yield(i) { return }`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "Prints 0 and end; extra yield calls are ignored", "pt-BR": "Imprime 0 e end; as chamadas extras de yield são ignoradas" },
+				"why": {
+					"en": "The runtime does not silently tolerate the misuse; calling `yield` after it returned false is detected and panics.",
+					"pt-BR": "O runtime não tolera o uso incorreto em silêncio; chamar `yield` depois de ele retornar false é detectado e causa panic."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "Prints 0, 1, 2 and end; `break` has no effect", "pt-BR": "Imprime 0, 1, 2 e end; o `break` não tem efeito" },
+				"why": {
+					"en": "The loop body never runs again after `break`; the extra `yield` call triggers a panic instead.",
+					"pt-BR": "O corpo do loop nunca roda de novo após o `break`; a chamada extra de `yield` dispara um panic."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "Prints 0, then panics: range function continued iteration after function for loop body returned false", "pt-BR": "Imprime 0, depois panic: range function continued iteration after function for loop body returned false" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "The program deadlocks waiting for the iterator", "pt-BR": "O programa entra em deadlock esperando o iterador" },
+				"why": {
+					"en": "Range over func uses plain function calls on the same goroutine; there are no channels to block on.",
+					"pt-BR": "Range sobre função usa chamadas de função simples na mesma goroutine; não há channels para bloquear."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It does not compile: the result of `yield` must be used", "pt-BR": "Não compila: o resultado de `yield` precisa ser usado" },
+				"why": {
+					"en": "Go allows discarding a function's return value; the rule is enforced at run time, not by the compiler.",
+					"pt-BR": "Go permite descartar o retorno de uma função; a regra é verificada em tempo de execução, não pelo compilador."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: For statements with range clause", "url": "https://go.dev/ref/spec#For_range", "kind": "spec" },
+			{ "title": "Range Over Function Types (The Go Blog)", "url": "https://go.dev/blog/range-functions", "kind": "blog" },
+			{ "title": "iter package", "url": "https://pkg.go.dev/iter", "kind": "doc" }
+		]
+	},
+	{
+		"id": "comparable-any-runtime-panic",
+		"difficulty": "very-hard",
+		"tags": ["generics", "comparable", "interfaces", "panics"],
+		"code": "func Eq[T comparable](a, b T) bool { return a == b }\n\nfunc main() {\n\tfmt.Println(Eq[any](1, 1))\n\tfmt.Println(Eq[any]([]int{1}, []int{1}))\n}",
+		"question": {
+			"en": "What happens with Go 1.27?",
+			"pt-BR": "O que acontece no Go 1.27?"
+		},
+		"explanation": {
+			"en": "Since Go 1.20, a type argument satisfies `comparable` if it is comparable, even if not strictly comparable, so `any` is accepted. Comparing two interface values compares their dynamic types and then their values, and panics if the dynamic type is not comparable. The first call prints `true`; the second panics with `runtime error: comparing uncomparable type []int`.",
+			"pt-BR": "Desde o Go 1.20, um type argument satisfaz `comparable` se for comparável, mesmo que não seja estritamente comparável, então `any` é aceito. Comparar dois valores de interface compara os tipos dinâmicos e depois os valores, e causa panic se o tipo dinâmico não for comparável. A primeira chamada imprime `true`; a segunda causa panic com `runtime error: comparing uncomparable type []int`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "Compile error: any does not satisfy comparable", "pt-BR": "Erro de compilação: any does not satisfy comparable" },
+				"why": {
+					"en": "That was the behaviour in Go 1.18 and 1.19; Go 1.20 relaxed the rule so interfaces satisfy `comparable`.",
+					"pt-BR": "Esse era o comportamento no Go 1.18 e 1.19; o Go 1.20 relaxou a regra para interfaces satisfazerem `comparable`."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "Prints true, then false", "pt-BR": "Imprime true, depois false" },
+				"why": {
+					"en": "Slices are never compared by contents or identity; comparing them through interfaces panics instead of returning false.",
+					"pt-BR": "Slices nunca são comparados por conteúdo ou identidade; compará-los via interfaces causa panic em vez de retornar false."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Prints true, then true", "pt-BR": "Imprime true, depois true" },
+				"why": {
+					"en": "Go has no element-wise `==` for slices; use `slices.Equal` for that.",
+					"pt-BR": "Go não tem `==` elemento a elemento para slices; para isso use `slices.Equal`."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Compile error only at the second call, because []int is not comparable", "pt-BR": "Erro de compilação só na segunda chamada, porque []int não é comparável" },
+				"why": {
+					"en": "With `T` explicitly `any`, the slices are just values assigned to `any`; the compiler cannot see their dynamic type.",
+					"pt-BR": "Com `T` explicitamente `any`, os slices são apenas valores atribuídos a `any`; o compilador não enxerga o tipo dinâmico."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "Prints true, then panics: comparing uncomparable type []int", "pt-BR": "Imprime true, depois panic: comparing uncomparable type []int" }
+			}
+		],
+		"sources": [
+			{ "title": "All your comparable types (The Go Blog)", "url": "https://go.dev/blog/comparable", "kind": "blog" },
+			{ "title": "The Go Programming Language Specification: Satisfying a type constraint", "url": "https://go.dev/ref/spec#Satisfying_a_type_constraint", "kind": "spec" },
+			{ "title": "Go 1.20 Release Notes: Changes to the language", "url": "https://go.dev/doc/go1.20#language", "kind": "doc" }
+		]
+	},
+	{
+		"id": "generic-slice-loses-named-type",
+		"difficulty": "very-hard",
+		"tags": ["generics", "type-inference", "constraints"],
+		"code": "type Integer interface{ ~int | ~int32 | ~int64 }\n\nfunc Scale[E Integer](s []E, c E) []E {\n\tr := make([]E, len(s))\n\tfor i, v := range s {\n\t\tr[i] = v * c\n\t}\n\treturn r\n}\n\ntype Point []int32\n\nfunc (p Point) String() string { return fmt.Sprint(\"P\", []int32(p)) }\n\nfunc main() {\n\tp := Point{1, 2}\n\tfmt.Println(Scale(p, 2).String())\n}",
+		"question": {
+			"en": "What happens when you build this program?",
+			"pt-BR": "O que acontece ao compilar este programa?"
+		},
+		"explanation": {
+			"en": "Passing `Point` for `[]E` is allowed because `Point` is assignable to `[]int32`, so inference picks `E = int32`. But the result type is `[]E`, i.e. `[]int32`, not `Point`, so it has no `String` method: `Scale(p, 2).String undefined (type []int32 has no field or method String)`. The fix is a type parameter for the slice itself: `func Scale[S ~[]E, E Integer](s S, c E) S`, which keeps the named type and prints `P[2 4]`.",
+			"pt-BR": "Passar `Point` para `[]E` é permitido porque `Point` é atribuível a `[]int32`, então a inferência escolhe `E = int32`. Mas o tipo do resultado é `[]E`, ou seja `[]int32`, não `Point`, então não tem método `String`: `Scale(p, 2).String undefined (type []int32 has no field or method String)`. A correção é um type parameter para o próprio slice: `func Scale[S ~[]E, E Integer](s S, c E) S`, que preserva o tipo nomeado e imprime `P[2 4]`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It prints P[2 4]", "pt-BR": "Imprime P[2 4]" },
+				"why": {
+					"en": "That is the output only after changing the signature to `[S ~[]E, E Integer](s S, c E) S`; with `[]E` the named type is lost.",
+					"pt-BR": "Essa é a saída só depois de mudar a assinatura para `[S ~[]E, E Integer](s S, c E) S`; com `[]E` o tipo nomeado se perde."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "Compile error: Scale(p, 2).String undefined (type []int32 has no field or method String)", "pt-BR": "Erro de compilação: Scale(p, 2).String undefined (type []int32 has no field or method String)" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "Compile error: Point does not match []E", "pt-BR": "Erro de compilação: Point does not match []E" },
+				"why": {
+					"en": "Inference unifies the underlying type `[]int32` with `[]E` (inexact unification for assignability), so `E = int32` is found.",
+					"pt-BR": "A inferência unifica o underlying type `[]int32` com `[]E` (unificação inexata por atribuibilidade), então encontra `E = int32`."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It prints [2 4], because String is not called on a plain slice", "pt-BR": "Imprime [2 4], porque String não é chamado num slice comum" },
+				"why": {
+					"en": "The code calls `.String()` explicitly, so the missing method is a compile error, not a formatting difference.",
+					"pt-BR": "O código chama `.String()` explicitamente, então o método ausente é erro de compilação, não diferença de formatação."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "Compile error: cannot infer E from untyped constant 2", "pt-BR": "Erro de compilação: cannot infer E from untyped constant 2" },
+				"why": {
+					"en": "`E` is inferred from the typed argument `p`; the untyped `2` is then converted to `int32`.",
+					"pt-BR": "`E` é inferido do argumento tipado `p`; o `2` sem tipo é então convertido para `int32`."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "An Introduction To Generics (The Go Blog)", "url": "https://go.dev/blog/intro-generics", "kind": "blog" },
+			{ "title": "Deconstructing Type Parameters (The Go Blog)", "url": "https://go.dev/blog/deconstructing-type-parameters", "kind": "blog" },
+			{ "title": "The Go Programming Language Specification: Type inference", "url": "https://go.dev/ref/spec#Type_inference", "kind": "spec" }
+		]
+	}
+]

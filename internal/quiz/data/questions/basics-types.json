@@ -2,7 +2,10 @@
 	{
 		"id": "zero-value-string",
 		"difficulty": "very-easy",
-		"tags": ["zero-values", "strings"],
+		"tags": [
+			"zero-values",
+			"strings"
+		],
 		"code": "var s string\nfmt.Printf(\"%q\", s)",
 		"question": {
 			"en": "What does this code print?",
@@ -16,11 +19,17 @@
 			{
 				"id": "a",
 				"correct": true,
-				"text": { "en": "\"\"", "pt-BR": "\"\"" }
+				"text": {
+					"en": "\"\"",
+					"pt-BR": "\"\""
+				}
 			},
 			{
 				"id": "b",
-				"text": { "en": "<nil>", "pt-BR": "<nil>" },
+				"text": {
+					"en": "<nil>",
+					"pt-BR": "<nil>"
+				},
 				"why": {
 					"en": "A string is a value type, not a pointer; it can never be nil. Only pointers, slices, maps, channels, functions and interfaces have nil as zero value.",
 					"pt-BR": "string é um tipo de valor, não um ponteiro; nunca pode ser nil. Só ponteiros, slices, maps, channels, funções e interfaces têm nil como zero value."
@@ -28,7 +37,10 @@
 			},
 			{
 				"id": "c",
-				"text": { "en": "\"0\"", "pt-BR": "\"0\"" },
+				"text": {
+					"en": "\"0\"",
+					"pt-BR": "\"0\""
+				},
 				"why": {
 					"en": "0 is the zero value of numeric types; the zero value of a string is empty, not the character 0.",
 					"pt-BR": "0 é o zero value dos tipos numéricos; o zero value de uma string é vazio, não o caractere 0."
@@ -36,7 +48,10 @@
 			},
 			{
 				"id": "d",
-				"text": { "en": "Unpredictable garbage left in memory", "pt-BR": "Lixo imprevisível que estava na memória" },
+				"text": {
+					"en": "Unpredictable garbage left in memory",
+					"pt-BR": "Lixo imprevisível que estava na memória"
+				},
 				"why": {
 					"en": "Go always initializes memory: there are no uninitialized variables, unlike local variables in C.",
 					"pt-BR": "Go sempre inicializa a memória: não existem variáveis não inicializadas, ao contrário de variáveis locais em C."
@@ -44,7 +59,10 @@
 			},
 			{
 				"id": "e",
-				"text": { "en": "It does not compile: variables must be initialized", "pt-BR": "Não compila: variáveis precisam ser inicializadas" },
+				"text": {
+					"en": "It does not compile: variables must be initialized",
+					"pt-BR": "Não compila: variáveis precisam ser inicializadas"
+				},
 				"why": {
 					"en": "Declaring a variable without an initializer is valid Go; the compiler only rejects local variables that are never used.",
 					"pt-BR": "Declarar uma variável sem inicializador é Go válido; o compilador só rejeita variáveis locais que nunca são usadas."
@@ -52,14 +70,25 @@
 			}
 		],
 		"sources": [
-			{ "title": "The Go Programming Language Specification: The zero value", "url": "https://go.dev/ref/spec#The_zero_value", "kind": "spec" },
-			{ "title": "A Tour of Go: Zero values", "url": "https://go.dev/tour/basics/12", "kind": "doc" }
+			{
+				"title": "The Go Programming Language Specification: The zero value",
+				"url": "https://go.dev/ref/spec#The_zero_value",
+				"kind": "spec"
+			},
+			{
+				"title": "A Tour of Go: Zero values",
+				"url": "https://go.dev/tour/basics/12",
+				"kind": "doc"
+			}
 		]
 	},
 	{
 		"id": "nil-map-write",
 		"difficulty": "easy",
-		"tags": ["maps", "zero-values"],
+		"tags": [
+			"maps",
+			"zero-values"
+		],
 		"code": "var m map[string]int\nm[\"a\"] = 1\nfmt.Println(len(m))",
 		"question": {
 			"en": "What happens when this code runs?",
@@ -73,11 +102,17 @@
 			{
 				"id": "a",
 				"correct": true,
-				"text": { "en": "It panics: assignment to entry in nil map", "pt-BR": "Ocorre panic: assignment to entry in nil map" }
+				"text": {
+					"en": "It panics: assignment to entry in nil map",
+					"pt-BR": "Ocorre panic: assignment to entry in nil map"
+				}
 			},
 			{
 				"id": "b",
-				"text": { "en": "It prints 1", "pt-BR": "Imprime 1" },
+				"text": {
+					"en": "It prints 1",
+					"pt-BR": "Imprime 1"
+				},
 				"why": {
 					"en": "Go does not allocate a map lazily on the first write; the variable stays nil until `make` or a literal creates the map.",
 					"pt-BR": "Go não aloca o map automaticamente na primeira escrita; a variável continua nil até `make` ou um literal criar o map."
@@ -85,7 +120,10 @@
 			},
 			{
 				"id": "c",
-				"text": { "en": "It prints 0: writes to a nil map are ignored", "pt-BR": "Imprime 0: escritas em map nil são ignoradas" },
+				"text": {
+					"en": "It prints 0: writes to a nil map are ignored",
+					"pt-BR": "Imprime 0: escritas em map nil são ignoradas"
+				},
 				"why": {
 					"en": "Only reads are safe on a nil map. Writes are not silently dropped; they panic at run time.",
 					"pt-BR": "Só leituras são seguras em um map nil. Escritas não são descartadas em silêncio; causam panic em tempo de execução."
@@ -93,7 +131,10 @@
 			},
 			{
 				"id": "d",
-				"text": { "en": "It does not compile", "pt-BR": "Não compila" },
+				"text": {
+					"en": "It does not compile",
+					"pt-BR": "Não compila"
+				},
 				"why": {
 					"en": "The code is valid: the compiler cannot know the map is nil, so the failure happens only at run time.",
 					"pt-BR": "O código é válido: o compilador não sabe que o map é nil, então a falha só acontece em tempo de execução."
@@ -101,7 +142,10 @@
 			},
 			{
 				"id": "e",
-				"text": { "en": "The program deadlocks", "pt-BR": "O programa entra em deadlock" },
+				"text": {
+					"en": "The program deadlocks",
+					"pt-BR": "O programa entra em deadlock"
+				},
 				"why": {
 					"en": "Deadlocks involve goroutines blocked on channels or locks; a nil map write is an immediate runtime panic.",
 					"pt-BR": "Deadlocks envolvem goroutines bloqueadas em channels ou locks; escrever em map nil é um panic imediato."
@@ -109,8 +153,1691 @@
 			}
 		],
 		"sources": [
-			{ "title": "The Go Programming Language Specification: Map types", "url": "https://go.dev/ref/spec#Map_types", "kind": "spec" },
-			{ "title": "Go maps in action (The Go Blog)", "url": "https://go.dev/blog/maps", "kind": "blog" }
+			{
+				"title": "The Go Programming Language Specification: Map types",
+				"url": "https://go.dev/ref/spec#Map_types",
+				"kind": "spec"
+			},
+			{
+				"title": "Go maps in action (The Go Blog)",
+				"url": "https://go.dev/blog/maps",
+				"kind": "blog"
+			}
+		]
+	},
+	{
+		"id": "short-var-decl-package-level",
+		"difficulty": "very-easy",
+		"tags": [
+			"variables",
+			"short-declarations"
+		],
+		"code": "package main\n\nimport \"fmt\"\n\nx := 1\n\nfunc main() {\n\tfmt.Println(x)\n}",
+		"question": {
+			"en": "What happens when you try to build this program?",
+			"pt-BR": "O que acontece ao tentar compilar este programa?"
+		},
+		"explanation": {
+			"en": "A short variable declaration (`:=`) is a statement and may only appear inside a function body. At package level every declaration must start with a keyword, so the compiler reports `syntax error: non-declaration statement outside function body`. Use `var x = 1` instead.",
+			"pt-BR": "A declaração curta de variável (`:=`) é um statement e só pode aparecer dentro do corpo de uma função. No nível de pacote toda declaração precisa começar com uma palavra-chave, então o compilador reporta `syntax error: non-declaration statement outside function body`. Use `var x = 1`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "It compiles and prints 1",
+					"pt-BR": "Compila e imprime 1"
+				},
+				"why": {
+					"en": "`:=` is not allowed outside functions; package-level variables need the `var` keyword.",
+					"pt-BR": "`:=` não é permitido fora de funções; variáveis de pacote precisam da palavra-chave `var`."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": {
+					"en": "Compile error: non-declaration statement outside function body",
+					"pt-BR": "Erro de compilação: non-declaration statement outside function body"
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "It compiles and prints 0",
+					"pt-BR": "Compila e imprime 0"
+				},
+				"why": {
+					"en": "The program never compiles, so no value, zero or otherwise, is printed.",
+					"pt-BR": "O programa nem compila, então nenhum valor, zero ou não, é impresso."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "Compile error: x declared and not used",
+					"pt-BR": "Erro de compilação: x declared and not used"
+				},
+				"why": {
+					"en": "The unused-variable error only applies to local variables, and here `x` is used anyway; the real problem is the syntax.",
+					"pt-BR": "O erro de variável não usada só vale para variáveis locais, e aqui `x` é usada; o problema real é de sintaxe."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It compiles, but `x` is local to an implicit init function",
+					"pt-BR": "Compila, mas `x` fica local a uma função init implícita"
+				},
+				"why": {
+					"en": "Go never wraps package-level statements in an implicit function; it simply rejects them.",
+					"pt-BR": "Go nunca embrulha statements de nível de pacote em uma função implícita; ele simplesmente os rejeita."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Short variable declarations",
+				"url": "https://go.dev/ref/spec#Short_variable_declarations",
+				"kind": "spec"
+			},
+			{
+				"title": "A Tour of Go: Short variable declarations",
+				"url": "https://go.dev/tour/basics/10",
+				"kind": "doc"
+			}
+		]
+	},
+	{
+		"id": "switch-no-implicit-fallthrough",
+		"difficulty": "very-easy",
+		"tags": [
+			"switch",
+			"control-flow"
+		],
+		"code": "n := 2\nswitch n {\ncase 1:\n\tfmt.Println(\"one\")\ncase 2:\n\tfmt.Println(\"two\")\ncase 3:\n\tfmt.Println(\"three\")\ndefault:\n\tfmt.Println(\"other\")\n}",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "In Go, a `switch` runs only the first matching case and then leaves the switch; there is no implicit fall through to the next case, so no `break` is needed. The output is just `two`. To continue into the next case you must write `fallthrough` explicitly.",
+			"pt-BR": "Em Go, um `switch` executa só o primeiro case que casa e sai do switch; não existe fall through implícito para o próximo case, então não é preciso `break`. A saída é só `two`. Para continuar no próximo case é preciso escrever `fallthrough` explicitamente."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "two, three and other, each on its own line",
+					"pt-BR": "two, three e other, cada um em uma linha"
+				},
+				"why": {
+					"en": "That is C/Java behaviour without `break`. Go cases do not fall through by default.",
+					"pt-BR": "Esse é o comportamento de C/Java sem `break`. Em Go os cases não caem no próximo por padrão."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "two and other, each on its own line",
+					"pt-BR": "two e other, cada um em uma linha"
+				},
+				"why": {
+					"en": "`default` runs only when no case matches; it is not executed in addition to a matching case.",
+					"pt-BR": "`default` só roda quando nenhum case casa; ele não é executado além de um case que casou."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": {
+					"en": "two",
+					"pt-BR": "two"
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "Nothing: every case needs a break",
+					"pt-BR": "Nada: todo case precisa de break"
+				},
+				"why": {
+					"en": "`break` is optional in Go switches; each case ends the switch automatically.",
+					"pt-BR": "`break` é opcional em switches de Go; cada case encerra o switch automaticamente."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It does not compile: missing break statements",
+					"pt-BR": "Não compila: faltam statements break"
+				},
+				"why": {
+					"en": "The code is valid Go; omitting `break` is the normal style.",
+					"pt-BR": "O código é Go válido; omitir `break` é o estilo normal."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Expression switches",
+				"url": "https://go.dev/ref/spec#Expression_switches",
+				"kind": "spec"
+			},
+			{
+				"title": "Effective Go: Switch",
+				"url": "https://go.dev/doc/effective_go#switch",
+				"kind": "effective-go"
+			},
+			{
+				"title": "A Tour of Go: Switch",
+				"url": "https://go.dev/tour/flowcontrol/9",
+				"kind": "doc"
+			}
+		]
+	},
+	{
+		"id": "array-assignment-copies",
+		"difficulty": "very-easy",
+		"tags": [
+			"arrays",
+			"value-semantics"
+		],
+		"code": "a := [3]int{1, 2, 3}\nb := a\nb[0] = 100\nfmt.Println(a[0], b[0])",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "Arrays are values in Go: assigning an array, or passing it to a function, copies all of its elements. `b` is an independent copy, so changing `b[0]` leaves `a` untouched and the output is `1 100`. Slices behave differently because they share a backing array.",
+			"pt-BR": "Arrays são valores em Go: atribuir um array, ou passá-lo para uma função, copia todos os elementos. `b` é uma cópia independente, então alterar `b[0]` não afeta `a` e a saída é `1 100`. Slices se comportam diferente porque compartilham um backing array."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "100 100",
+					"pt-BR": "100 100"
+				},
+				"why": {
+					"en": "That would be true for a slice, which shares its backing array. An array assignment copies the data.",
+					"pt-BR": "Isso valeria para um slice, que compartilha o backing array. Atribuir um array copia os dados."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "1 1",
+					"pt-BR": "1 1"
+				},
+				"why": {
+					"en": "`b` is a regular, mutable variable; the assignment `b[0] = 100` does change it.",
+					"pt-BR": "`b` é uma variável comum e mutável; a atribuição `b[0] = 100` a altera de fato."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "It does not compile: arrays cannot be assigned",
+					"pt-BR": "Não compila: arrays não podem ser atribuídos"
+				},
+				"why": {
+					"en": "Unlike C, Go arrays are first-class values that can be assigned and compared with `==`.",
+					"pt-BR": "Ao contrário de C, arrays em Go são valores de primeira classe que podem ser atribuídos e comparados com `==`."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": {
+					"en": "1 100",
+					"pt-BR": "1 100"
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "100 1",
+					"pt-BR": "100 1"
+				},
+				"why": {
+					"en": "Nothing writes to `a` after the copy, so `a[0]` keeps its original value 1.",
+					"pt-BR": "Nada escreve em `a` depois da cópia, então `a[0]` mantém o valor original 1."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Array types",
+				"url": "https://go.dev/ref/spec#Array_types",
+				"kind": "spec"
+			},
+			{
+				"title": "Go Slices: usage and internals (The Go Blog)",
+				"url": "https://go.dev/blog/slices-intro",
+				"kind": "blog"
+			},
+			{
+				"title": "Effective Go: Arrays",
+				"url": "https://go.dev/doc/effective_go#arrays",
+				"kind": "effective-go"
+			}
+		]
+	},
+	{
+		"id": "len-string-counts-bytes",
+		"difficulty": "easy",
+		"tags": [
+			"strings",
+			"utf-8",
+			"runes"
+		],
+		"code": "s := \"héllo\"\nfmt.Println(len(s))",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "A Go string is a read-only sequence of bytes, and `len` returns the number of bytes, not characters. Source code is UTF-8, where `é` (U+00E9) takes two bytes, so the result is 6. To count runes use `utf8.RuneCountInString(s)` or `len([]rune(s))`, which give 5.",
+			"pt-BR": "Uma string em Go é uma sequência de bytes somente leitura, e `len` retorna o número de bytes, não de caracteres. O código-fonte é UTF-8, em que `é` (U+00E9) ocupa dois bytes, então o resultado é 6. Para contar runes use `utf8.RuneCountInString(s)` ou `len([]rune(s))`, que dão 5."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "5",
+					"pt-BR": "5"
+				},
+				"why": {
+					"en": "5 is the number of runes (characters); `len` on a string counts bytes.",
+					"pt-BR": "5 é o número de runes (caracteres); `len` em uma string conta bytes."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": {
+					"en": "6",
+					"pt-BR": "6"
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "10",
+					"pt-BR": "10"
+				},
+				"why": {
+					"en": "Go strings are not UTF-16 with two bytes per character; ASCII letters take one byte each in UTF-8.",
+					"pt-BR": "Strings em Go não são UTF-16 com dois bytes por caractere; letras ASCII ocupam um byte cada em UTF-8."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "20",
+					"pt-BR": "20"
+				},
+				"why": {
+					"en": "That assumes four bytes per character (as `[]rune` stores them). The string itself stores UTF-8 bytes.",
+					"pt-BR": "Isso supõe quatro bytes por caractere (como um `[]rune` armazena). A string em si guarda bytes UTF-8."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It depends on the operating system's locale",
+					"pt-BR": "Depende do locale do sistema operacional"
+				},
+				"why": {
+					"en": "Go source files are always UTF-8 and `len` is computed from the bytes, independent of locale.",
+					"pt-BR": "Arquivos-fonte de Go são sempre UTF-8 e `len` é calculado a partir dos bytes, independente do locale."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: String types",
+				"url": "https://go.dev/ref/spec#String_types",
+				"kind": "spec"
+			},
+			{
+				"title": "Strings, bytes, runes and characters in Go (The Go Blog)",
+				"url": "https://go.dev/blog/strings",
+				"kind": "blog"
+			},
+			{
+				"title": "100 Go Mistakes: Not understanding the concept of rune (#36)",
+				"url": "https://100go.co/#not-understanding-the-concept-of-rune-36",
+				"kind": "book"
+			}
+		]
+	},
+	{
+		"id": "map-missing-key-comma-ok",
+		"difficulty": "easy",
+		"tags": [
+			"maps",
+			"comma-ok",
+			"zero-values"
+		],
+		"code": "m := map[string]int{\"a\": 1}\nv, ok := m[\"b\"]\nfmt.Println(v, ok)",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "Indexing a map with a missing key does not panic: it returns the zero value of the element type. The optional second value of the comma-ok form reports whether the key was present, so the output is `0 false`. This is how you tell a missing key apart from a key stored with value 0.",
+			"pt-BR": "Indexar um map com uma chave ausente não causa panic: retorna o zero value do tipo do elemento. O segundo valor opcional da forma comma-ok informa se a chave existia, então a saída é `0 false`. É assim que se diferencia uma chave ausente de uma chave guardada com valor 0."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "It panics: key not found",
+					"pt-BR": "Ocorre panic: chave não encontrada"
+				},
+				"why": {
+					"en": "Go maps never panic on a missing key when reading; they return the zero value.",
+					"pt-BR": "Maps em Go nunca causam panic ao ler uma chave ausente; eles retornam o zero value."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "<nil> false",
+					"pt-BR": "<nil> false"
+				},
+				"why": {
+					"en": "The element type is `int`, whose zero value is 0; an `int` cannot be nil.",
+					"pt-BR": "O tipo do elemento é `int`, cujo zero value é 0; um `int` não pode ser nil."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "0 true",
+					"pt-BR": "0 true"
+				},
+				"why": {
+					"en": "`ok` is true only when the key exists in the map; \"b\" was never inserted.",
+					"pt-BR": "`ok` só é true quando a chave existe no map; \"b\" nunca foi inserida."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "1 false",
+					"pt-BR": "1 false"
+				},
+				"why": {
+					"en": "A lookup never returns the value of a different key; missing keys always yield the zero value.",
+					"pt-BR": "Uma busca nunca retorna o valor de outra chave; chaves ausentes sempre retornam o zero value."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": {
+					"en": "0 false",
+					"pt-BR": "0 false"
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Index expressions",
+				"url": "https://go.dev/ref/spec#Index_expressions",
+				"kind": "spec"
+			},
+			{
+				"title": "Effective Go: Maps",
+				"url": "https://go.dev/doc/effective_go#maps",
+				"kind": "effective-go"
+			},
+			{
+				"title": "Go maps in action (The Go Blog)",
+				"url": "https://go.dev/blog/maps",
+				"kind": "blog"
+			}
+		]
+	},
+	{
+		"id": "reslice-len-cap",
+		"difficulty": "easy",
+		"tags": [
+			"slices",
+			"len-cap"
+		],
+		"code": "s := make([]int, 5)\nt := s[1:3]\nfmt.Println(len(t), cap(t))",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "For `s[low:high]` the length is `high - low` = 2, and the capacity runs from `low` to the end of the underlying array: `cap(s) - low` = 5 - 1 = 4. The new slice shares the same backing array as `s`, so it can be resliced up to that capacity.",
+			"pt-BR": "Para `s[low:high]` o comprimento é `high - low` = 2, e a capacidade vai de `low` até o fim do array subjacente: `cap(s) - low` = 5 - 1 = 4. O novo slice compartilha o mesmo backing array de `s`, por isso pode ser refatiado até essa capacidade."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "2 2",
+					"pt-BR": "2 2"
+				},
+				"why": {
+					"en": "A simple slice expression does not cut the capacity at `high`; capacity extends to the end of the backing array.",
+					"pt-BR": "Uma expressão de slice simples não corta a capacidade em `high`; a capacidade vai até o fim do backing array."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "2 5",
+					"pt-BR": "2 5"
+				},
+				"why": {
+					"en": "Capacity is measured from the new start index, so the element before `low` is no longer reachable: 5 - 1 = 4.",
+					"pt-BR": "A capacidade é medida a partir do novo índice inicial, então o elemento antes de `low` deixa de ser alcançável: 5 - 1 = 4."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": {
+					"en": "2 4",
+					"pt-BR": "2 4"
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "3 4",
+					"pt-BR": "3 4"
+				},
+				"why": {
+					"en": "The high bound is exclusive: `s[1:3]` contains indexes 1 and 2, so the length is 2.",
+					"pt-BR": "O limite superior é exclusivo: `s[1:3]` contém os índices 1 e 2, então o comprimento é 2."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "3 3",
+					"pt-BR": "3 3"
+				},
+				"why": {
+					"en": "Neither value is 3: the length is `high - low` and the capacity is `cap(s) - low`.",
+					"pt-BR": "Nenhum dos valores é 3: o comprimento é `high - low` e a capacidade é `cap(s) - low`."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Slice expressions",
+				"url": "https://go.dev/ref/spec#Slice_expressions",
+				"kind": "spec"
+			},
+			{
+				"title": "A Tour of Go: Slice length and capacity",
+				"url": "https://go.dev/tour/moretypes/11",
+				"kind": "doc"
+			},
+			{
+				"title": "100 Go Mistakes: Not understanding slice length and capacity (#20)",
+				"url": "https://100go.co/#not-understanding-slice-length-and-capacity-20",
+				"kind": "book"
+			}
+		]
+	},
+	{
+		"id": "nil-vs-empty-slice",
+		"difficulty": "easy",
+		"tags": [
+			"slices",
+			"nil",
+			"zero-values"
+		],
+		"code": "var a []int\nb := []int{}\nfmt.Println(a == nil, b == nil, len(a), len(b))",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "`var a []int` declares a slice with its zero value, nil. The literal `[]int{}` creates a non-nil slice with length 0. Both have length 0 and can be ranged over and appended to the same way, but only the first compares equal to nil, so the output is `true false 0 0`.",
+			"pt-BR": "`var a []int` declara um slice com seu zero value, nil. O literal `[]int{}` cria um slice não nil com comprimento 0. Os dois têm comprimento 0 e aceitam range e append do mesmo jeito, mas só o primeiro é igual a nil, então a saída é `true false 0 0`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": {
+					"en": "true false 0 0",
+					"pt-BR": "true false 0 0"
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "true true 0 0",
+					"pt-BR": "true true 0 0"
+				},
+				"why": {
+					"en": "An empty composite literal allocates a slice header with a non-nil pointer, so it is not nil even though it is empty.",
+					"pt-BR": "Um literal composto vazio cria um slice com ponteiro não nil, então ele não é nil mesmo estando vazio."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "false false 0 0",
+					"pt-BR": "false false 0 0"
+				},
+				"why": {
+					"en": "A slice declared with `var` and no initializer has the zero value nil.",
+					"pt-BR": "Um slice declarado com `var` sem inicializador tem o zero value nil."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It panics when calling len on a nil slice",
+					"pt-BR": "Ocorre panic ao chamar len em um slice nil"
+				},
+				"why": {
+					"en": "`len` and `cap` of a nil slice are simply 0; nil slices are safe to read, range over and append to.",
+					"pt-BR": "`len` e `cap` de um slice nil são simplesmente 0; slices nil podem ser lidos, percorridos com range e usados em append."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It does not compile: slices cannot be compared",
+					"pt-BR": "Não compila: slices não podem ser comparados"
+				},
+				"why": {
+					"en": "Slices cannot be compared with each other, but comparing a slice with the predeclared `nil` is allowed.",
+					"pt-BR": "Slices não podem ser comparados entre si, mas comparar um slice com o `nil` pré-declarado é permitido."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Slice types",
+				"url": "https://go.dev/ref/spec#Slice_types",
+				"kind": "spec"
+			},
+			{
+				"title": "A Tour of Go: Nil slices",
+				"url": "https://go.dev/tour/moretypes/12",
+				"kind": "doc"
+			},
+			{
+				"title": "100 Go Mistakes: Being confused about nil vs. empty slice (#22)",
+				"url": "https://100go.co/#being-confused-about-nil-vs-empty-slice-22",
+				"kind": "book"
+			}
+		]
+	},
+	{
+		"id": "append-overwrites-shared-backing-array",
+		"difficulty": "medium",
+		"tags": [
+			"slices",
+			"append",
+			"aliasing"
+		],
+		"code": "a := []int{1, 2, 3, 4}\nb := a[:2]\nb = append(b, 99)\nfmt.Println(a)",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "`b` has length 2 but capacity 4, sharing `a`'s backing array. Since there is spare capacity, `append` writes 99 in place at index 2 instead of allocating, overwriting `a[2]`. The output is `[1 2 99 4]`; use a full slice expression `a[:2:2]` or copy the data to avoid this.",
+			"pt-BR": "`b` tem comprimento 2 mas capacidade 4, compartilhando o backing array de `a`. Como há capacidade sobrando, o `append` escreve 99 no próprio array, no índice 2, em vez de alocar, sobrescrevendo `a[2]`. A saída é `[1 2 99 4]`; use uma full slice expression `a[:2:2]` ou copie os dados para evitar isso."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "[1 2 3 4]",
+					"pt-BR": "[1 2 3 4]"
+				},
+				"why": {
+					"en": "`append` only allocates a new array when capacity is exceeded; here it reuses the shared one.",
+					"pt-BR": "`append` só aloca um novo array quando a capacidade é excedida; aqui ele reaproveita o array compartilhado."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "[1 2 99 3 4]",
+					"pt-BR": "[1 2 99 3 4]"
+				},
+				"why": {
+					"en": "`append` never inserts or shifts elements, and `a` keeps its own length 4.",
+					"pt-BR": "`append` nunca insere nem desloca elementos, e `a` mantém seu próprio comprimento 4."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "[1 2 3 4 99]",
+					"pt-BR": "[1 2 3 4 99]"
+				},
+				"why": {
+					"en": "The append was on `b`, whose length is 2, so the new element goes at index 2; `a`'s length does not change.",
+					"pt-BR": "O append foi em `b`, cujo comprimento é 2, então o novo elemento vai para o índice 2; o comprimento de `a` não muda."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": {
+					"en": "[1 2 99 4]",
+					"pt-BR": "[1 2 99 4]"
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "[1 2]",
+					"pt-BR": "[1 2]"
+				},
+				"why": {
+					"en": "Reslicing into `b` does not shrink `a`; `a` still has length 4.",
+					"pt-BR": "Fatiar em `b` não encolhe `a`; `a` continua com comprimento 4."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Appending to and copying slices",
+				"url": "https://go.dev/ref/spec#Appending_and_copying_slices",
+				"kind": "spec"
+			},
+			{
+				"title": "Go Slices: usage and internals (The Go Blog)",
+				"url": "https://go.dev/blog/slices-intro",
+				"kind": "blog"
+			},
+			{
+				"title": "100 Go Mistakes: Unexpected side effects using slice append (#25)",
+				"url": "https://100go.co/#unexpected-side-effects-using-slice-append-25",
+				"kind": "book"
+			}
+		]
+	},
+	{
+		"id": "range-string-byte-offsets",
+		"difficulty": "medium",
+		"tags": [
+			"strings",
+			"runes",
+			"range",
+			"utf-8"
+		],
+		"code": "for i, r := range \"héllo\" {\n\tfmt.Print(i, \":\", string(r), \" \")\n}",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "`range` over a string decodes UTF-8 and yields one rune per iteration, but the index is the byte offset where that rune starts. `é` occupies bytes 1 and 2, so the next rune starts at 3. The output is `0:h 1:é 3:l 4:l 5:o`.",
+			"pt-BR": "`range` sobre uma string decodifica UTF-8 e entrega uma rune por iteração, mas o índice é o offset em bytes onde aquela rune começa. `é` ocupa os bytes 1 e 2, então a próxima rune começa em 3. A saída é `0:h 1:é 3:l 4:l 5:o`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "0:h 1:é 2:l 3:l 4:o",
+					"pt-BR": "0:h 1:é 2:l 3:l 4:o"
+				},
+				"why": {
+					"en": "The index is not a rune counter; it is the byte position of each rune, which skips 2 here.",
+					"pt-BR": "O índice não é um contador de runes; é a posição em bytes de cada rune, que pula o 2 aqui."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": {
+					"en": "0:h 1:é 3:l 4:l 5:o",
+					"pt-BR": "0:h 1:é 3:l 4:l 5:o"
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "0:h 1:Ã 2:© 3:l 4:l 5:o",
+					"pt-BR": "0:h 1:Ã 2:© 3:l 4:l 5:o"
+				},
+				"why": {
+					"en": "That is what iterating byte by byte would give. `range` over a string decodes whole runes.",
+					"pt-BR": "Isso seria o resultado de iterar byte a byte. `range` sobre uma string decodifica runes inteiras."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "0:104 1:233 3:108 4:108 5:111",
+					"pt-BR": "0:104 1:233 3:108 4:108 5:111"
+				},
+				"why": {
+					"en": "`string(r)` converts the rune to its UTF-8 text; the numbers would appear only when printing `r` directly.",
+					"pt-BR": "`string(r)` converte a rune para seu texto UTF-8; os números só apareceriam imprimindo `r` diretamente."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It does not compile: strings cannot be ranged over",
+					"pt-BR": "Não compila: não é possível usar range em strings"
+				},
+				"why": {
+					"en": "Strings are one of the types `range` supports, yielding byte index and rune.",
+					"pt-BR": "Strings são um dos tipos aceitos por `range`, que entrega índice em bytes e rune."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: For statements with range clause",
+				"url": "https://go.dev/ref/spec#For_range",
+				"kind": "spec"
+			},
+			{
+				"title": "Strings, bytes, runes and characters in Go (The Go Blog)",
+				"url": "https://go.dev/blog/strings",
+				"kind": "blog"
+			},
+			{
+				"title": "100 Go Mistakes: Inaccurate string iteration (#37)",
+				"url": "https://100go.co/#inaccurate-string-iteration-37",
+				"kind": "book"
+			}
+		]
+	},
+	{
+		"id": "shadowing-short-declaration-in-block",
+		"difficulty": "medium",
+		"tags": [
+			"shadowing",
+			"scope",
+			"short-declarations"
+		],
+		"code": "x := 1\nif true {\n\tx := 2\n\tx++\n}\nfmt.Println(x)",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "Each `if` body is a new block. Inside it, `x := 2` declares a brand new `x` that shadows the outer one; `x++` changes only the inner variable, which goes out of scope at the closing brace. The outer `x` is still 1. This is a classic bug with `err` or a result variable redeclared via `:=` inside a block; `go vet -vettool` with the shadow analyzer can catch it.",
+			"pt-BR": "Cada corpo de `if` é um novo bloco. Dentro dele, `x := 2` declara um `x` totalmente novo que faz shadowing do externo; `x++` altera só a variável interna, que sai de escopo ao fechar a chave. O `x` externo continua 1. É um bug clássico com `err` ou uma variável de resultado redeclarada com `:=` dentro de um bloco; o analisador shadow (via `go vet -vettool`) detecta isso."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "3",
+					"pt-BR": "3"
+				},
+				"why": {
+					"en": "`:=` inside the block creates a new variable instead of assigning to the outer `x`.",
+					"pt-BR": "`:=` dentro do bloco cria uma nova variável em vez de atribuir ao `x` externo."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "2",
+					"pt-BR": "2"
+				},
+				"why": {
+					"en": "Neither the inner initial value nor its increment leaks out of the block; the outer `x` is never touched.",
+					"pt-BR": "Nem o valor inicial interno nem o incremento vazam para fora do bloco; o `x` externo nunca é tocado."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "It does not compile: x redeclared in this block",
+					"pt-BR": "Não compila: x redeclared in this block"
+				},
+				"why": {
+					"en": "Redeclaration is an error only in the same block. A nested block may declare a variable with the same name.",
+					"pt-BR": "Redeclarar só é erro no mesmo bloco. Um bloco aninhado pode declarar uma variável com o mesmo nome."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It does not compile: no new variables on left side of :=",
+					"pt-BR": "Não compila: no new variables on left side of :="
+				},
+				"why": {
+					"en": "That error appears only when every name on the left already exists in the same scope; here the inner scope has no `x` yet.",
+					"pt-BR": "Esse erro só aparece quando todos os nomes à esquerda já existem no mesmo escopo; aqui o escopo interno ainda não tem `x`."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": {
+					"en": "1",
+					"pt-BR": "1"
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Declarations and scope",
+				"url": "https://go.dev/ref/spec#Declarations_and_scope",
+				"kind": "spec"
+			},
+			{
+				"title": "Effective Go: Redeclaration and reassignment",
+				"url": "https://go.dev/doc/effective_go#redeclaration",
+				"kind": "effective-go"
+			},
+			{
+				"title": "100 Go Mistakes: Unintended variable shadowing (#1)",
+				"url": "https://100go.co/#unintended-variable-shadowing-1",
+				"kind": "book"
+			}
+		]
+	},
+	{
+		"id": "map-struct-field-not-assignable",
+		"difficulty": "medium",
+		"tags": [
+			"maps",
+			"structs",
+			"addressability"
+		],
+		"code": "type point struct{ x, y int }\n\nm := map[string]point{\"a\": {1, 2}}\nm[\"a\"].x = 10\nfmt.Println(m)",
+		"question": {
+			"en": "What happens with this code?",
+			"pt-BR": "O que acontece com este código?"
+		},
+		"explanation": {
+			"en": "Map elements are not addressable, because the runtime may move them when the map grows. Assigning to a field of a struct stored by value in a map is therefore rejected: `cannot assign to struct field m[\"a\"].x in map`. Copy the value, change it and store it back (`p := m[\"a\"]; p.x = 10; m[\"a\"] = p`), or use `map[string]*point`.",
+			"pt-BR": "Elementos de map não são endereçáveis, porque o runtime pode movê-los quando o map cresce. Por isso atribuir a um campo de uma struct guardada por valor em um map é rejeitado: `cannot assign to struct field m[\"a\"].x in map`. Copie o valor, altere e grave de volta (`p := m[\"a\"]; p.x = 10; m[\"a\"] = p`), ou use `map[string]*point`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": {
+					"en": "Compile error: cannot assign to struct field m[\"a\"].x in map",
+					"pt-BR": "Erro de compilação: cannot assign to struct field m[\"a\"].x in map"
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "It prints map[a:{10 2}]",
+					"pt-BR": "Imprime map[a:{10 2}]"
+				},
+				"why": {
+					"en": "This would require the map element to be addressable, which the spec does not allow.",
+					"pt-BR": "Isso exigiria que o elemento do map fosse endereçável, o que a spec não permite."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "It prints map[a:{1 2}]: a temporary copy is modified",
+					"pt-BR": "Imprime map[a:{1 2}]: uma cópia temporária é modificada"
+				},
+				"why": {
+					"en": "Go does not silently modify a temporary copy; it refuses to compile the assignment.",
+					"pt-BR": "Go não modifica uma cópia temporária em silêncio; ele se recusa a compilar a atribuição."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It panics at run time",
+					"pt-BR": "Ocorre panic em tempo de execução"
+				},
+				"why": {
+					"en": "The problem is detected statically by the compiler, so the program never runs.",
+					"pt-BR": "O problema é detectado estaticamente pelo compilador, então o programa nem roda."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It prints map[a:{10 0}]",
+					"pt-BR": "Imprime map[a:{10 0}]"
+				},
+				"why": {
+					"en": "Field assignment never resets other fields, and in any case this assignment does not compile.",
+					"pt-BR": "Atribuir um campo nunca zera os outros campos e, de qualquer forma, essa atribuição não compila."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Assignment statements",
+				"url": "https://go.dev/ref/spec#Assignment_statements",
+				"kind": "spec"
+			},
+			{
+				"title": "The Go Programming Language Specification: Address operators",
+				"url": "https://go.dev/ref/spec#Address_operators",
+				"kind": "spec"
+			},
+			{
+				"title": "golang/go#3117: cannot assign to a field of a map element directly",
+				"url": "https://github.com/golang/go/issues/3117",
+				"kind": "issue"
+			}
+		]
+	},
+	{
+		"id": "full-slice-expression-limits-capacity",
+		"difficulty": "hard",
+		"tags": [
+			"slices",
+			"append",
+			"full-slice-expression",
+			"aliasing"
+		],
+		"code": "a := []int{1, 2, 3, 4}\nb := a[0:2:2]\nb = append(b, 99)\nfmt.Println(a, b)",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "The full slice expression `a[low:high:max]` sets the capacity to `max - low`, here 2. Since `b` is already full, `append` must allocate a new backing array and copy, so writing 99 does not touch `a`. The output is `[1 2 3 4] [1 2 99]`. This is the standard way to hand out a sub-slice that cannot clobber the caller's data.",
+			"pt-BR": "A full slice expression `a[low:high:max]` define a capacidade como `max - low`, aqui 2. Como `b` já está cheio, o `append` precisa alocar um novo backing array e copiar, então escrever 99 não afeta `a`. A saída é `[1 2 3 4] [1 2 99]`. É o jeito padrão de entregar um sub-slice que não consegue sobrescrever os dados de quem chamou."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "[1 2 99 4] [1 2 99]",
+					"pt-BR": "[1 2 99 4] [1 2 99]"
+				},
+				"why": {
+					"en": "That happens with `a[0:2]`, whose capacity is 4. The third index caps the capacity at 2, forcing a reallocation.",
+					"pt-BR": "Isso acontece com `a[0:2]`, cuja capacidade é 4. O terceiro índice limita a capacidade a 2, forçando uma realocação."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "[1 2 3 4] [1 2]",
+					"pt-BR": "[1 2 3 4] [1 2]"
+				},
+				"why": {
+					"en": "A limited capacity does not make `append` fail; it simply grows into a new array, so `b` gets the 99.",
+					"pt-BR": "Uma capacidade limitada não faz o `append` falhar; ele só cresce para um novo array, então `b` recebe o 99."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "It panics: append exceeds capacity",
+					"pt-BR": "Ocorre panic: append excede a capacidade"
+				},
+				"why": {
+					"en": "`append` never panics on full capacity; it allocates. Only out-of-range indexing or slicing panics.",
+					"pt-BR": "`append` nunca causa panic por capacidade cheia; ele aloca. Só indexação ou fatiamento fora do intervalo causam panic."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": {
+					"en": "[1 2 3 4] [1 2 99]",
+					"pt-BR": "[1 2 3 4] [1 2 99]"
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It does not compile: slices take at most two indexes",
+					"pt-BR": "Não compila: slices aceitam no máximo dois índices"
+				},
+				"why": {
+					"en": "Three-index (full) slice expressions have been part of the language since Go 1.2.",
+					"pt-BR": "Expressões de slice com três índices (full slice expressions) fazem parte da linguagem desde o Go 1.2."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Slice expressions",
+				"url": "https://go.dev/ref/spec#Slice_expressions",
+				"kind": "spec"
+			},
+			{
+				"title": "Slices from the ground up (Dave Cheney)",
+				"url": "https://dave.cheney.net/2018/07/12/slices-from-the-ground-up",
+				"kind": "article"
+			},
+			{
+				"title": "100 Go Mistakes: Unexpected side effects using slice append (#25)",
+				"url": "https://100go.co/#unexpected-side-effects-using-slice-append-25",
+				"kind": "book"
+			}
+		]
+	},
+	{
+		"id": "int8-overflow-wraps",
+		"difficulty": "hard",
+		"tags": [
+			"numeric-types",
+			"overflow",
+			"integers"
+		],
+		"code": "var x int8 = 127\nx++\nfmt.Println(x, -x)",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "Integer overflow on variables is not an error in Go: the spec defines two's-complement wrap-around, so 127 + 1 in `int8` becomes -128. Negating -128 also overflows (+128 does not fit in `int8`) and wraps back to -128, so the output is `-128 -128`. Only constant expressions are checked: `const c int8 = 127 + 1` would not compile.",
+			"pt-BR": "Overflow de inteiro em variáveis não é erro em Go: a spec define wrap-around em complemento de dois, então 127 + 1 em `int8` vira -128. Negar -128 também estoura (+128 não cabe em `int8`) e volta para -128, então a saída é `-128 -128`. Só expressões constantes são verificadas: `const c int8 = 127 + 1` não compilaria."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "-128 128: the negation is computed as int",
+					"pt-BR": "-128 128: a negação é calculada como int"
+				},
+				"why": {
+					"en": "`-x` has type `int8`, which cannot hold 128; the negation wraps to -128 as well.",
+					"pt-BR": "`-x` tem tipo `int8`, que não comporta 128; a negação também dá wrap-around para -128."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "It panics: integer overflow",
+					"pt-BR": "Ocorre panic: integer overflow"
+				},
+				"why": {
+					"en": "Go never panics on arithmetic overflow; only integer division by zero panics.",
+					"pt-BR": "Go nunca causa panic em overflow aritmético; só divisão inteira por zero causa panic."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "127 -127: the increment saturates",
+					"pt-BR": "127 -127: o incremento satura"
+				},
+				"why": {
+					"en": "Go integers do not saturate; they wrap around modulo 2^n.",
+					"pt-BR": "Inteiros em Go não saturam; eles dão wrap-around módulo 2^n."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It does not compile: constant 128 overflows int8",
+					"pt-BR": "Não compila: constant 128 overflows int8"
+				},
+				"why": {
+					"en": "The compiler checks only constant expressions. `x++` operates on a variable, so the overflow happens at run time.",
+					"pt-BR": "O compilador só verifica expressões constantes. `x++` opera sobre uma variável, então o overflow acontece em tempo de execução."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": {
+					"en": "-128 -128",
+					"pt-BR": "-128 -128"
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Integer overflow",
+				"url": "https://go.dev/ref/spec#Integer_overflow",
+				"kind": "spec"
+			},
+			{
+				"title": "The Go Programming Language Specification: Constant expressions",
+				"url": "https://go.dev/ref/spec#Constant_expressions",
+				"kind": "spec"
+			},
+			{
+				"title": "100 Go Mistakes: Neglecting integer overflows (#18)",
+				"url": "https://100go.co/#neglecting-integer-overflows-18",
+				"kind": "book"
+			}
+		]
+	},
+	{
+		"id": "range-array-evaluates-copy",
+		"difficulty": "hard",
+		"tags": [
+			"arrays",
+			"slices",
+			"range",
+			"value-semantics"
+		],
+		"code": "a := [3]int{1, 2, 3}\nfor i, v := range a {\n\tif i == 0 {\n\t\ta[1] = 20\n\t}\n\tfmt.Print(v, \" \")\n}\nfmt.Println()\ns := []int{1, 2, 3}\nfor i, v := range s {\n\tif i == 0 {\n\t\ts[1] = 20\n\t}\n\tfmt.Print(v, \" \")\n}",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "The range expression is evaluated once before the loop starts, and the iteration values are read from that result. For an array, that result is a copy of the whole array, so changing `a[1]` during the loop is not seen: `1 2 3`. For a slice, the copy is only the slice header, which still points to the same backing array, so the write is seen: `1 20 3`.",
+			"pt-BR": "A expressão do range é avaliada uma única vez antes do loop começar, e os valores de iteração são lidos desse resultado. Para um array, esse resultado é uma cópia do array inteiro, então alterar `a[1]` durante o loop não é percebido: `1 2 3`. Para um slice, a cópia é só do header do slice, que ainda aponta para o mesmo backing array, então a escrita é percebida: `1 20 3`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "1 20 3 (twice)",
+					"pt-BR": "1 20 3 (duas vezes)"
+				},
+				"why": {
+					"en": "Ranging over an array value iterates over a copy, so writes to the original array during the loop are not observed.",
+					"pt-BR": "Usar range em um valor array percorre uma cópia, então escritas no array original durante o loop não são vistas."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "1 2 3 (twice)",
+					"pt-BR": "1 2 3 (duas vezes)"
+				},
+				"why": {
+					"en": "Copying a slice copies only its header; the elements are still shared, so the slice loop sees the 20.",
+					"pt-BR": "Copiar um slice copia só o header; os elementos continuam compartilhados, então o loop do slice vê o 20."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "1 20 3, then 1 2 3",
+					"pt-BR": "1 20 3, depois 1 2 3"
+				},
+				"why": {
+					"en": "It is the other way around: the array is copied by value, the slice shares its backing array.",
+					"pt-BR": "É o contrário: o array é copiado por valor, o slice compartilha o backing array."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It panics: collection modified during iteration",
+					"pt-BR": "Ocorre panic: coleção modificada durante a iteração"
+				},
+				"why": {
+					"en": "Go has no concurrent-modification check for arrays or slices; modifying elements during range is allowed.",
+					"pt-BR": "Go não tem verificação de modificação concorrente para arrays ou slices; alterar elementos durante o range é permitido."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": {
+					"en": "1 2 3, then 1 20 3",
+					"pt-BR": "1 2 3, depois 1 20 3"
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: For statements with range clause",
+				"url": "https://go.dev/ref/spec#For_range",
+				"kind": "spec"
+			},
+			{
+				"title": "100 Go Mistakes: Ignoring how arguments are evaluated in range loops (#31)",
+				"url": "https://100go.co/#ignoring-how-arguments-are-evaluated-in-range-loops-channels-and-arrays-31",
+				"kind": "book"
+			}
+		]
+	},
+	{
+		"id": "iota-implicit-repetition",
+		"difficulty": "hard",
+		"tags": [
+			"constants",
+			"iota"
+		],
+		"code": "const (\n\ta = iota * 10\n\tb\n\t_\n\tc = \"x\"\n\td\n\te = iota\n)\n\nfmt.Println(a, b, c, d, e)",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "`iota` is the index of the ConstSpec inside the `const` block, starting at 0, and it increments on every line, including `_` and lines with explicit values. A line without an expression repeats the previous expression with the current `iota`. So `a = 0*10`, `b = 1*10`, `_` uses 2, `c = \"x\"`, `d` repeats `\"x\"`, and `e = iota` is 5: `0 10 x x 5`.",
+			"pt-BR": "`iota` é o índice da ConstSpec dentro do bloco `const`, começando em 0, e incrementa a cada linha, inclusive `_` e linhas com valor explícito. Uma linha sem expressão repete a expressão anterior com o `iota` atual. Assim `a = 0*10`, `b = 1*10`, `_` usa o 2, `c = \"x\"`, `d` repete `\"x\"` e `e = iota` vale 5: `0 10 x x 5`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "0 10 x x 3",
+					"pt-BR": "0 10 x x 3"
+				},
+				"why": {
+					"en": "`iota` is not reset or paused by explicit values or by `_`; it counts every line of the block, so `e` is on line index 5.",
+					"pt-BR": "`iota` não é zerado nem pausado por valores explícitos ou por `_`; ele conta toda linha do bloco, então `e` está na linha de índice 5."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": {
+					"en": "0 10 x x 5",
+					"pt-BR": "0 10 x x 5"
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "0 1 x x 5",
+					"pt-BR": "0 1 x x 5"
+				},
+				"why": {
+					"en": "`b` repeats the whole expression `iota * 10`, not just `iota`, so it is 10.",
+					"pt-BR": "`b` repete a expressão inteira `iota * 10`, não só `iota`, então vale 10."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "0 10 x 4 5",
+					"pt-BR": "0 10 x 4 5"
+				},
+				"why": {
+					"en": "`d` repeats the most recent expression, which is `\"x\"`, not `iota`.",
+					"pt-BR": "`d` repete a expressão mais recente, que é `\"x\"`, não `iota`."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It does not compile: d has no value",
+					"pt-BR": "Não compila: d não tem valor"
+				},
+				"why": {
+					"en": "Omitting the expression in a parenthesized `const` block is valid: the previous expression and type are reused.",
+					"pt-BR": "Omitir a expressão em um bloco `const` entre parênteses é válido: a expressão e o tipo anteriores são reaproveitados."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Iota",
+				"url": "https://go.dev/ref/spec#Iota",
+				"kind": "spec"
+			},
+			{
+				"title": "The Go Programming Language Specification: Constant declarations",
+				"url": "https://go.dev/ref/spec#Constant_declarations",
+				"kind": "spec"
+			}
+		]
+	},
+	{
+		"id": "untyped-constant-exact-arithmetic",
+		"difficulty": "very-hard",
+		"tags": [
+			"constants",
+			"untyped-constants",
+			"floating-point"
+		],
+		"code": "const c1, c2, c3 = 0.1, 0.2, 0.3\nx, y, z := 0.1, 0.2, 0.3\nfmt.Println(c1+c2 == c3, x+y == z)",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "Untyped constant expressions are evaluated exactly, with arbitrary precision, at compile time, so `0.1 + 0.2 == 0.3` is true for the constants. The variables have type `float64`; each value is rounded to binary floating point and the sum at run time is 0.30000000000000004, so the second comparison is false. Output: `true false`.",
+			"pt-BR": "Expressões com constantes untyped são avaliadas de forma exata, com precisão arbitrária, em tempo de compilação, então `0.1 + 0.2 == 0.3` é true para as constantes. As variáveis têm tipo `float64`; cada valor é arredondado para ponto flutuante binário e a soma em tempo de execução dá 0.30000000000000004, então a segunda comparação é false. Saída: `true false`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "false false",
+					"pt-BR": "false false"
+				},
+				"why": {
+					"en": "Constant arithmetic is not done in `float64`; the spec requires exact (or at least very high precision) evaluation.",
+					"pt-BR": "A aritmética de constantes não é feita em `float64`; a spec exige avaliação exata (ou pelo menos com precisão muito alta)."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "true true",
+					"pt-BR": "true true"
+				},
+				"why": {
+					"en": "Once the values are stored in `float64` variables, they carry binary rounding errors and the runtime sum differs from 0.3.",
+					"pt-BR": "Depois que os valores vão para variáveis `float64`, eles carregam erros de arredondamento binário e a soma em tempo de execução difere de 0.3."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "false true",
+					"pt-BR": "false true"
+				},
+				"why": {
+					"en": "It is the reverse: the exact constants compare equal, the rounded floats do not.",
+					"pt-BR": "É o contrário: as constantes exatas são iguais, os floats arredondados não."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": {
+					"en": "true false",
+					"pt-BR": "true false"
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It does not compile: floating-point values cannot be compared with ==",
+					"pt-BR": "Não compila: valores de ponto flutuante não podem ser comparados com =="
+				},
+				"why": {
+					"en": "Floats are comparable in Go; `==` is legal, it just compares the exact binary values.",
+					"pt-BR": "Floats são comparáveis em Go; `==` é válido, só compara os valores binários exatos."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Constant expressions",
+				"url": "https://go.dev/ref/spec#Constant_expressions",
+				"kind": "spec"
+			},
+			{
+				"title": "Constants (The Go Blog)",
+				"url": "https://go.dev/blog/constants",
+				"kind": "blog"
+			},
+			{
+				"title": "The Go Programming Language Specification: Constants",
+				"url": "https://go.dev/ref/spec#Constants",
+				"kind": "spec"
+			}
+		]
+	},
+	{
+		"id": "struct-compare-uncomparable-dynamic-type",
+		"difficulty": "very-hard",
+		"tags": [
+			"structs",
+			"comparability",
+			"interfaces"
+		],
+		"code": "type box struct{ v any }\n\na := box{v: []int{1}}\nb := box{v: []int{1}}\nfmt.Println(a == b)",
+		"question": {
+			"en": "What happens when this code runs?",
+			"pt-BR": "O que acontece quando este código roda?"
+		},
+		"explanation": {
+			"en": "A struct is comparable when all its fields are comparable, and an `any` field is comparable as far as the compiler knows, so `a == b` compiles. At run time, comparing two interface values with identical dynamic types compares the dynamic values, and `[]int` is not comparable, so the program panics with `runtime error: comparing uncomparable type []int`. The same panic happens when such a value is used as a map key.",
+			"pt-BR": "Uma struct é comparável quando todos os campos são comparáveis, e um campo `any` é comparável do ponto de vista do compilador, então `a == b` compila. Em tempo de execução, comparar dois valores interface com o mesmo tipo dinâmico compara os valores dinâmicos, e `[]int` não é comparável, então o programa causa panic com `runtime error: comparing uncomparable type []int`. O mesmo panic ocorre ao usar esse valor como chave de map."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "It does not compile: struct containing []int cannot be compared",
+					"pt-BR": "Não compila: struct contendo []int não pode ser comparada"
+				},
+				"why": {
+					"en": "The field's static type is `any`, which is comparable; the compiler cannot see the dynamic `[]int`.",
+					"pt-BR": "O tipo estático do campo é `any`, que é comparável; o compilador não enxerga o `[]int` dinâmico."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "It prints true: the slices hold the same elements",
+					"pt-BR": "Imprime true: os slices têm os mesmos elementos"
+				},
+				"why": {
+					"en": "Go never compares slices element by element with `==`; use `slices.Equal` or `reflect.DeepEqual` for that.",
+					"pt-BR": "Go nunca compara slices elemento a elemento com `==`; para isso use `slices.Equal` ou `reflect.DeepEqual`."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": {
+					"en": "It panics: comparing uncomparable type []int",
+					"pt-BR": "Ocorre panic: comparing uncomparable type []int"
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It prints false: the slices point to different arrays",
+					"pt-BR": "Imprime false: os slices apontam para arrays diferentes"
+				},
+				"why": {
+					"en": "There is no pointer comparison fallback for slices inside interfaces; the runtime panics instead.",
+					"pt-BR": "Não existe fallback de comparação por ponteiro para slices dentro de interfaces; o runtime causa panic."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It prints false: interface fields are compared by type only",
+					"pt-BR": "Imprime false: campos interface são comparados só pelo tipo"
+				},
+				"why": {
+					"en": "Interfaces compare both dynamic type and dynamic value; here the types match, so the value comparison is attempted and panics.",
+					"pt-BR": "Interfaces comparam tipo dinâmico e valor dinâmico; aqui os tipos coincidem, então a comparação dos valores é tentada e causa panic."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: Comparison operators",
+				"url": "https://go.dev/ref/spec#Comparison_operators",
+				"kind": "spec"
+			},
+			{
+				"title": "The Go Programming Language Specification: Run-time panics",
+				"url": "https://go.dev/ref/spec#Run_time_panics",
+				"kind": "spec"
+			},
+			{
+				"title": "100 Go Mistakes: Comparing values incorrectly (#29)",
+				"url": "https://100go.co/#comparing-values-incorrectly-29",
+				"kind": "book"
+			}
+		]
+	},
+	{
+		"id": "concurrent-map-writes-fatal",
+		"difficulty": "very-hard",
+		"tags": [
+			"maps",
+			"runtime",
+			"concurrency"
+		],
+		"code": "defer func() { fmt.Println(\"recovered:\", recover()) }()\nm := map[int]int{}\nfor g := 0; g < 2; g++ {\n\tgo func() {\n\t\tfor i := 0; ; i++ {\n\t\t\tm[i] = i\n\t\t}\n\t}()\n}\nselect {}",
+		"question": {
+			"en": "What is the expected outcome of running this program (without -race)?",
+			"pt-BR": "Qual é o resultado esperado ao rodar este programa (sem -race)?"
+		},
+		"explanation": {
+			"en": "Built-in maps are not safe for concurrent writes. Since Go 1.6 the runtime has a cheap, best-effort check that detects concurrent misuse and aborts the process with `fatal error: concurrent map writes`. A fatal error is not a panic: deferred functions do not run and `recover` cannot intercept it, so the program crashes with the goroutine dump. Protect the map with a `sync.Mutex` or use `sync.Map`.",
+			"pt-BR": "Maps nativos não são seguros para escritas concorrentes. Desde o Go 1.6 o runtime tem uma verificação barata e best-effort que detecta o uso concorrente e aborta o processo com `fatal error: concurrent map writes`. Um fatal error não é um panic: funções deferred não rodam e `recover` não consegue interceptá-lo, então o programa cai com o dump das goroutines. Proteja o map com `sync.Mutex` ou use `sync.Map`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "It prints \"recovered: concurrent map writes\" and exits normally",
+					"pt-BR": "Imprime \"recovered: concurrent map writes\" e termina normalmente"
+				},
+				"why": {
+					"en": "This is a fatal runtime error, not a panic; `recover` never sees it and the deferred function does not run.",
+					"pt-BR": "É um fatal error do runtime, não um panic; `recover` nunca o vê e a função deferred não roda."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "It runs forever; maps use internal locks",
+					"pt-BR": "Roda para sempre; maps usam locks internos"
+				},
+				"why": {
+					"en": "Maps have no internal locking, for performance; the runtime only detects misuse and crashes.",
+					"pt-BR": "Maps não têm lock interno, por desempenho; o runtime só detecta o uso indevido e derruba o programa."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "It fails with fatal error: all goroutines are asleep - deadlock!",
+					"pt-BR": "Falha com fatal error: all goroutines are asleep - deadlock!"
+				},
+				"why": {
+					"en": "The writer goroutines are always runnable, so the deadlock detector never fires; the map check fires first.",
+					"pt-BR": "As goroutines que escrevem estão sempre executáveis, então o detector de deadlock nunca dispara; a verificação do map dispara antes."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It does not compile: maps cannot be captured by goroutines",
+					"pt-BR": "Não compila: maps não podem ser capturados por goroutines"
+				},
+				"why": {
+					"en": "Closures can capture any variable; data races are a run-time problem the compiler does not reject.",
+					"pt-BR": "Closures podem capturar qualquer variável; data races são um problema de tempo de execução que o compilador não rejeita."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": {
+					"en": "It crashes with fatal error: concurrent map writes, which recover cannot catch",
+					"pt-BR": "Cai com fatal error: concurrent map writes, que recover não consegue capturar"
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "Go FAQ: Why are map operations not defined to be atomic?",
+				"url": "https://go.dev/doc/faq#atomic_maps",
+				"kind": "faq"
+			},
+			{
+				"title": "Go 1.6 Release Notes: Runtime",
+				"url": "https://go.dev/doc/go1.6#runtime",
+				"kind": "doc"
+			},
+			{
+				"title": "Go maps in action (The Go Blog)",
+				"url": "https://go.dev/blog/maps",
+				"kind": "blog"
+			}
+		]
+	},
+	{
+		"id": "range-string-invalid-utf8",
+		"difficulty": "very-hard",
+		"tags": [
+			"strings",
+			"runes",
+			"utf-8",
+			"range"
+		],
+		"code": "for i, r := range \"a\\xffb\" {\n\tfmt.Print(i, \" \", r, \"; \")\n}\nfmt.Println(len(\"a\\xffb\"))",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "`\\xff` puts a single raw byte in the string; it is not valid UTF-8. When `range` meets an invalid encoding it yields `utf8.RuneError` (U+FFFD, 65533) and advances exactly one byte, so iteration continues normally. The string has 3 bytes. Output: `0 97; 1 65533; 2 98; 3`.",
+			"pt-BR": "`\\xff` coloca um único byte cru na string; ele não é UTF-8 válido. Quando `range` encontra uma codificação inválida, ele entrega `utf8.RuneError` (U+FFFD, 65533) e avança exatamente um byte, então a iteração segue normalmente. A string tem 3 bytes. Saída: `0 97; 1 65533; 2 98; 3`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": {
+					"en": "0 97; 1 65533; 2 98; 3",
+					"pt-BR": "0 97; 1 65533; 2 98; 3"
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "0 97; 1 255; 2 98; 3",
+					"pt-BR": "0 97; 1 255; 2 98; 3"
+				},
+				"why": {
+					"en": "Byte 0xFF is not decoded as U+00FF; an invalid UTF-8 byte becomes the replacement rune U+FFFD.",
+					"pt-BR": "O byte 0xFF não é decodificado como U+00FF; um byte UTF-8 inválido vira a rune de substituição U+FFFD."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "0 97; 1 65533; 3 98; 4",
+					"pt-BR": "0 97; 1 65533; 3 98; 4"
+				},
+				"why": {
+					"en": "The replacement rune is reported, but only the one invalid byte is consumed; it is not stored as 3 bytes in the string.",
+					"pt-BR": "A rune de substituição é reportada, mas só o byte inválido é consumido; ela não é gravada como 3 bytes na string."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It panics: invalid UTF-8 in string",
+					"pt-BR": "Ocorre panic: UTF-8 inválido na string"
+				},
+				"why": {
+					"en": "Strings may hold arbitrary bytes; ranging over invalid UTF-8 is well defined and never panics.",
+					"pt-BR": "Strings podem guardar bytes arbitrários; range sobre UTF-8 inválido é bem definido e nunca causa panic."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "0 97; 2 98; 3: invalid bytes are skipped",
+					"pt-BR": "0 97; 2 98; 3: bytes inválidos são ignorados"
+				},
+				"why": {
+					"en": "Invalid bytes are not skipped silently; each produces an iteration with `utf8.RuneError`.",
+					"pt-BR": "Bytes inválidos não são pulados em silêncio; cada um gera uma iteração com `utf8.RuneError`."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Programming Language Specification: For statements with range clause",
+				"url": "https://go.dev/ref/spec#For_range",
+				"kind": "spec"
+			},
+			{
+				"title": "Strings, bytes, runes and characters in Go (The Go Blog)",
+				"url": "https://go.dev/blog/strings",
+				"kind": "blog"
+			},
+			{
+				"title": "Package unicode/utf8: RuneError",
+				"url": "https://pkg.go.dev/unicode/utf8#RuneError",
+				"kind": "doc"
+			}
 		]
 	}
 ]

@@ -1,0 +1,1260 @@
+[
+	{
+		"id": "main-return-ends-goroutines",
+		"difficulty": "very-easy",
+		"tags": ["goroutines", "program-exit"],
+		"code": "func main() {\n\tgo fmt.Println(\"from goroutine\")\n}",
+		"question": {
+			"en": "What is guaranteed about the output of this program?",
+			"pt-BR": "O que é garantido sobre a saída deste programa?"
+		},
+		"explanation": {
+			"en": "Program execution ends when `main` returns; the spec says it does not wait for other (non-main) goroutines to complete. The goroutine may or may not get to run before the process exits, so the line may or may not appear. To wait for it, use a `sync.WaitGroup`, a channel or similar synchronization.",
+			"pt-BR": "A execução do programa termina quando `main` retorna; a spec diz que ele não espera as outras goroutines (não-main) terminarem. A goroutine pode ou não chegar a rodar antes de o processo encerrar, então a linha pode ou não aparecer. Para esperar por ela, use um `sync.WaitGroup`, um channel ou outra sincronização."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It always prints \"from goroutine\"", "pt-BR": "Sempre imprime \"from goroutine\"" },
+				"why": {
+					"en": "Nothing makes `main` wait for the goroutine; returning from `main` terminates the program immediately.",
+					"pt-BR": "Nada faz `main` esperar a goroutine; retornar de `main` encerra o programa imediatamente."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It never compiles: a go statement needs a function literal", "pt-BR": "Não compila: o go statement exige uma função literal" },
+				"why": {
+					"en": "Any function or method call can follow `go`, including `fmt.Println(...)`; its arguments are evaluated in the calling goroutine.",
+					"pt-BR": "Qualquer chamada de função ou método pode vir depois do `go`, inclusive `fmt.Println(...)`; os argumentos são avaliados na goroutine que chama."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "Nothing: it may or may not print, because main does not wait", "pt-BR": "Nada: pode imprimir ou não, porque main não espera" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "It deadlocks: all goroutines are asleep", "pt-BR": "Entra em deadlock: all goroutines are asleep" },
+				"why": {
+					"en": "No goroutine is blocked on a channel or lock here; `main` simply returns and the process exits.",
+					"pt-BR": "Nenhuma goroutine está bloqueada em channel ou lock aqui; `main` só retorna e o processo encerra."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "The runtime waits for every goroutine before exiting, so it prints once", "pt-BR": "O runtime espera todas as goroutines antes de sair, então imprime uma vez" },
+				"why": {
+					"en": "That is how threads behave in some languages (for example non-daemon threads in Java), not goroutines in Go.",
+					"pt-BR": "Esse é o comportamento de threads em algumas linguagens (como threads não-daemon em Java), não de goroutines em Go."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Program execution", "url": "https://go.dev/ref/spec#Program_execution", "kind": "spec" },
+			{ "title": "The Go Programming Language Specification: Go statements", "url": "https://go.dev/ref/spec#Go_statements", "kind": "spec" }
+		]
+	},
+	{
+		"id": "unbuffered-send-without-receiver-deadlock",
+		"difficulty": "very-easy",
+		"tags": ["channels", "deadlock", "unbuffered-channels"],
+		"code": "ch := make(chan int)\nch <- 1\nfmt.Println(<-ch)",
+		"question": {
+			"en": "What happens when this code runs inside main?",
+			"pt-BR": "O que acontece quando este código roda dentro de main?"
+		},
+		"explanation": {
+			"en": "An unbuffered channel has no room to store values: a send blocks until another goroutine is ready to receive. Here the only goroutine is blocked on `ch <- 1` and the receive below is never reached, so the runtime detects that every goroutine is blocked and aborts with \"fatal error: all goroutines are asleep - deadlock!\".",
+			"pt-BR": "Um channel unbuffered não tem espaço para guardar valores: o envio bloqueia até outra goroutine estar pronta para receber. Aqui a única goroutine fica parada em `ch <- 1` e o recebimento logo abaixo nunca é alcançado, então o runtime detecta que todas as goroutines estão bloqueadas e aborta com \"fatal error: all goroutines are asleep - deadlock!\"."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It prints 1", "pt-BR": "Imprime 1" },
+				"why": {
+					"en": "That would need a buffer of at least 1; with `make(chan int)` the send cannot complete without a concurrent receiver.",
+					"pt-BR": "Isso exigiria um buffer de pelo menos 1; com `make(chan int)` o envio não completa sem um receptor concorrente."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "fatal error: all goroutines are asleep - deadlock!", "pt-BR": "fatal error: all goroutines are asleep - deadlock!" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "It prints 0", "pt-BR": "Imprime 0" },
+				"why": {
+					"en": "Zero values come from receiving on a closed channel; this channel is open and the receive never even runs.",
+					"pt-BR": "Zero values vêm de receber de um channel fechado; este channel está aberto e o recebimento nem chega a rodar."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "The send is dropped and the receive blocks forever silently", "pt-BR": "O envio é descartado e o recebimento bloqueia para sempre em silêncio" },
+				"why": {
+					"en": "Channel sends are never dropped; the program blocks on the send itself, and the runtime reports the deadlock instead of hanging silently.",
+					"pt-BR": "Envios em channel nunca são descartados; o programa bloqueia no próprio envio e o runtime reporta o deadlock em vez de travar em silêncio."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It does not compile", "pt-BR": "Não compila" },
+				"why": {
+					"en": "The compiler does not analyse channel usage for deadlocks; the code is valid and fails only at run time.",
+					"pt-BR": "O compilador não analisa o uso de channels em busca de deadlocks; o código é válido e só falha em tempo de execução."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Channel types", "url": "https://go.dev/ref/spec#Channel_types", "kind": "spec" },
+			{ "title": "A Tour of Go: Channels", "url": "https://go.dev/tour/concurrency/2", "kind": "doc" }
+		]
+	},
+	{
+		"id": "buffered-channel-len-cap",
+		"difficulty": "very-easy",
+		"tags": ["channels", "buffered-channels"],
+		"code": "ch := make(chan int, 3)\nch <- 1\nch <- 2\nfmt.Println(len(ch), cap(ch))",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "For a channel, `cap` is the buffer size given to `make` and `len` is the number of elements currently queued in the buffer. Two values were sent into a buffer of 3 without being received, so it prints `2 3`. The sends do not block because the buffer is not full.",
+			"pt-BR": "Para um channel, `cap` é o tamanho do buffer passado ao `make` e `len` é a quantidade de elementos enfileirados no buffer no momento. Dois valores foram enviados para um buffer de 3 sem serem recebidos, então imprime `2 3`. Os envios não bloqueiam porque o buffer não está cheio."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "3 3", "pt-BR": "3 3" },
+				"why": {
+					"en": "`len` does not report capacity; it counts the elements actually waiting in the buffer.",
+					"pt-BR": "`len` não informa a capacidade; ele conta os elementos que estão de fato esperando no buffer."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "0 3", "pt-BR": "0 3" },
+				"why": {
+					"en": "Values sent to a buffered channel stay in the buffer until received, and `len` counts them.",
+					"pt-BR": "Valores enviados para um channel buffered ficam no buffer até serem recebidos, e `len` os conta."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It does not compile: len and cap do not accept channels", "pt-BR": "Não compila: len e cap não aceitam channels" },
+				"why": {
+					"en": "Both built-ins are defined for channels in the spec, alongside slices, arrays and (for `len`) maps and strings.",
+					"pt-BR": "As duas built-ins são definidas para channels na spec, junto com slices, arrays e (para `len`) maps e strings."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "2 3", "pt-BR": "2 3" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "2 2", "pt-BR": "2 2" },
+				"why": {
+					"en": "The capacity is fixed at creation by `make(chan int, 3)`; it does not shrink or grow with use.",
+					"pt-BR": "A capacidade é fixada na criação por `make(chan int, 3)`; ela não diminui nem cresce com o uso."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Length and capacity", "url": "https://go.dev/ref/spec#Length_and_capacity", "kind": "spec" },
+			{ "title": "A Tour of Go: Buffered Channels", "url": "https://go.dev/tour/concurrency/3", "kind": "doc" }
+		]
+	},
+	{
+		"id": "receive-from-closed-channel-comma-ok",
+		"difficulty": "very-easy",
+		"tags": ["channels", "close", "comma-ok"],
+		"code": "ch := make(chan int, 1)\nch <- 7\nclose(ch)\nv, ok := <-ch\nfmt.Println(v, ok)\nv, ok = <-ch\nfmt.Println(v, ok)",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "Closing a channel does not discard values already buffered: the first receive still gets `7` with `ok == true`. Once the buffer is drained, receives on a closed channel return immediately with the zero value and `ok == false`. Output:\n`7 true`\n`0 false`",
+			"pt-BR": "Fechar um channel não descarta os valores que já estão no buffer: o primeiro recebimento ainda pega `7` com `ok == true`. Depois que o buffer esvazia, recebimentos em um channel fechado retornam na hora com o zero value e `ok == false`. Saída:\n`7 true`\n`0 false`"
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "7 true, then 0 false", "pt-BR": "7 true, depois 0 false" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "0 false, then 0 false", "pt-BR": "0 false, depois 0 false" },
+				"why": {
+					"en": "`close` only marks that no more values will be sent; buffered values remain receivable.",
+					"pt-BR": "`close` só indica que nenhum valor novo será enviado; os valores no buffer continuam disponíveis para recebimento."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "7 false, then 0 false", "pt-BR": "7 false, depois 0 false" },
+				"why": {
+					"en": "`ok` is false only when the value is a zero value produced because the channel is closed and empty, not for a real buffered value.",
+					"pt-BR": "`ok` só é false quando o valor é um zero value gerado porque o channel está fechado e vazio, não para um valor real que estava no buffer."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "7 true, then it panics: receive from closed channel", "pt-BR": "7 true, depois panic: receive from closed channel" },
+				"why": {
+					"en": "Receiving from a closed channel never panics; only sending to it or closing it again does.",
+					"pt-BR": "Receber de um channel fechado nunca causa panic; só enviar para ele ou fechá-lo de novo causa."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "7 true, then the second receive blocks forever", "pt-BR": "7 true, depois o segundo recebimento bloqueia para sempre" },
+				"why": {
+					"en": "Blocking forever is the behaviour of a nil channel or of an open empty channel; a closed channel always returns immediately.",
+					"pt-BR": "Bloquear para sempre é o comportamento de um channel nil ou de um channel aberto e vazio; um channel fechado sempre retorna na hora."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Receive operator", "url": "https://go.dev/ref/spec#Receive_operator", "kind": "spec" },
+			{ "title": "The Go Programming Language Specification: Close", "url": "https://go.dev/ref/spec#Close", "kind": "spec" },
+			{ "title": "Dave Cheney: Channel Axioms", "url": "https://dave.cheney.net/2014/03/19/channel-axioms", "kind": "article" }
+		]
+	},
+	{
+		"id": "send-on-closed-channel-panics",
+		"difficulty": "easy",
+		"tags": ["channels", "close", "panic"],
+		"code": "ch := make(chan int, 1)\nclose(ch)\nch <- 1\nfmt.Println(\"sent\")",
+		"question": {
+			"en": "What happens when this code runs?",
+			"pt-BR": "O que acontece quando este código roda?"
+		},
+		"explanation": {
+			"en": "Sending on a closed channel causes a run-time panic, `panic: send on closed channel`, even if the buffer has free space. This is why the convention is that only the sender closes a channel, and only when it is sure no more sends will happen. Closing an already closed (or nil) channel also panics.",
+			"pt-BR": "Enviar para um channel fechado causa panic em tempo de execução, `panic: send on closed channel`, mesmo que o buffer tenha espaço livre. Por isso a convenção é que só quem envia fecha o channel, e só quando tem certeza de que não haverá mais envios. Fechar um channel já fechado (ou nil) também causa panic."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It prints sent: the buffer still has room", "pt-BR": "Imprime sent: o buffer ainda tem espaço" },
+				"why": {
+					"en": "Free buffer space does not matter; any send on a closed channel panics.",
+					"pt-BR": "Espaço livre no buffer não importa; qualquer envio para um channel fechado causa panic."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "The send is silently ignored and it prints sent", "pt-BR": "O envio é ignorado em silêncio e imprime sent" },
+				"why": {
+					"en": "Go never drops sends silently; silently ignoring would hide a real bug in the producer.",
+					"pt-BR": "Go nunca descarta envios em silêncio; ignorar esconderia um bug real em quem produz os valores."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "fatal error: all goroutines are asleep - deadlock!", "pt-BR": "fatal error: all goroutines are asleep - deadlock!" },
+				"why": {
+					"en": "The send does not block at all: the runtime detects the closed channel and panics immediately.",
+					"pt-BR": "O envio nem bloqueia: o runtime detecta o channel fechado e causa panic na hora."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: sending after close is rejected", "pt-BR": "Não compila: enviar depois de close é rejeitado" },
+				"why": {
+					"en": "Whether a channel is closed is a run-time state; the compiler does not track it.",
+					"pt-BR": "Estar fechado ou não é um estado em tempo de execução; o compilador não o acompanha."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "panic: send on closed channel", "pt-BR": "panic: send on closed channel" }
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Send statements", "url": "https://go.dev/ref/spec#Send_statements", "kind": "spec" },
+			{ "title": "Dave Cheney: Channel Axioms", "url": "https://dave.cheney.net/2014/03/19/channel-axioms", "kind": "article" }
+		]
+	},
+	{
+		"id": "range-over-unclosed-channel-deadlock",
+		"difficulty": "easy",
+		"tags": ["channels", "range", "deadlock", "close"],
+		"code": "ch := make(chan int, 3)\nch <- 1\nch <- 2\nch <- 3\nfor v := range ch {\n\tfmt.Println(v)\n}\nfmt.Println(\"done\")",
+		"question": {
+			"en": "What happens when this code runs inside main?",
+			"pt-BR": "O que acontece quando este código roda dentro de main?"
+		},
+		"explanation": {
+			"en": "`for range` over a channel keeps receiving until the channel is closed. It prints 1, 2 and 3, then blocks waiting for a fourth value; since no other goroutine exists, the runtime aborts with \"fatal error: all goroutines are asleep - deadlock!\" and `done` is never printed. Calling `close(ch)` after the sends would end the loop.",
+			"pt-BR": "`for range` sobre um channel continua recebendo até o channel ser fechado. Ele imprime 1, 2 e 3 e depois bloqueia esperando um quarto valor; como não existe outra goroutine, o runtime aborta com \"fatal error: all goroutines are asleep - deadlock!\" e `done` nunca é impresso. Chamar `close(ch)` depois dos envios encerraria o loop."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It prints 1 2 3 and then done", "pt-BR": "Imprime 1 2 3 e depois done" },
+				"why": {
+					"en": "An empty buffer does not end the loop; only closing the channel does.",
+					"pt-BR": "Um buffer vazio não encerra o loop; só fechar o channel encerra."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It prints only done: range over a channel needs a goroutine", "pt-BR": "Imprime só done: range em channel exige uma goroutine" },
+				"why": {
+					"en": "Receiving in the same goroutine is fine while values are buffered, so the three values are printed.",
+					"pt-BR": "Receber na mesma goroutine funciona enquanto há valores no buffer, então os três valores são impressos."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "It prints 1 2 3, then fails with all goroutines are asleep - deadlock!", "pt-BR": "Imprime 1 2 3 e depois falha com all goroutines are asleep - deadlock!" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "It prints 1 2 3 and hangs forever without any message", "pt-BR": "Imprime 1 2 3 e trava para sempre sem nenhuma mensagem" },
+				"why": {
+					"en": "When every goroutine is blocked, the runtime detects it and exits with a fatal error instead of hanging.",
+					"pt-BR": "Quando todas as goroutines estão bloqueadas, o runtime detecta e sai com fatal error em vez de travar."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It prints 1 2 3 0 0 0 ... in an infinite loop", "pt-BR": "Imprime 1 2 3 0 0 0 ... em loop infinito" },
+				"why": {
+					"en": "Zero values are returned only by a closed channel, and `range` stops on close instead of yielding them.",
+					"pt-BR": "Zero values só são retornados por um channel fechado, e `range` para no close em vez de entregá-los."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: For statements with range clause", "url": "https://go.dev/ref/spec#For_range", "kind": "spec" },
+			{ "title": "A Tour of Go: Range and Close", "url": "https://go.dev/tour/concurrency/4", "kind": "doc" }
+		]
+	},
+	{
+		"id": "waitgroup-add-before-go",
+		"difficulty": "easy",
+		"tags": ["sync", "waitgroup", "goroutines"],
+		"code": "var wg sync.WaitGroup\nfor i := range 3 {\n\tgo func() {\n\t\twg.Add(1)\n\t\tdefer wg.Done()\n\t\tfmt.Println(i)\n\t}()\n}\nwg.Wait()",
+		"question": {
+			"en": "What is wrong with this code?",
+			"pt-BR": "O que está errado neste código?"
+		},
+		"explanation": {
+			"en": "The `sync.WaitGroup` docs require that calls to `Add` with a positive delta that occur when the counter is zero happen before `Wait`. Here `Add` runs inside the goroutines, so `Wait` can observe a zero counter and return before any goroutine has started; some or all numbers may never be printed. Call `wg.Add(1)` before the `go` statement, or use `wg.Go` (Go 1.25+), which does it for you.",
+			"pt-BR": "A documentação de `sync.WaitGroup` exige que chamadas a `Add` com delta positivo, feitas quando o contador está em zero, aconteçam antes de `Wait`. Aqui `Add` roda dentro das goroutines, então `Wait` pode ver o contador em zero e retornar antes de qualquer goroutine começar; alguns ou todos os números podem nunca ser impressos. Chame `wg.Add(1)` antes do `go`, ou use `wg.Go` (Go 1.25+), que faz isso por você."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "Nothing: it always prints 0, 1 and 2 in some order", "pt-BR": "Nada: sempre imprime 0, 1 e 2 em alguma ordem" },
+				"why": {
+					"en": "`Wait` may run while the counter is still zero, so there is no guarantee that any goroutine finishes first.",
+					"pt-BR": "`Wait` pode rodar enquanto o contador ainda está em zero, então não há garantia de que alguma goroutine termine antes."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "wg.Add runs inside the goroutine, so Wait may return before any of them runs", "pt-BR": "wg.Add roda dentro da goroutine, então Wait pode retornar antes de qualquer uma rodar" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "All goroutines print 3 because they share the loop variable", "pt-BR": "Todas as goroutines imprimem 3 porque compartilham a variável do loop" },
+				"why": {
+					"en": "Since Go 1.22 each iteration has its own `i`, and `range 3` never even produces the value 3.",
+					"pt-BR": "Desde o Go 1.22 cada iteração tem seu próprio `i`, e `range 3` nem chega a produzir o valor 3."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "defer wg.Done() is illegal inside a goroutine", "pt-BR": "defer wg.Done() é ilegal dentro de uma goroutine" },
+				"why": {
+					"en": "`defer wg.Done()` at the top of the goroutine body is the idiomatic pattern; the problem is where `Add` is called.",
+					"pt-BR": "`defer wg.Done()` no início do corpo da goroutine é o padrão idiomático; o problema é onde `Add` é chamado."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It always deadlocks because Wait blocks forever", "pt-BR": "Sempre entra em deadlock porque Wait bloqueia para sempre" },
+				"why": {
+					"en": "Every `Add(1)` is matched by a `Done`, so `Wait` never blocks forever; the bug is that it may return too early.",
+					"pt-BR": "Todo `Add(1)` tem um `Done` correspondente, então `Wait` nunca bloqueia para sempre; o bug é que ele pode retornar cedo demais."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "sync package: WaitGroup.Add", "url": "https://pkg.go.dev/sync#WaitGroup.Add", "kind": "doc" },
+			{ "title": "sync package: WaitGroup.Go", "url": "https://pkg.go.dev/sync#WaitGroup.Go", "kind": "doc" }
+		]
+	},
+	{
+		"id": "send-only-channel-receive-compile-error",
+		"difficulty": "easy",
+		"tags": ["channels", "channel-direction", "compile-error"],
+		"code": "func consume(ch chan<- int) {\n\tv := <-ch\n\t_ = v\n}",
+		"question": {
+			"en": "What happens when you compile this function?",
+			"pt-BR": "O que acontece ao compilar esta função?"
+		},
+		"explanation": {
+			"en": "`chan<- int` is a send-only channel type: the optional arrow in the type restricts the channel to sending. Receiving from it is a compile-time error: `invalid operation: cannot receive from send-only channel ch`. A bidirectional `chan int` converts implicitly to either direction, which is how functions document and enforce their role in a pipeline.",
+			"pt-BR": "`chan<- int` é um tipo de channel somente para envio: a seta opcional no tipo restringe o channel a enviar. Receber dele é erro de compilação: `invalid operation: cannot receive from send-only channel ch`. Um `chan int` bidirecional é convertido implicitamente para qualquer direção, e é assim que funções documentam e garantem seu papel em um pipeline."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "Compile error: cannot receive from send-only channel", "pt-BR": "Erro de compilação: cannot receive from send-only channel" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "It compiles; receiving panics at run time", "pt-BR": "Compila; o recebimento causa panic em tempo de execução" },
+				"why": {
+					"en": "Channel direction is part of the static type, so the misuse is caught by the compiler, not at run time.",
+					"pt-BR": "A direção do channel faz parte do tipo estático, então o uso errado é pego pelo compilador, não em tempo de execução."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It compiles: direction annotations are only documentation", "pt-BR": "Compila: anotações de direção são só documentação" },
+				"why": {
+					"en": "Direction annotations are enforced by the type checker; they are not comments.",
+					"pt-BR": "As anotações de direção são verificadas pelo type checker; não são comentários."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Compile error: chan<- int means receive-only, so sending would fail", "pt-BR": "Erro de compilação: chan<- int significa somente recebimento, então enviar falharia" },
+				"why": {
+					"en": "The arrow points into `chan`, meaning values flow into it: `chan<-` is send-only and `<-chan` is receive-only.",
+					"pt-BR": "A seta aponta para dentro de `chan`, ou seja, os valores entram nele: `chan<-` é somente envio e `<-chan` é somente recebimento."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It compiles and blocks forever when called", "pt-BR": "Compila e bloqueia para sempre quando chamada" },
+				"why": {
+					"en": "The code never gets to run: receiving from a send-only channel is rejected at compile time.",
+					"pt-BR": "O código nem chega a rodar: receber de um channel somente de envio é rejeitado na compilação."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Channel types", "url": "https://go.dev/ref/spec#Channel_types", "kind": "spec" },
+			{ "title": "Go Concurrency Patterns: Pipelines and cancellation", "url": "https://go.dev/blog/pipelines", "kind": "blog" }
+		]
+	},
+	{
+		"id": "select-default-non-blocking",
+		"difficulty": "easy",
+		"tags": ["select", "channels"],
+		"code": "ch := make(chan int)\nselect {\ncase v := <-ch:\n\tfmt.Println(\"received\", v)\ndefault:\n\tfmt.Println(\"no value\")\n}",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "A `select` with a `default` case never blocks: if no communication can proceed right now, `default` runs. Nobody is sending on `ch`, so the receive is not ready and the program prints `no value`. This is the idiom for a non-blocking send or receive; in a `for` loop it becomes a busy loop, so use it carefully.",
+			"pt-BR": "Um `select` com `default` nunca bloqueia: se nenhuma comunicação pode acontecer agora, o `default` roda. Ninguém está enviando em `ch`, então o recebimento não está pronto e o programa imprime `no value`. É o idioma para envio ou recebimento não bloqueante; dentro de um `for` vira busy loop, então use com cuidado."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "received 0", "pt-BR": "received 0" },
+				"why": {
+					"en": "A zero value with no sender would come only from a closed channel; `ch` is open and empty.",
+					"pt-BR": "Um zero value sem ninguém enviando só viria de um channel fechado; `ch` está aberto e vazio."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "fatal error: all goroutines are asleep - deadlock!", "pt-BR": "fatal error: all goroutines are asleep - deadlock!" },
+				"why": {
+					"en": "That would happen without `default`; with it, the `select` does not block.",
+					"pt-BR": "Isso aconteceria sem o `default`; com ele, o `select` não bloqueia."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It randomly prints either line", "pt-BR": "Imprime uma das linhas aleatoriamente" },
+				"why": {
+					"en": "Random choice applies only among cases that are ready; `default` is chosen only when none is ready, which is always the case here.",
+					"pt-BR": "A escolha aleatória vale só entre cases prontos; `default` só é escolhido quando nenhum está pronto, o que é sempre o caso aqui."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "no value", "pt-BR": "no value" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "It waits until something is sent, then prints received", "pt-BR": "Espera até algo ser enviado e depois imprime received" },
+				"why": {
+					"en": "Waiting is what a `select` without `default` does; `default` makes it return immediately.",
+					"pt-BR": "Esperar é o que um `select` sem `default` faz; o `default` faz ele retornar na hora."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Select statements", "url": "https://go.dev/ref/spec#Select_statements", "kind": "spec" },
+			{ "title": "A Tour of Go: Default Selection", "url": "https://go.dev/tour/concurrency/6", "kind": "doc" }
+		]
+	},
+	{
+		"id": "nil-channel-receive-blocks-forever",
+		"difficulty": "medium",
+		"tags": ["channels", "nil-channel", "deadlock"],
+		"code": "var ch chan int\nfmt.Println(<-ch)",
+		"question": {
+			"en": "What happens when this code runs inside main?",
+			"pt-BR": "O que acontece quando este código roda dentro de main?"
+		},
+		"explanation": {
+			"en": "The zero value of a channel is nil, and both sending to and receiving from a nil channel block forever. Since `main` is the only goroutine, the runtime aborts with \"fatal error: all goroutines are asleep - deadlock!\" and shows `goroutine 1 [chan receive (nil chan)]`. In a larger program with other live goroutines, it would just leak silently. Only `close` on a nil channel panics.",
+			"pt-BR": "O zero value de um channel é nil, e tanto enviar quanto receber de um channel nil bloqueiam para sempre. Como `main` é a única goroutine, o runtime aborta com \"fatal error: all goroutines are asleep - deadlock!\" e mostra `goroutine 1 [chan receive (nil chan)]`. Em um programa maior, com outras goroutines vivas, ela só ficaria vazando em silêncio. Só `close` em channel nil causa panic."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It prints 0", "pt-BR": "Imprime 0" },
+				"why": {
+					"en": "Getting the zero value immediately is the behaviour of a closed channel, not a nil one.",
+					"pt-BR": "Receber o zero value na hora é o comportamento de um channel fechado, não de um channel nil."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "panic: receive from nil channel", "pt-BR": "panic: receive from nil channel" },
+				"why": {
+					"en": "Unlike a nil map or pointer, a nil channel does not panic on use; it blocks. The only nil-channel panic is `close`.",
+					"pt-BR": "Diferente de um map ou ponteiro nil, um channel nil não causa panic ao ser usado; ele bloqueia. O único panic com channel nil é no `close`."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "panic: invalid memory address or nil pointer dereference", "pt-BR": "panic: invalid memory address or nil pointer dereference" },
+				"why": {
+					"en": "The runtime handles nil channels explicitly: the operation parks the goroutine instead of dereferencing anything.",
+					"pt-BR": "O runtime trata channels nil explicitamente: a operação estaciona a goroutine em vez de desreferenciar algo."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: ch is used before being initialized", "pt-BR": "Não compila: ch é usado antes de ser inicializado" },
+				"why": {
+					"en": "Go has no \"use before init\" error; `ch` has the valid zero value nil.",
+					"pt-BR": "Go não tem erro de \"uso antes de inicializar\"; `ch` tem o zero value válido nil."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "It blocks forever, and the runtime reports all goroutines are asleep - deadlock!", "pt-BR": "Bloqueia para sempre, e o runtime reporta all goroutines are asleep - deadlock!" }
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Receive operator", "url": "https://go.dev/ref/spec#Receive_operator", "kind": "spec" },
+			{ "title": "Dave Cheney: Channel Axioms", "url": "https://dave.cheney.net/2014/03/19/channel-axioms", "kind": "article" }
+		]
+	},
+	{
+		"id": "mutex-copied-by-value-receiver",
+		"difficulty": "medium",
+		"tags": ["sync", "mutex", "methods", "go-vet"],
+		"code": "type Counter struct {\n\tmu sync.Mutex\n\tn  int\n}\n\nfunc (c Counter) Inc() {\n\tc.mu.Lock()\n\tdefer c.mu.Unlock()\n\tc.n++\n}\n\nfunc main() {\n\tvar c Counter\n\tfor range 3 {\n\t\tc.Inc()\n\t}\n\tfmt.Println(c.n)\n}",
+		"question": {
+			"en": "What does this program print, and what does `go vet` say?",
+			"pt-BR": "O que este programa imprime, e o que o `go vet` diz?"
+		},
+		"explanation": {
+			"en": "`Inc` has a value receiver, so every call works on a copy of the whole `Counter`, including a copy of the mutex. The increment is lost and the program prints `0`. `go vet`'s copylocks check reports `Inc passes lock by value: Counter contains sync.Mutex`; the sync docs say a Mutex must not be copied after first use. Use a pointer receiver `func (c *Counter) Inc()`.",
+			"pt-BR": "`Inc` tem receiver por valor, então cada chamada trabalha em uma cópia do `Counter` inteiro, inclusive uma cópia do mutex. O incremento se perde e o programa imprime `0`. A verificação copylocks do `go vet` reporta `Inc passes lock by value: Counter contains sync.Mutex`; a documentação do sync diz que um Mutex não deve ser copiado depois do primeiro uso. Use receiver ponteiro `func (c *Counter) Inc()`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "3, and go vet reports nothing", "pt-BR": "3, e o go vet não reporta nada" },
+				"why": {
+					"en": "A value receiver gets a copy, so `c.n++` changes the copy, never the caller's variable.",
+					"pt-BR": "Um receiver por valor recebe uma cópia, então `c.n++` altera a cópia, nunca a variável de quem chamou."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "0, and go vet reports that Inc passes lock by value", "pt-BR": "0, e o go vet reporta que Inc passes lock by value" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "It deadlocks on the second call because the mutex is still locked", "pt-BR": "Entra em deadlock na segunda chamada porque o mutex continua travado" },
+				"why": {
+					"en": "Each call locks and unlocks its own copy of the mutex, and the copy taken from `c` is always unlocked.",
+					"pt-BR": "Cada chamada trava e destrava sua própria cópia do mutex, e a cópia feita de `c` está sempre destravada."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: structs containing a Mutex cannot have value receivers", "pt-BR": "Não compila: structs com Mutex não podem ter receivers por valor" },
+				"why": {
+					"en": "The compiler allows it; copying locks is caught by `go vet`, not by the type checker.",
+					"pt-BR": "O compilador permite; copiar locks é detectado pelo `go vet`, não pelo type checker."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "3, because Go automatically takes the address of addressable receivers", "pt-BR": "3, porque Go pega o endereço automaticamente de receivers endereçáveis" },
+				"why": {
+					"en": "Automatic `&c` happens only when the method has a pointer receiver; with a value receiver Go copies `c`.",
+					"pt-BR": "O `&c` automático só acontece quando o método tem receiver ponteiro; com receiver por valor Go copia `c`."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "sync package: Mutex", "url": "https://pkg.go.dev/sync#Mutex", "kind": "doc" },
+			{ "title": "cmd/vet: copylocks", "url": "https://pkg.go.dev/cmd/vet", "kind": "doc" }
+		]
+	},
+	{
+		"id": "context-withtimeout-deadline-exceeded",
+		"difficulty": "medium",
+		"tags": ["context", "timeouts", "errors"],
+		"code": "ctx, cancel := context.WithTimeout(context.Background(), 10*time.Millisecond)\ndefer cancel()\n<-ctx.Done()\nfmt.Println(ctx.Err())\nfmt.Println(errors.Is(ctx.Err(), context.Canceled))",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "When the timeout fires, `Done` is closed and `Err` returns `context.DeadlineExceeded`, whose message is `context deadline exceeded`. It is a different error from `context.Canceled`, which is returned when `cancel` is called explicitly, so `errors.Is` reports `false`. Output:\n`context deadline exceeded`\n`false`",
+			"pt-BR": "Quando o timeout dispara, `Done` é fechado e `Err` retorna `context.DeadlineExceeded`, cuja mensagem é `context deadline exceeded`. É um erro diferente de `context.Canceled`, que é retornado quando `cancel` é chamado explicitamente, então `errors.Is` retorna `false`. Saída:\n`context deadline exceeded`\n`false`"
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "context canceled, then true", "pt-BR": "context canceled, depois true" },
+				"why": {
+					"en": "The deferred `cancel` has not run yet; the context ended because of its deadline, so `Err` is `DeadlineExceeded`.",
+					"pt-BR": "O `cancel` adiado ainda não rodou; o context terminou por causa do deadline, então `Err` é `DeadlineExceeded`."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "<nil>, then false", "pt-BR": "<nil>, depois false" },
+				"why": {
+					"en": "After `Done` is closed, `Err` is guaranteed to return a non-nil error explaining why.",
+					"pt-BR": "Depois que `Done` é fechado, `Err` sempre retorna um erro não nil explicando o motivo."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "context deadline exceeded, then false", "pt-BR": "context deadline exceeded, depois false" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "context deadline exceeded, then true", "pt-BR": "context deadline exceeded, depois true" },
+				"why": {
+					"en": "`DeadlineExceeded` does not wrap `Canceled`; check it with `errors.Is(err, context.DeadlineExceeded)`.",
+					"pt-BR": "`DeadlineExceeded` não encapsula `Canceled`; verifique com `errors.Is(err, context.DeadlineExceeded)`."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It blocks forever because nothing calls cancel before <-ctx.Done()", "pt-BR": "Bloqueia para sempre porque nada chama cancel antes de <-ctx.Done()" },
+				"why": {
+					"en": "`WithTimeout` closes `Done` by itself when the duration elapses; `cancel` only releases resources earlier.",
+					"pt-BR": "`WithTimeout` fecha `Done` sozinho quando o tempo acaba; `cancel` só libera os recursos mais cedo."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "context package: WithTimeout", "url": "https://pkg.go.dev/context#WithTimeout", "kind": "doc" },
+			{ "title": "context package: DeadlineExceeded", "url": "https://pkg.go.dev/context#DeadlineExceeded", "kind": "doc" },
+			{ "title": "Go Concurrency Patterns: Context", "url": "https://go.dev/blog/context", "kind": "blog" }
+		]
+	},
+	{
+		"id": "waitgroup-go-method",
+		"difficulty": "medium",
+		"tags": ["sync", "waitgroup", "atomic", "go-1-25"],
+		"code": "var wg sync.WaitGroup\nvar n atomic.Int64\nfor i := range 5 {\n\twg.Go(func() {\n\t\tn.Add(int64(i))\n\t})\n}\nwg.Wait()\nfmt.Println(n.Load())",
+		"question": {
+			"en": "What does this code print (Go 1.25 or later)?",
+			"pt-BR": "O que este código imprime (Go 1.25 ou mais recente)?"
+		},
+		"explanation": {
+			"en": "`WaitGroup.Go`, added in Go 1.25, calls `Add(1)`, runs `f` in a new goroutine and calls `Done` when `f` returns, so the `Add` placement bug cannot happen. Each iteration has its own `i` (Go 1.22+), `atomic.Int64` makes the concurrent additions safe, and `Wait` returns only after all five goroutines finish: 0+1+2+3+4 = `10`.",
+			"pt-BR": "`WaitGroup.Go`, adicionado no Go 1.25, chama `Add(1)`, roda `f` em uma nova goroutine e chama `Done` quando `f` retorna, então o bug de posicionamento do `Add` não acontece. Cada iteração tem seu próprio `i` (Go 1.22+), `atomic.Int64` torna as somas concorrentes seguras e `Wait` só retorna depois que as cinco goroutines terminam: 0+1+2+3+4 = `10`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "10", "pt-BR": "10" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "20, because every goroutine sees i == 4", "pt-BR": "20, porque toda goroutine vê i == 4" },
+				"why": {
+					"en": "Since Go 1.22 the loop variable is per-iteration, so each closure captures a different `i`.",
+					"pt-BR": "Desde o Go 1.22 a variável do loop é por iteração, então cada closure captura um `i` diferente."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Any value from 0 to 10: Wait does not know about the goroutines", "pt-BR": "Qualquer valor de 0 a 10: Wait não sabe das goroutines" },
+				"why": {
+					"en": "`wg.Go` increments the counter before starting each goroutine, so `Wait` blocks until all of them are done.",
+					"pt-BR": "`wg.Go` incrementa o contador antes de iniciar cada goroutine, então `Wait` bloqueia até todas terminarem."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: WaitGroup has no Go method", "pt-BR": "Não compila: WaitGroup não tem método Go" },
+				"why": {
+					"en": "That was true before Go 1.25; `sync.WaitGroup.Go` is now part of the standard library.",
+					"pt-BR": "Isso era verdade antes do Go 1.25; `sync.WaitGroup.Go` agora faz parte da biblioteca padrão."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "0: wg.Go runs f synchronously and discards the result", "pt-BR": "0: wg.Go roda f de forma síncrona e descarta o resultado" },
+				"why": {
+					"en": "`wg.Go` starts `f` in a new goroutine; the additions to `n` are real and visible after `Wait`.",
+					"pt-BR": "`wg.Go` inicia `f` em uma nova goroutine; as somas em `n` acontecem de verdade e ficam visíveis depois de `Wait`."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "sync package: WaitGroup.Go", "url": "https://pkg.go.dev/sync#WaitGroup.Go", "kind": "doc" },
+			{ "title": "Go 1.25 Release Notes: sync", "url": "https://go.dev/doc/go1.25#syncpkgsync", "kind": "doc" }
+		]
+	},
+	{
+		"id": "race-detector-only-executed-races",
+		"difficulty": "medium",
+		"tags": ["race-detector", "data-race", "testing"],
+		"question": {
+			"en": "Your tests pass with `go test -race` and no warning is printed. What does that tell you?",
+			"pt-BR": "Seus testes passam com `go test -race` e nenhum aviso aparece. O que isso significa?"
+		},
+		"explanation": {
+			"en": "The race detector instruments memory accesses and reports races only on code paths that actually ran during that execution, so it has no false positives but can miss races in code the tests never exercised or interleavings that did not occur. It is not a static proof. It also costs roughly 5-10x memory and 2-20x execution time, which is why it is used in tests and canaries rather than everywhere in production.",
+			"pt-BR": "O race detector instrumenta os acessos à memória e só reporta races em caminhos de código que de fato rodaram naquela execução; por isso não tem falsos positivos, mas pode deixar passar races em código que os testes não exercitaram ou em intercalações que não ocorreram. Não é uma prova estática. Ele também custa por volta de 5-10x de memória e 2-20x de tempo de execução, por isso é usado em testes e canários, não em toda a produção."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "The package is proven free of data races", "pt-BR": "O pacote está provado livre de data races" },
+				"why": {
+					"en": "The detector is dynamic: code that was not executed, or schedules that did not happen, are not checked.",
+					"pt-BR": "O detector é dinâmico: código que não rodou, ou escalonamentos que não aconteceram, não são verificados."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "Only that the code compiled with -race; races are found by go vet", "pt-BR": "Só que o código compilou com -race; races são encontrados pelo go vet" },
+				"why": {
+					"en": "`go vet` does not detect data races; `-race` instruments the binary and checks accesses at run time.",
+					"pt-BR": "`go vet` não detecta data races; `-race` instrumenta o binário e verifica os acessos em tempo de execução."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Race warnings are printed only with -v, so the result is inconclusive", "pt-BR": "Avisos de race só aparecem com -v, então o resultado é inconclusivo" },
+				"why": {
+					"en": "Detected races are always reported (and the test fails); no verbosity flag is needed.",
+					"pt-BR": "Races detectados são sempre reportados (e o teste falha); não é preciso flag de verbosidade."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "No race happened on the code paths the tests executed; untested paths may still race", "pt-BR": "Nenhum race ocorreu nos caminhos que os testes executaram; caminhos não testados ainda podem ter race" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "The detector may have hidden real races to avoid false positives on channels", "pt-BR": "O detector pode ter escondido races reais para evitar falsos positivos com channels" },
+				"why": {
+					"en": "It understands channels, mutexes and atomics as synchronization; it does not suppress real races to avoid false positives.",
+					"pt-BR": "Ele entende channels, mutexes e atomics como sincronização; não esconde races reais para evitar falsos positivos."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Data Race Detector: How To Use", "url": "https://go.dev/doc/articles/race_detector#How_To_Use", "kind": "doc" },
+			{ "title": "Data Race Detector: Runtime Overheads", "url": "https://go.dev/doc/articles/race_detector#Runtime_Overheads", "kind": "doc" },
+			{ "title": "The Go Blog: Introducing the Go Race Detector", "url": "https://go.dev/blog/race-detector", "kind": "blog" }
+		]
+	},
+	{
+		"id": "unbuffered-channel-happens-before",
+		"difficulty": "hard",
+		"tags": ["memory-model", "happens-before", "unbuffered-channels"],
+		"code": "var c = make(chan int)\nvar a string\n\nfunc f() {\n\ta = \"hello, world\"\n\t<-c\n}\n\nfunc main() {\n\tgo f()\n\tc <- 0\n\tfmt.Println(a)\n}",
+		"question": {
+			"en": "What does the Go memory model guarantee about this program?",
+			"pt-BR": "O que o memory model de Go garante sobre este programa?"
+		},
+		"explanation": {
+			"en": "The memory model says a receive from an unbuffered channel is synchronized before the completion of the corresponding send. The write to `a` happens before `<-c`, which is synchronized before `c <- 0` completes, which happens before the print. So it is guaranteed to print `hello, world`, with no data race. With a buffered channel (`make(chan int, 1)`) this guarantee would be lost.",
+			"pt-BR": "O memory model diz que um recebimento de um channel unbuffered é sincronizado antes da conclusão do envio correspondente. A escrita em `a` acontece antes de `<-c`, que é sincronizado antes da conclusão de `c <- 0`, que acontece antes do print. Então é garantido que imprime `hello, world`, sem data race. Com um channel buffered (`make(chan int, 1)`) essa garantia se perderia."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "Nothing: it may print an empty string because f writes a concurrently", "pt-BR": "Nada: pode imprimir string vazia porque f escreve em a concorrentemente" },
+				"why": {
+					"en": "The unbuffered channel orders the two goroutines, so the write is visible; this is the exact example in the memory model.",
+					"pt-BR": "O channel unbuffered ordena as duas goroutines, então a escrita fica visível; este é exatamente o exemplo do memory model."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "It always prints hello, world", "pt-BR": "Sempre imprime hello, world" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "It is a data race on a; go run -race reports it", "pt-BR": "É um data race em a; go run -race reporta" },
+				"why": {
+					"en": "There is a happens-before edge from the write to the read, so there is no race to report.",
+					"pt-BR": "Existe uma relação happens-before da escrita para a leitura, então não há race para reportar."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It deadlocks, because f receives only after writing a", "pt-BR": "Entra em deadlock, porque f só recebe depois de escrever em a" },
+				"why": {
+					"en": "`main` simply blocks on the send until `f` reaches the receive, then both proceed.",
+					"pt-BR": "`main` só bloqueia no envio até `f` chegar ao recebimento, e então os dois seguem."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It is guaranteed only because a send happens before the receive completes", "pt-BR": "É garantido só porque um envio acontece antes do recebimento completar" },
+				"why": {
+					"en": "That rule orders the sender's earlier writes before the receiver; here the writer is the receiver, so it is the unbuffered receive-before-send-completes rule that applies.",
+					"pt-BR": "Essa regra ordena as escritas anteriores de quem envia antes de quem recebe; aqui quem escreve é quem recebe, então a regra que se aplica é a do recebimento unbuffered antes da conclusão do envio."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Memory Model: Channel communication", "url": "https://go.dev/ref/mem#chan", "kind": "memory-model" }
+		]
+	},
+	{
+		"id": "select-nil-channel-disables-case",
+		"difficulty": "hard",
+		"tags": ["select", "nil-channel", "channels", "fan-in"],
+		"code": "a, b := make(chan int), make(chan int)\ngo func() { a <- 1; close(a) }()\ngo func() { b <- 2; close(b) }()\nsum := 0\nfor a != nil || b != nil {\n\tselect {\n\tcase v, ok := <-a:\n\t\tif !ok {\n\t\t\ta = nil\n\t\t\tcontinue\n\t\t}\n\t\tsum += v\n\tcase v, ok := <-b:\n\t\tif !ok {\n\t\t\tb = nil\n\t\t\tcontinue\n\t\t}\n\t\tsum += v\n\t}\n}\nfmt.Println(sum)",
+		"question": {
+			"en": "What does this code print, and why are the channels set to nil?",
+			"pt-BR": "O que este código imprime, e por que os channels recebem nil?"
+		},
+		"explanation": {
+			"en": "A closed channel is always ready in a `select`, so leaving it there would spin on zero values. Setting the variable to nil disables that case, because communication on a nil channel never proceeds and `select` ignores it. The loop ends once both inputs are closed, and it prints `3`. This is the standard trick for merging channels that close at different times.",
+			"pt-BR": "Um channel fechado está sempre pronto em um `select`, então deixá-lo ali faria o loop girar recebendo zero values. Atribuir nil à variável desativa aquele case, porque a comunicação em um channel nil nunca acontece e o `select` o ignora. O loop termina quando as duas entradas estão fechadas, e imprime `3`. É o truque padrão para juntar channels que fecham em momentos diferentes."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It panics: receive from nil channel inside select", "pt-BR": "Causa panic: receive from nil channel dentro do select" },
+				"why": {
+					"en": "Receiving on a nil channel never panics; inside `select` such a case is simply never chosen.",
+					"pt-BR": "Receber de um channel nil nunca causa panic; dentro de um `select` esse case simplesmente nunca é escolhido."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It deadlocks after the first channel is set to nil", "pt-BR": "Entra em deadlock depois que o primeiro channel recebe nil" },
+				"why": {
+					"en": "The other case is still active, so `select` keeps waiting on it until it closes too.",
+					"pt-BR": "O outro case continua ativo, então o `select` segue esperando nele até ele também fechar."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It may print 1, 2 or 3 depending on which case select picks", "pt-BR": "Pode imprimir 1, 2 ou 3 dependendo de qual case o select escolher" },
+				"why": {
+					"en": "The random choice changes only the order in which values are read; the loop runs until both channels are closed, so both values are always added.",
+					"pt-BR": "A escolha aleatória muda só a ordem de leitura; o loop roda até os dois channels fecharem, então os dois valores são sempre somados."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "nil is needed so the garbage collector can free the closed channels", "pt-BR": "nil é necessário para o garbage collector liberar os channels fechados" },
+				"why": {
+					"en": "Memory is not the reason; the goal is to stop `select` from repeatedly choosing an always-ready closed channel.",
+					"pt-BR": "Memória não é o motivo; o objetivo é impedir que o `select` escolha repetidamente um channel fechado que está sempre pronto."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "3: a nil channel is never ready, so setting it to nil disables that case", "pt-BR": "3: um channel nil nunca fica pronto, então atribuir nil desativa aquele case" }
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Select statements", "url": "https://go.dev/ref/spec#Select_statements", "kind": "spec" },
+			{ "title": "Dave Cheney: Channel Axioms", "url": "https://dave.cheney.net/2014/03/19/channel-axioms", "kind": "article" }
+		]
+	},
+	{
+		"id": "time-after-in-select-loop-resets",
+		"difficulty": "hard",
+		"tags": ["select", "timers", "time-after"],
+		"code": "msgs := make(chan int)\ngo func() {\n\tfor i := range 10 {\n\t\tmsgs <- i\n\t\ttime.Sleep(50 * time.Millisecond)\n\t}\n}()\nreceived := 0\nfor {\n\tselect {\n\tcase <-msgs:\n\t\treceived++\n\tcase <-time.After(200 * time.Millisecond):\n\t\tfmt.Println(\"timeout after\", received, \"messages\")\n\t\treturn\n\t}\n}",
+		"question": {
+			"en": "A message arrives every 50ms for about half a second. What happens?",
+			"pt-BR": "Chega uma mensagem a cada 50ms por cerca de meio segundo. O que acontece?"
+		},
+		"explanation": {
+			"en": "`time.After` is evaluated every time the `select` is entered, so each iteration creates a fresh 200ms timer. It acts as an idle timeout, not an overall deadline: it only fires after the producer stops, printing `timeout after 10 messages` about 650ms after the start. For a total deadline, create the timer (or a `context.WithTimeout`) once before the loop. Since Go 1.23, timers that are no longer referenced are garbage collected even if not stopped, so this pattern no longer leaks memory, but it still allocates a timer per iteration.",
+			"pt-BR": "`time.After` é avaliado toda vez que o `select` começa, então cada iteração cria um timer novo de 200ms. Ele funciona como timeout de inatividade, não como prazo total: só dispara depois que o produtor para, imprimindo `timeout after 10 messages` cerca de 650ms depois do início. Para um prazo total, crie o timer (ou um `context.WithTimeout`) uma vez antes do loop. Desde o Go 1.23, timers sem referência são coletados pelo garbage collector mesmo sem `Stop`, então esse padrão não vaza mais memória, mas ainda aloca um timer por iteração."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "It prints timeout after 10 messages, only after the producer stops", "pt-BR": "Imprime timeout after 10 messages, só depois que o produtor para" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "It prints timeout after 4 messages, 200ms after the loop starts", "pt-BR": "Imprime timeout after 4 messages, 200ms depois que o loop começa" },
+				"why": {
+					"en": "That would need a single timer created before the loop; here a new one starts on every iteration.",
+					"pt-BR": "Isso exigiria um único timer criado antes do loop; aqui um novo começa a cada iteração."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It never prints: time.After channels are dropped when another case wins", "pt-BR": "Nunca imprime: os channels de time.After são descartados quando outro case vence" },
+				"why": {
+					"en": "Once messages stop, a fresh timer has no competition and fires after 200ms.",
+					"pt-BR": "Quando as mensagens param, um timer novo não tem concorrência e dispara depois de 200ms."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It panics after 10 messages because msgs is never closed", "pt-BR": "Causa panic depois de 10 mensagens porque msgs nunca é fechado" },
+				"why": {
+					"en": "An unclosed channel just stays empty; the timer case becomes ready and the function returns normally.",
+					"pt-BR": "Um channel não fechado só fica vazio; o case do timer fica pronto e a função retorna normalmente."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "In Go 1.27 it still leaks every unfired timer until it expires, eventually exhausting memory", "pt-BR": "No Go 1.27 ainda vaza todo timer não disparado até ele expirar, até esgotar a memória" },
+				"why": {
+					"en": "Since Go 1.23 unreferenced timers are eligible for garbage collection immediately, and here the program also ends after the timeout.",
+					"pt-BR": "Desde o Go 1.23 timers sem referência podem ser coletados imediatamente, e aqui o programa ainda termina depois do timeout."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "time package: After", "url": "https://pkg.go.dev/time#After", "kind": "doc" },
+			{ "title": "Go 1.23 Release Notes: Timer changes", "url": "https://go.dev/doc/go1.23#timer-changes", "kind": "doc" },
+			{ "title": "The Go Programming Language Specification: Select statements", "url": "https://go.dev/ref/spec#Select_statements", "kind": "spec" }
+		]
+	},
+	{
+		"id": "errgroup-withcontext-cancels-on-first-error",
+		"difficulty": "hard",
+		"tags": ["errgroup", "context", "cancellation"],
+		"code": "g, ctx := errgroup.WithContext(context.Background())\ng.Go(func() error {\n\treturn errors.New(\"boom\")\n})\ng.Go(func() error {\n\t<-ctx.Done()\n\treturn ctx.Err()\n})\nerr := g.Wait()\nfmt.Println(err)\nfmt.Println(ctx.Err())",
+		"question": {
+			"en": "Using `golang.org/x/sync/errgroup`, what does this code print?",
+			"pt-BR": "Usando `golang.org/x/sync/errgroup`, o que este código imprime?"
+		},
+		"explanation": {
+			"en": "The context returned by `errgroup.WithContext` is canceled the first time a function passed to `Go` returns a non-nil error, or when `Wait` returns. The first function fails with `boom`, which cancels `ctx`, so the second one unblocks and returns `context.Canceled`. `Wait` returns only the first non-nil error, so it prints `boom` and then `context canceled`.",
+			"pt-BR": "O context retornado por `errgroup.WithContext` é cancelado na primeira vez que uma função passada para `Go` retorna erro não nil, ou quando `Wait` retorna. A primeira função falha com `boom`, o que cancela `ctx`, então a segunda desbloqueia e retorna `context.Canceled`. `Wait` retorna só o primeiro erro não nil, então imprime `boom` e depois `context canceled`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It blocks forever: nothing cancels ctx", "pt-BR": "Bloqueia para sempre: nada cancela ctx" },
+				"why": {
+					"en": "The group cancels its derived context itself as soon as one function returns an error.",
+					"pt-BR": "O próprio grupo cancela o context derivado assim que uma função retorna erro."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "Either boom or context canceled, depending on which goroutine finishes first", "pt-BR": "boom ou context canceled, dependendo de qual goroutine termina primeiro" },
+				"why": {
+					"en": "The second function can only return after the cancellation caused by the first error, so `boom` is always recorded first.",
+					"pt-BR": "A segunda função só retorna depois do cancelamento causado pelo primeiro erro, então `boom` é sempre registrado primeiro."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "boom, then context canceled", "pt-BR": "boom, depois context canceled" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "boom and context canceled joined together, then context canceled", "pt-BR": "boom e context canceled juntos, depois context canceled" },
+				"why": {
+					"en": "errgroup does not use `errors.Join`; `Wait` returns only the first non-nil error.",
+					"pt-BR": "O errgroup não usa `errors.Join`; `Wait` retorna só o primeiro erro não nil."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "boom, then <nil>: the context is only canceled if the caller calls cancel", "pt-BR": "boom, depois <nil>: o context só é cancelado se quem chama chamar cancel" },
+				"why": {
+					"en": "`WithContext` does not hand you a cancel function; the group cancels the context itself on error and when `Wait` returns.",
+					"pt-BR": "`WithContext` não devolve uma função cancel; o grupo cancela o context sozinho no erro e quando `Wait` retorna."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "errgroup package: WithContext", "url": "https://pkg.go.dev/golang.org/x/sync/errgroup#WithContext", "kind": "doc" },
+			{ "title": "errgroup package: Group.Go", "url": "https://pkg.go.dev/golang.org/x/sync/errgroup#Group.Go", "kind": "doc" }
+		]
+	},
+	{
+		"id": "busy-wait-plain-bool-data-race",
+		"difficulty": "very-hard",
+		"tags": ["memory-model", "data-race", "race-detector"],
+		"code": "var done bool\n\nfunc setup() {\n\ttime.Sleep(10 * time.Millisecond)\n\tdone = true\n}\n\nfunc main() {\n\tgo setup()\n\tfor !done {\n\t}\n\tfmt.Println(\"finished\")\n}",
+		"question": {
+			"en": "According to the Go memory model, what is true about this program?",
+			"pt-BR": "Segundo o memory model de Go, o que é verdade sobre este programa?"
+		},
+		"explanation": {
+			"en": "The write and the reads of `done` are not ordered by any synchronization, which is a data race. The memory model gives no guarantee that `main` ever observes the write: the compiler may keep `done` in a register and loop forever. It may happen to print `finished` on a given run (it did with Go 1.27 on amd64), but `go run -race` reports `WARNING: DATA RACE` and exits with status 66. Use `atomic.Bool`, a channel or a mutex.",
+			"pt-BR": "A escrita e as leituras de `done` não são ordenadas por nenhuma sincronização, o que é um data race. O memory model não garante que `main` vá enxergar a escrita algum dia: o compilador pode manter `done` em um registrador e o loop nunca terminar. Pode acontecer de imprimir `finished` em uma execução (aconteceu com Go 1.27 em amd64), mas `go run -race` reporta `WARNING: DATA RACE` e sai com status 66. Use `atomic.Bool`, um channel ou um mutex."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It is guaranteed to print finished after about 10ms", "pt-BR": "É garantido que imprime finished depois de uns 10ms" },
+				"why": {
+					"en": "A sleep is not synchronization; without a happens-before edge the write may never become visible to the loop.",
+					"pt-BR": "Um sleep não é sincronização; sem uma relação happens-before a escrita pode nunca ficar visível para o loop."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It is safe because a bool is written in a single machine instruction", "pt-BR": "É seguro porque um bool é escrito em uma única instrução de máquina" },
+				"why": {
+					"en": "Atomicity at the hardware level is irrelevant: the language memory model defines it as a race, and the compiler may optimize accordingly.",
+					"pt-BR": "Ser atômico no hardware é irrelevante: o memory model da linguagem define isso como race, e o compilador pode otimizar com base nisso."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It is guaranteed never to terminate, because the loop is hoisted", "pt-BR": "É garantido que nunca termina, porque o loop é otimizado para fora" },
+				"why": {
+					"en": "Hoisting is allowed, not required; the outcome is simply not guaranteed either way.",
+					"pt-BR": "Essa otimização é permitida, não obrigatória; o resultado simplesmente não é garantido em nenhum dos sentidos."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "It has a data race: it may print finished or loop forever, and -race reports it", "pt-BR": "Tem data race: pode imprimir finished ou ficar em loop para sempre, e o -race reporta" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "It does not compile: an empty for body is rejected", "pt-BR": "Não compila: corpo de for vazio é rejeitado" },
+				"why": {
+					"en": "An empty loop body is valid Go; the problem is the unsynchronized shared variable.",
+					"pt-BR": "Um corpo de loop vazio é Go válido; o problema é a variável compartilhada sem sincronização."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Memory Model: Incorrect synchronization", "url": "https://go.dev/ref/mem#badsync", "kind": "memory-model" },
+			{ "title": "The Go Memory Model: Implementation Restrictions for Programs Containing Data Races", "url": "https://go.dev/ref/mem#restrictions", "kind": "memory-model" },
+			{ "title": "Data Race Detector", "url": "https://go.dev/doc/articles/race_detector", "kind": "doc" }
+		]
+	},
+	{
+		"id": "atomic-store-load-publishes-data",
+		"difficulty": "very-hard",
+		"tags": ["memory-model", "atomic", "happens-before"],
+		"code": "var data int\nvar ready atomic.Bool\ngo func() {\n\tdata = 42\n\tready.Store(true)\n}()\nfor !ready.Load() {\n}\nfmt.Println(data)",
+		"question": {
+			"en": "Is reading the plain `data` variable after the loop safe, and what does it print?",
+			"pt-BR": "Ler a variável comum `data` depois do loop é seguro, e o que é impresso?"
+		},
+		"explanation": {
+			"en": "Since the 2022 revision, the memory model states that if an atomic operation B observes the effect of atomic operation A, A is synchronized before B, and all atomics behave as if in one sequentially consistent order (like C++ seq_cst). The write to `data` is sequenced before `Store`, and the `Load` that sees `true` is sequenced before the read, so it always prints `42` and `-race` reports nothing. The spin loop is still wasteful CPU-wise; a channel or `WaitGroup` would be idiomatic.",
+			"pt-BR": "Desde a revisão de 2022, o memory model diz que se uma operação atômica B observa o efeito da operação atômica A, então A é sincronizada antes de B, e todas as operações atômicas se comportam como em uma única ordem sequencialmente consistente (como o seq_cst do C++). A escrita em `data` vem antes do `Store` na mesma goroutine, e o `Load` que vê `true` vem antes da leitura, então sempre imprime `42` e o `-race` não reporta nada. O spin loop ainda desperdiça CPU; um channel ou `WaitGroup` seria o idiomático."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It is a data race on data: atomics only protect the atomic variable itself", "pt-BR": "É um data race em data: atomics só protegem a própria variável atômica" },
+				"why": {
+					"en": "In Go, atomics create happens-before edges, so ordinary writes before a `Store` are visible after a `Load` that observes it.",
+					"pt-BR": "Em Go, atomics criam relações happens-before, então escritas comuns antes de um `Store` ficam visíveis depois de um `Load` que o observa."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "Safe: it always prints 42, because the observed Store is synchronized before the Load", "pt-BR": "Seguro: sempre imprime 42, porque o Store observado é sincronizado antes do Load" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "It may print 0, because the CPU can reorder data = 42 after the Store", "pt-BR": "Pode imprimir 0, porque a CPU pode reordenar data = 42 para depois do Store" },
+				"why": {
+					"en": "Go atomics are sequentially consistent; the compiler and runtime emit the barriers needed to forbid that reordering.",
+					"pt-BR": "Atomics em Go são sequencialmente consistentes; o compilador e o runtime emitem as barreiras necessárias para proibir essa reordenação."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Safe only on amd64; on arm64 Go atomics are relaxed and it may print 0", "pt-BR": "Seguro só em amd64; em arm64 os atomics de Go são relaxed e pode imprimir 0" },
+				"why": {
+					"en": "The guarantee comes from the language memory model and holds on every architecture Go supports.",
+					"pt-BR": "A garantia vem do memory model da linguagem e vale em toda arquitetura que Go suporta."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It does not compile: atomic.Bool must be created with atomic.NewBool", "pt-BR": "Não compila: atomic.Bool precisa ser criado com atomic.NewBool" },
+				"why": {
+					"en": "The typed atomics added in Go 1.19 are ready to use at their zero value; `NewBool` belongs to third-party packages.",
+					"pt-BR": "Os atomics tipados adicionados no Go 1.19 já funcionam no zero value; `NewBool` é de pacotes de terceiros."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Memory Model: Atomic Values", "url": "https://go.dev/ref/mem#atomic", "kind": "memory-model" },
+			{ "title": "sync/atomic package: Bool", "url": "https://pkg.go.dev/sync/atomic#Bool", "kind": "doc" }
+		]
+	},
+	{
+		"id": "buffered-channel-semaphore-memory-model",
+		"difficulty": "very-hard",
+		"tags": ["memory-model", "buffered-channels", "semaphore", "worker-pool"],
+		"code": "var limit = make(chan int, 3)\n\nfunc main() {\n\tfor _, w := range work {\n\t\tgo func() {\n\t\t\tlimit <- 1\n\t\t\tw()\n\t\t\t<-limit\n\t\t}()\n\t}\n\tselect {}\n}",
+		"question": {
+			"en": "Which memory model rule guarantees that at most three `w()` calls run at the same time?",
+			"pt-BR": "Qual regra do memory model garante que no máximo três chamadas de `w()` rodem ao mesmo tempo?"
+		},
+		"explanation": {
+			"en": "The memory model says the kth receive from a channel with capacity C is synchronized before the completion of the k+Cth send. With C = 3, the 4th send (acquiring a slot) cannot complete until the 1st receive (releasing a slot) has happened, so a buffered channel works as a counting semaphore. This generalizes the unbuffered rule (C = 0) and is exactly the example the memory model uses.",
+			"pt-BR": "O memory model diz que o k-ésimo recebimento de um channel com capacidade C é sincronizado antes da conclusão do (k+C)-ésimo envio. Com C = 3, o 4º envio (pegar uma vaga) não pode completar até o 1º recebimento (liberar uma vaga) acontecer, então um channel buffered funciona como semáforo contador. Isso generaliza a regra do channel unbuffered (C = 0) e é exatamente o exemplo usado no memory model."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "A send on a channel is synchronized before the completion of the corresponding receive", "pt-BR": "Um envio em um channel é sincronizado antes da conclusão do recebimento correspondente" },
+				"why": {
+					"en": "True, but it only orders each value's send and receive; it says nothing about blocking the fourth sender.",
+					"pt-BR": "É verdade, mas só ordena o envio e o recebimento de cada valor; não diz nada sobre bloquear o quarto envio."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "A receive from an unbuffered channel is synchronized before the corresponding send completes", "pt-BR": "Um recebimento de um channel unbuffered é sincronizado antes da conclusão do envio correspondente" },
+				"why": {
+					"en": "That rule is the special case C = 0; `limit` is buffered with capacity 3.",
+					"pt-BR": "Essa regra é o caso especial C = 0; `limit` é buffered com capacidade 3."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "The closing of a channel is synchronized before a receive that returns a zero value", "pt-BR": "O fechamento de um channel é sincronizado antes de um recebimento que retorna zero value" },
+				"why": {
+					"en": "The program never closes `limit`, so the close rule is not involved.",
+					"pt-BR": "O programa nunca fecha `limit`, então a regra do close não entra em jogo."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "None: the limit is just a scheduler heuristic and can be exceeded", "pt-BR": "Nenhuma: o limite é só uma heurística do scheduler e pode ser ultrapassado" },
+				"why": {
+					"en": "It is a formal guarantee of the memory model, independent of scheduling or GOMAXPROCS.",
+					"pt-BR": "É uma garantia formal do memory model, independente do escalonamento ou do GOMAXPROCS."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "The kth receive from a channel with capacity C is synchronized before the k+Cth send completes", "pt-BR": "O k-ésimo recebimento de um channel com capacidade C é sincronizado antes da conclusão do (k+C)-ésimo envio" }
+			}
+		],
+		"sources": [
+			{ "title": "The Go Memory Model: Channel communication", "url": "https://go.dev/ref/mem#chan", "kind": "memory-model" },
+			{ "title": "Effective Go: Channels", "url": "https://go.dev/doc/effective_go#channels", "kind": "effective-go" }
+		]
+	},
+	{
+		"id": "context-withoutcancel-afterfunc",
+		"difficulty": "very-hard",
+		"tags": ["context", "cancellation", "go-1-21"],
+		"code": "type key struct{}\n\nfunc main() {\n\tbase := context.WithValue(context.Background(), key{}, \"v\")\n\tparent, cancel := context.WithCancel(base)\n\tchild := context.WithoutCancel(parent)\n\tstop := context.AfterFunc(parent, func() { fmt.Println(\"after\") })\n\tcancel()\n\ttime.Sleep(50 * time.Millisecond)\n\tfmt.Println(child.Err(), child.Value(key{}), child.Done() == nil, stop())\n}",
+		"question": {
+			"en": "What does this program print?",
+			"pt-BR": "O que este programa imprime?"
+		},
+		"explanation": {
+			"en": "`context.AfterFunc` runs `f` in its own goroutine once `parent` is canceled, so `after` is printed first. `WithoutCancel` (Go 1.21) keeps the parent's values but is never canceled: `Err` is `nil` and `Done` returns a nil channel. The `stop` function returns `false` because `f` has already been started. Output:\n`after`\n`<nil> v true false`",
+			"pt-BR": "`context.AfterFunc` roda `f` em uma goroutine própria quando `parent` é cancelado, então `after` é impresso primeiro. `WithoutCancel` (Go 1.21) mantém os valores do pai, mas nunca é cancelado: `Err` é `nil` e `Done` retorna um channel nil. A função `stop` retorna `false` porque `f` já foi iniciada. Saída:\n`after`\n`<nil> v true false`"
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "after, then context canceled v false false", "pt-BR": "after, depois context canceled v false false" },
+				"why": {
+					"en": "That is how a normal derived context behaves; `WithoutCancel` deliberately does not propagate the parent's cancellation.",
+					"pt-BR": "É assim que um context derivado normal se comporta; `WithoutCancel` de propósito não propaga o cancelamento do pai."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "after, then <nil> <nil> true false", "pt-BR": "after, depois <nil> <nil> true false" },
+				"why": {
+					"en": "`WithoutCancel` drops only cancellation and deadline; values are still looked up in the parent chain.",
+					"pt-BR": "`WithoutCancel` remove só o cancelamento e o deadline; os valores continuam sendo buscados na cadeia de pais."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "after, then <nil> v true false", "pt-BR": "after, depois <nil> v true false" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "<nil> v true true, without after: stop prevents f from running", "pt-BR": "<nil> v true true, sem after: stop impede f de rodar" },
+				"why": {
+					"en": "`stop` is called only after the cancellation; by then `f` has started, so it returns `false` and cannot undo it.",
+					"pt-BR": "`stop` só é chamado depois do cancelamento; nesse momento `f` já começou, então ele retorna `false` e não desfaz nada."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "after, then <nil> v false true", "pt-BR": "after, depois <nil> v false true" },
+				"why": {
+					"en": "A context that can never be canceled returns a nil `Done` channel, and `stop` reports `true` only if it stopped `f` from being run.",
+					"pt-BR": "Um context que nunca pode ser cancelado retorna `Done` nil, e `stop` só retorna `true` se impediu `f` de rodar."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "context package: WithoutCancel", "url": "https://pkg.go.dev/context#WithoutCancel", "kind": "doc" },
+			{ "title": "context package: AfterFunc", "url": "https://pkg.go.dev/context#AfterFunc", "kind": "doc" },
+			{ "title": "Go 1.21 Release Notes", "url": "https://go.dev/doc/go1.21", "kind": "doc" }
+		]
+	}
+]

@@ -1,0 +1,1257 @@
+[
+	{
+		"id": "defer-lifo-order-in-loop",
+		"difficulty": "very-easy",
+		"tags": ["defer", "control-flow"],
+		"code": "for i := range 3 {\n\tdefer fmt.Print(i)\n}\nfmt.Print(\"start \")",
+		"question": {
+			"en": "What does this code print when it runs inside `main`?",
+			"pt-BR": "O que este código imprime quando roda dentro de `main`?"
+		},
+		"explanation": {
+			"en": "Deferred calls run when the surrounding function returns, in last-in-first-out order. The loop pushes `Print(0)`, `Print(1)`, `Print(2)`, `start ` is printed immediately, and then the deferred calls run in reverse: `start 210`.",
+			"pt-BR": "Chamadas com defer rodam quando a função que as contém retorna, em ordem LIFO (a última registrada roda primeiro). O loop empilha `Print(0)`, `Print(1)`, `Print(2)`, `start ` é impresso na hora e depois os defers rodam ao contrário: `start 210`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "start 012", "pt-BR": "start 012" },
+				"why": {
+					"en": "Deferred calls form a stack, not a queue: the last one registered is the first one to run.",
+					"pt-BR": "Os defers formam uma pilha, não uma fila: o último registrado é o primeiro a rodar."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "012start ", "pt-BR": "012start " },
+				"why": {
+					"en": "`defer` postpones the call until the function returns; nothing is printed while the loop runs.",
+					"pt-BR": "`defer` adia a chamada até a função retornar; nada é impresso enquanto o loop roda."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "start 210", "pt-BR": "start 210" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "start 333", "pt-BR": "start 333" },
+				"why": {
+					"en": "The arguments of a deferred call are evaluated when the `defer` statement executes, and `range 3` yields 0, 1 and 2, never 3.",
+					"pt-BR": "Os argumentos de uma chamada com defer são avaliados quando o `defer` executa, e `range 3` produz 0, 1 e 2, nunca 3."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "start 2", "pt-BR": "start 2" },
+				"why": {
+					"en": "Each `defer` registers a new call; later ones do not replace earlier ones.",
+					"pt-BR": "Cada `defer` registra uma nova chamada; as posteriores não substituem as anteriores."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Defer statements", "url": "https://go.dev/ref/spec#Defer_statements", "kind": "spec" },
+			{ "title": "The Go Blog: Defer, Panic, and Recover", "url": "https://go.dev/blog/defer-panic-and-recover", "kind": "blog" }
+		]
+	},
+	{
+		"id": "exported-identifier-uppercase",
+		"difficulty": "very-easy",
+		"tags": ["packages", "visibility"],
+		"code": "package store\n\ntype Item struct {\n\tName  string\n\tprice int\n}\n\nfunc newItem() Item { return Item{} }\nfunc Load() []Item  { return nil }",
+		"question": {
+			"en": "Which identifiers can code in another package refer to?",
+			"pt-BR": "Quais identificadores podem ser usados por código de outro pacote?"
+		},
+		"explanation": {
+			"en": "An identifier is exported when its first character is a Unicode upper case letter and it is declared at package level (or is a field or method name). `Item`, `Item.Name` and `Load` start with upper case; `price` and `newItem` start with lower case and are visible only inside package `store`. Go has no `public`/`private` keywords.",
+			"pt-BR": "Um identificador é exportado quando seu primeiro caractere é uma letra maiúscula Unicode e ele é declarado no nível do pacote (ou é nome de campo ou método). `Item`, `Item.Name` e `Load` começam com maiúscula; `price` e `newItem` começam com minúscula e só são visíveis dentro do pacote `store`. Go não tem palavras-chave `public`/`private`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "`Item`, `Item.Name` and `Load`", "pt-BR": "`Item`, `Item.Name` e `Load`" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "All of them: Go has no access control inside a module", "pt-BR": "Todos: Go não tem controle de acesso dentro de um módulo" },
+				"why": {
+					"en": "Visibility is per package, not per module: lower-case names are hidden even from other packages of the same module.",
+					"pt-BR": "A visibilidade é por pacote, não por módulo: nomes minúsculos ficam ocultos até para outros pacotes do mesmo módulo."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Only `Item` and `Load`; struct fields are always private", "pt-BR": "Só `Item` e `Load`; campos de struct são sempre privados" },
+				"why": {
+					"en": "The same capitalization rule applies to struct fields, so `Name` is exported while `price` is not.",
+					"pt-BR": "A mesma regra de maiúscula vale para campos de struct, então `Name` é exportado e `price` não."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "`Item`, `Item.Name`, `Item.price` and `Load`", "pt-BR": "`Item`, `Item.Name`, `Item.price` e `Load`" },
+				"why": {
+					"en": "Exporting a type does not export its lower-case fields; `price` stays package-private.",
+					"pt-BR": "Exportar um tipo não exporta seus campos minúsculos; `price` continua privado ao pacote."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "Only `Load`, because only functions can be exported", "pt-BR": "Só `Load`, porque só funções podem ser exportadas" },
+				"why": {
+					"en": "Types, constants, variables, fields and methods are exported by the same upper-case rule as functions.",
+					"pt-BR": "Tipos, constantes, variáveis, campos e métodos são exportados pela mesma regra da maiúscula que as funções."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Exported identifiers", "url": "https://go.dev/ref/spec#Exported_identifiers", "kind": "spec" },
+			{ "title": "A Tour of Go: Exported names", "url": "https://go.dev/tour/basics/3", "kind": "doc" }
+		]
+	},
+	{
+		"id": "error-interface-definition",
+		"difficulty": "very-easy",
+		"tags": ["errors", "interfaces"],
+		"question": {
+			"en": "What does a type need in order to be usable as an `error`?",
+			"pt-BR": "O que um tipo precisa ter para ser usado como `error`?"
+		},
+		"explanation": {
+			"en": "`error` is a predeclared interface with a single method: `Error() string`. Any type with that method satisfies it implicitly, with no `implements` declaration. Wrapping (`Unwrap`), `Is` and `As` methods are optional extras used by the `errors` package.",
+			"pt-BR": "`error` é uma interface pré-declarada com um único método: `Error() string`. Qualquer tipo com esse método a satisfaz implicitamente, sem declarar `implements`. Os métodos `Unwrap`, `Is` e `As` são extras opcionais usados pelo pacote `errors`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "Embed the `errors.Error` struct", "pt-BR": "Embutir a struct `errors.Error`" },
+				"why": {
+					"en": "There is no `errors.Error` base type; Go interfaces are satisfied by methods, not by inheritance or embedding.",
+					"pt-BR": "Não existe um tipo base `errors.Error`; interfaces em Go são satisfeitas por métodos, não por herança ou embedding."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "Methods `Error() string` and `Unwrap() error`", "pt-BR": "Os métodos `Error() string` e `Unwrap() error`" },
+				"why": {
+					"en": "`Unwrap` is optional; it only matters for wrapped errors inspected with `errors.Is`/`errors.As`.",
+					"pt-BR": "`Unwrap` é opcional; só importa para erros encapsulados inspecionados com `errors.Is`/`errors.As`."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "A `String() string` method", "pt-BR": "Um método `String() string`" },
+				"why": {
+					"en": "`String() string` is the `fmt.Stringer` interface, which is unrelated to `error`.",
+					"pt-BR": "`String() string` é a interface `fmt.Stringer`, que não tem relação com `error`."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "A method `Error() string`", "pt-BR": "Um método `Error() string`" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "Be created with `errors.New` or `fmt.Errorf`", "pt-BR": "Ser criado com `errors.New` ou `fmt.Errorf`" },
+				"why": {
+					"en": "Those are convenience constructors; any user-defined type with an `Error() string` method is an error too.",
+					"pt-BR": "Essas são apenas funções de conveniência; qualquer tipo definido pelo usuário com o método `Error() string` também é um error."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Errors", "url": "https://go.dev/ref/spec#Errors", "kind": "spec" },
+			{ "title": "Effective Go: Errors", "url": "https://go.dev/doc/effective_go#errors", "kind": "effective-go" }
+		]
+	},
+	{
+		"id": "go-sum-purpose",
+		"difficulty": "very-easy",
+		"tags": ["modules", "go-sum"],
+		"question": {
+			"en": "What is the `go.sum` file for?",
+			"pt-BR": "Para que serve o arquivo `go.sum`?"
+		},
+		"explanation": {
+			"en": "`go.sum` stores cryptographic hashes of the module zip files and `go.mod` files of dependencies. The `go` command checks downloaded modules against these hashes (and the checksum database) so a dependency cannot change silently. It is not a lock file: versions are chosen from `go.mod`, and `go.sum` should be committed.",
+			"pt-BR": "O `go.sum` guarda hashes criptográficos dos zips de módulos e dos arquivos `go.mod` das dependências. O comando `go` confere os módulos baixados contra esses hashes (e contra o checksum database), então uma dependência não muda em silêncio. Não é um lock file: as versões vêm do `go.mod`, e o `go.sum` deve ir para o controle de versão."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It is a lock file that decides which dependency versions are built", "pt-BR": "É um lock file que decide quais versões das dependências são compiladas" },
+				"why": {
+					"en": "Versions come from the `require` directives in `go.mod` via Minimal Version Selection; `go.sum` only verifies their content.",
+					"pt-BR": "As versões vêm das diretivas `require` do `go.mod` via Minimal Version Selection; o `go.sum` só verifica o conteúdo delas."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "It records checksums of dependency content so downloads can be verified", "pt-BR": "Registra checksums do conteúdo das dependências para verificar os downloads" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "It is a build cache and should be added to `.gitignore`", "pt-BR": "É um cache de build e deve ir para o `.gitignore`" },
+				"why": {
+					"en": "The Go team recommends committing `go.sum` so every build verifies the same dependency content.",
+					"pt-BR": "O time do Go recomenda versionar o `go.sum` para que todo build verifique o mesmo conteúdo de dependências."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It lists the hashes of your own source files to detect local changes", "pt-BR": "Lista os hashes dos seus próprios arquivos para detectar mudanças locais" },
+				"why": {
+					"en": "`go.sum` covers dependency modules, not the source files of the main module.",
+					"pt-BR": "O `go.sum` cobre os módulos de dependência, não os arquivos fonte do módulo principal."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It stores credentials for private module proxies", "pt-BR": "Guarda credenciais para proxies de módulos privados" },
+				"why": {
+					"en": "Credentials go in `.netrc` or `GOAUTH`; private paths are set with `GOPRIVATE`. `go.sum` holds only hashes.",
+					"pt-BR": "Credenciais ficam no `.netrc` ou `GOAUTH`; caminhos privados se configuram com `GOPRIVATE`. O `go.sum` só tem hashes."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Go Modules Reference: go.sum files", "url": "https://go.dev/ref/mod#go-sum-files", "kind": "doc" },
+			{ "title": "The Go Blog: Using Go Modules", "url": "https://go.dev/blog/using-go-modules", "kind": "blog" }
+		]
+	},
+	{
+		"id": "errorf-w-vs-v-wrapping",
+		"difficulty": "easy",
+		"tags": ["errors", "wrapping", "errors-is"],
+		"code": "var ErrNotFound = errors.New(\"not found\")\n\na := fmt.Errorf(\"load user: %w\", ErrNotFound)\nb := fmt.Errorf(\"load user: %v\", ErrNotFound)\nfmt.Println(errors.Is(a, ErrNotFound), errors.Is(b, ErrNotFound))\nfmt.Println(a.Error() == b.Error())",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "Both verbs produce the same message, so the strings are equal. Only `%w` makes the result wrap the operand: the returned error has an `Unwrap` method, so `errors.Is` can walk the chain and find `ErrNotFound`. With `%v` the original error is flattened into text and the link is lost. Output: `true false` and `true`.",
+			"pt-BR": "Os dois verbos geram a mesma mensagem, então as strings são iguais. Só o `%w` faz o resultado encapsular o operando: o erro retornado tem um método `Unwrap`, e `errors.Is` consegue percorrer a cadeia e achar `ErrNotFound`. Com `%v` o erro original vira só texto e o vínculo se perde. Saída: `true false` e `true`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "true true\ntrue", "pt-BR": "true true\ntrue" },
+				"why": {
+					"en": "`errors.Is` does not compare messages; it compares error values along the `Unwrap` chain, which `%v` does not create.",
+					"pt-BR": "`errors.Is` não compara mensagens; compara valores de erro ao longo da cadeia de `Unwrap`, que o `%v` não cria."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "false false\ntrue", "pt-BR": "false false\ntrue" },
+				"why": {
+					"en": "`errors.Is` unwraps before comparing, so the error wrapped with `%w` does match the sentinel.",
+					"pt-BR": "`errors.Is` desencapsula antes de comparar, então o erro encapsulado com `%w` corresponde ao sentinel."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "true false\nfalse", "pt-BR": "true false\nfalse" },
+				"why": {
+					"en": "`%w` formats its operand exactly like `%v`; both messages are `load user: not found`.",
+					"pt-BR": "`%w` formata o operando exatamente como `%v`; as duas mensagens são `load user: not found`."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: `%w` is not a valid fmt verb", "pt-BR": "Não compila: `%w` não é um verbo válido do fmt" },
+				"why": {
+					"en": "`%w` has been supported by `fmt.Errorf` since Go 1.13; format strings are not checked by the compiler anyway.",
+					"pt-BR": "`%w` é suportado por `fmt.Errorf` desde o Go 1.13; e o compilador nem verifica strings de formato."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "true false\ntrue", "pt-BR": "true false\ntrue" }
+			}
+		],
+		"sources": [
+			{ "title": "The Go Blog: Working with Errors in Go 1.13", "url": "https://go.dev/blog/go1.13-errors", "kind": "blog" },
+			{ "title": "fmt package: Errorf", "url": "https://pkg.go.dev/fmt#Errorf", "kind": "doc" },
+			{ "title": "errors package: Is", "url": "https://pkg.go.dev/errors#Is", "kind": "doc" }
+		]
+	},
+	{
+		"id": "error-string-conventions",
+		"difficulty": "easy",
+		"tags": ["errors", "style"],
+		"question": {
+			"en": "Following Go conventions, which error is written best?",
+			"pt-BR": "Seguindo as convenções de Go, qual erro está escrito da melhor forma?"
+		},
+		"explanation": {
+			"en": "Error strings should not be capitalized (unless they start with a proper noun or acronym) and should not end with punctuation, because they are usually composed with other context, as in `log.Printf(\"reading %s: %v\", name, err)`. Prefixing with the operation and wrapping with `%w` keeps the message readable and the cause inspectable.",
+			"pt-BR": "Strings de erro não devem começar com maiúscula (a não ser que comecem com nome próprio ou sigla) nem terminar com pontuação, porque costumam ser combinadas com outro contexto, como em `log.Printf(\"reading %s: %v\", name, err)`. Prefixar com a operação e encapsular com `%w` mantém a mensagem legível e a causa inspecionável."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "`errors.New(\"Failed to open config file.\")`", "pt-BR": "`errors.New(\"Failed to open config file.\")`" },
+				"why": {
+					"en": "Capital letter and trailing period look wrong once the message is embedded in a longer one such as `load: Failed to open config file.: ...`.",
+					"pt-BR": "Maiúscula e ponto final ficam estranhos quando a mensagem é embutida em outra maior, como `load: Failed to open config file.: ...`."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "`fmt.Errorf(\"open config %q: %w\", path, err)`", "pt-BR": "`fmt.Errorf(\"open config %q: %w\", path, err)`" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "`errors.New(\"ERROR: config not found!\")`", "pt-BR": "`errors.New(\"ERROR: config not found!\")`" },
+				"why": {
+					"en": "Severity prefixes belong to the logger, and exclamation marks are punctuation that break composition.",
+					"pt-BR": "Prefixos de severidade são papel do logger, e ponto de exclamação é pontuação que atrapalha a composição."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "`fmt.Errorf(\"Open config: %v.\", err)`", "pt-BR": "`fmt.Errorf(\"Open config: %v.\", err)`" },
+				"why": {
+					"en": "It is capitalized, ends with a period and uses `%v`, which drops the wrapped cause for `errors.Is`/`errors.As`.",
+					"pt-BR": "Começa com maiúscula, termina com ponto e usa `%v`, que descarta a causa encapsulada para `errors.Is`/`errors.As`."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "`errors.New(fmt.Sprintf(\"Config error: %s\", err))`", "pt-BR": "`errors.New(fmt.Sprintf(\"Config error: %s\", err))`" },
+				"why": {
+					"en": "Besides the capital letter, building the string by hand loses the wrapped error; `fmt.Errorf` with `%w` does both in one call.",
+					"pt-BR": "Além da maiúscula, montar a string na mão perde o erro encapsulado; `fmt.Errorf` com `%w` faz as duas coisas em uma chamada."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Go Code Review Comments: Error Strings", "url": "https://go.dev/wiki/CodeReviewComments#error-strings", "kind": "doc" },
+			{ "title": "The Go Blog: Working with Errors in Go 1.13", "url": "https://go.dev/blog/go1.13-errors", "kind": "blog" }
+		]
+	},
+	{
+		"id": "internal-package-import-rule",
+		"difficulty": "easy",
+		"tags": ["packages", "internal", "modules"],
+		"question": {
+			"en": "Module `example.com/shop` contains the package `example.com/shop/internal/pricing`. Which code is allowed to import it?",
+			"pt-BR": "O módulo `example.com/shop` contém o pacote `example.com/shop/internal/pricing`. Que código pode importá-lo?"
+		},
+		"explanation": {
+			"en": "A package in or below a directory named `internal` can be imported only by code rooted at the parent of that `internal` directory. Here the parent is `example.com/shop`, so `example.com/shop/...` packages may import it and anything outside that tree gets a `use of internal package ... not allowed` error. The rule is enforced by the `go` command.",
+			"pt-BR": "Um pacote dentro (ou abaixo) de um diretório chamado `internal` só pode ser importado por código que esteja sob o diretório pai desse `internal`. Aqui o pai é `example.com/shop`, então pacotes `example.com/shop/...` podem importá-lo e qualquer coisa fora dessa árvore recebe o erro `use of internal package ... not allowed`. A regra é aplicada pelo comando `go`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "Only `example.com/shop/internal` and its subpackages", "pt-BR": "Só `example.com/shop/internal` e seus subpacotes" },
+				"why": {
+					"en": "The boundary is the parent of `internal`, so `example.com/shop/cmd/api` may import it too.",
+					"pt-BR": "O limite é o diretório pai de `internal`, então `example.com/shop/cmd/api` também pode importá-lo."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "Any module, as long as `pricing` exports its identifiers", "pt-BR": "Qualquer módulo, desde que `pricing` exporte seus identificadores" },
+				"why": {
+					"en": "Exported names control visibility of identifiers, but `internal` restricts which packages may import the package at all.",
+					"pt-BR": "Nomes exportados controlam a visibilidade dos identificadores, mas `internal` restringe quais pacotes podem importar o pacote."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "Any package whose path starts with `example.com/shop/`", "pt-BR": "Qualquer pacote cujo caminho comece com `example.com/shop/`" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "Only the `main` package of the module", "pt-BR": "Só o pacote `main` do módulo" },
+				"why": {
+					"en": "The rule has nothing to do with `main`; every package under the parent tree is allowed.",
+					"pt-BR": "A regra não tem relação com `main`; todo pacote sob a árvore do pai é permitido."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "Anyone: `internal` is just a naming convention with no enforcement", "pt-BR": "Qualquer um: `internal` é só uma convenção de nome, sem verificação" },
+				"why": {
+					"en": "The `go` command enforces the rule and rejects such imports at build time with `use of internal package ... not allowed`.",
+					"pt-BR": "O comando `go` aplica a regra e rejeita esses imports no build com `use of internal package ... not allowed`."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Command go: Internal packages", "url": "https://pkg.go.dev/cmd/go#hdr-Internal_packages", "kind": "doc" },
+			{ "title": "Go 1.4 Release Notes: Internal packages", "url": "https://go.dev/doc/go1.4#internalpackages", "kind": "doc" },
+			{ "title": "Organizing a Go module", "url": "https://go.dev/doc/modules/layout", "kind": "doc" }
+		]
+	},
+	{
+		"id": "break-inside-switch-in-loop",
+		"difficulty": "easy",
+		"tags": ["control-flow", "labels", "switch"],
+		"code": "for i := 0; i < 5; i++ {\n\tswitch i {\n\tcase 2:\n\t\tbreak\n\t}\n\tfmt.Print(i)\n}",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "An unlabeled `break` terminates the innermost `for`, `switch` or `select`. Here that is the `switch`, so the `break` only leaves the `case` and the loop keeps going, printing `01234`. To leave the loop from inside the `switch`, put a label on the `for` and use `break Label` (or `continue Label` to skip to the next iteration).",
+			"pt-BR": "Um `break` sem label encerra o `for`, `switch` ou `select` mais interno. Aqui é o `switch`, então o `break` só sai do `case` e o loop continua, imprimindo `01234`. Para sair do loop de dentro do `switch`, coloque um label no `for` e use `break Label` (ou `continue Label` para pular para a próxima iteração)."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "01234", "pt-BR": "01234" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "01", "pt-BR": "01" },
+				"why": {
+					"en": "That would need `break` to exit the `for`, but the innermost breakable statement is the `switch`.",
+					"pt-BR": "Isso exigiria que o `break` saísse do `for`, mas a instrução mais interna afetada pelo `break` é o `switch`."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "0134", "pt-BR": "0134" },
+				"why": {
+					"en": "`break` is not `continue`; after leaving the `switch` the `Print` below still runs for `i == 2`.",
+					"pt-BR": "`break` não é `continue`; depois de sair do `switch` o `Print` de baixo ainda roda para `i == 2`."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "012", "pt-BR": "012" },
+				"why": {
+					"en": "Nothing stops the loop after printing 2: the `break` happened before the `Print` and only affected the `switch`.",
+					"pt-BR": "Nada para o loop depois de imprimir 2: o `break` aconteceu antes do `Print` e só afetou o `switch`."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It does not compile: `break` is not allowed in a `case`", "pt-BR": "Não compila: `break` não é permitido em um `case`" },
+				"why": {
+					"en": "`break` is valid in a `switch`; it is just redundant here because Go cases do not fall through.",
+					"pt-BR": "`break` é válido em um `switch`; só é redundante aqui porque os cases de Go não caem no próximo."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Break statements", "url": "https://go.dev/ref/spec#Break_statements", "kind": "spec" },
+			{ "title": "The Go Programming Language Specification: Labeled statements", "url": "https://go.dev/ref/spec#Labeled_statements", "kind": "spec" }
+		]
+	},
+	{
+		"id": "multiple-init-functions",
+		"difficulty": "easy",
+		"tags": ["init", "packages"],
+		"question": {
+			"en": "Which statement about `init` functions is true?",
+			"pt-BR": "Qual afirmação sobre funções `init` é verdadeira?"
+		},
+		"explanation": {
+			"en": "A package may declare any number of `init()` functions, even several in the same file. They take no arguments, return nothing, cannot be called or referenced from code, and run automatically after all package-level variables are initialized, in the order they are presented to the compiler. All imported packages finish initializing before the importer's `init` functions run.",
+			"pt-BR": "Um pacote pode declarar quantas funções `init()` quiser, inclusive várias no mesmo arquivo. Elas não recebem argumentos, não retornam nada, não podem ser chamadas nem referenciadas pelo código e rodam automaticamente depois que todas as variáveis de pacote foram inicializadas, na ordem em que são apresentadas ao compilador. Todos os pacotes importados terminam de inicializar antes de as `init` do importador rodarem."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "Each package may have at most one `init` function", "pt-BR": "Cada pacote pode ter no máximo uma função `init`" },
+				"why": {
+					"en": "`init` is special: it is the one identifier that can be declared many times in the same package.",
+					"pt-BR": "`init` é especial: é o único identificador que pode ser declarado várias vezes no mesmo pacote."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "`init` runs before package-level variables are initialized", "pt-BR": "`init` roda antes de as variáveis de pacote serem inicializadas" },
+				"why": {
+					"en": "It is the opposite: variable initializers run first, so `init` can rely on them.",
+					"pt-BR": "É o contrário: os inicializadores de variáveis rodam primeiro, então `init` pode contar com eles."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "`main` may call `init()` again to reset package state", "pt-BR": "`main` pode chamar `init()` de novo para resetar o estado do pacote" },
+				"why": {
+					"en": "`init` cannot be referenced anywhere in the program; calling it is a compile error (`undefined: init`).",
+					"pt-BR": "`init` não pode ser referenciada em nenhum lugar do programa; chamá-la é erro de compilação (`undefined: init`)."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "A package may have several `init` functions, even in one file, and they all run", "pt-BR": "Um pacote pode ter várias funções `init`, até no mesmo arquivo, e todas rodam" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "`init` runs only in package `main`", "pt-BR": "`init` só roda no pacote `main`" },
+				"why": {
+					"en": "Every package's `init` functions run once when the package is initialized, which is why blank imports like `_ \"image/png\"` work.",
+					"pt-BR": "As `init` de todo pacote rodam uma vez quando o pacote é inicializado; por isso imports em branco como `_ \"image/png\"` funcionam."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Package initialization", "url": "https://go.dev/ref/spec#Package_initialization", "kind": "spec" },
+			{ "title": "Effective Go: The init function", "url": "https://go.dev/doc/effective_go#init", "kind": "effective-go" }
+		]
+	},
+	{
+		"id": "defer-argument-evaluation-time",
+		"difficulty": "medium",
+		"tags": ["defer", "closures"],
+		"code": "func main() {\n\tx := 1\n\tdefer fmt.Println(\"deferred:\", x)\n\tdefer func() { fmt.Println(\"closure:\", x) }()\n\tx = 2\n}",
+		"question": {
+			"en": "What does this program print?",
+			"pt-BR": "O que este programa imprime?"
+		},
+		"explanation": {
+			"en": "When a `defer` statement executes, the function value and its arguments are evaluated and saved, so the first deferred call captured `x == 1`. The closure takes no arguments and reads the variable `x` itself when it finally runs, seeing `2`. Deferred calls run in LIFO order, so the closure prints first.",
+			"pt-BR": "Quando um `defer` executa, o valor da função e os seus argumentos são avaliados e guardados, então a primeira chamada adiada capturou `x == 1`. A closure não recebe argumentos e lê a própria variável `x` quando finalmente roda, vendo `2`. Os defers rodam em ordem LIFO, então a closure imprime primeiro."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "deferred: 1\nclosure: 2", "pt-BR": "deferred: 1\nclosure: 2" },
+				"why": {
+					"en": "The values are right but the order is not: the defer registered last runs first.",
+					"pt-BR": "Os valores estão certos, mas a ordem não: o último defer registrado roda primeiro."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "closure: 2\ndeferred: 1", "pt-BR": "closure: 2\ndeferred: 1" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "closure: 2\ndeferred: 2", "pt-BR": "closure: 2\ndeferred: 2" },
+				"why": {
+					"en": "`fmt.Println(\"deferred:\", x)` copied `x` when the `defer` ran; later assignments do not affect saved arguments.",
+					"pt-BR": "`fmt.Println(\"deferred:\", x)` copiou `x` quando o `defer` rodou; atribuições posteriores não afetam argumentos já guardados."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "closure: 1\ndeferred: 1", "pt-BR": "closure: 1\ndeferred: 1" },
+				"why": {
+					"en": "A closure captures the variable, not a snapshot of its value, so it observes the assignment `x = 2`.",
+					"pt-BR": "Uma closure captura a variável, não uma cópia do valor, então ela enxerga a atribuição `x = 2`."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "deferred: 2\nclosure: 2", "pt-BR": "deferred: 2\nclosure: 2" },
+				"why": {
+					"en": "Both the order and the first value are wrong: arguments are evaluated at `defer` time and calls run LIFO.",
+					"pt-BR": "A ordem e o primeiro valor estão errados: argumentos são avaliados no momento do `defer` e as chamadas rodam em LIFO."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Defer statements", "url": "https://go.dev/ref/spec#Defer_statements", "kind": "spec" },
+			{ "title": "The Go Blog: Defer, Panic, and Recover", "url": "https://go.dev/blog/defer-panic-and-recover", "kind": "blog" },
+			{ "title": "100 Go Mistakes: Ignoring how defer arguments and receivers are evaluated (#47)", "url": "https://100go.co/#ignoring-how-defer-arguments-and-receivers-are-evaluated-argument-evaluation-pointer-and-value-receivers-47", "kind": "book" }
+		]
+	},
+	{
+		"id": "defer-modifies-named-result",
+		"difficulty": "medium",
+		"tags": ["defer", "named-results", "functions"],
+		"code": "func f() (n int) {\n\tdefer func() { n *= 2 }()\n\treturn 3\n}\n\nfunc g() int {\n\tn := 3\n\tdefer func() { n *= 2 }()\n\treturn n\n}\n\nfunc main() { fmt.Println(f(), g()) }",
+		"question": {
+			"en": "What does this program print?",
+			"pt-BR": "O que este programa imprime?"
+		},
+		"explanation": {
+			"en": "`return 3` first assigns 3 to the named result `n`, then deferred functions run, then the function returns to the caller. The closure in `f` changes the result variable itself, so `f` returns 6. In `g` the result is unnamed: `return n` copies 3 into the hidden result before the defer runs, and the closure only modifies the local `n`, so `g` returns 3.",
+			"pt-BR": "`return 3` primeiro atribui 3 ao resultado nomeado `n`, depois os defers rodam e só então a função volta para quem chamou. A closure em `f` altera a própria variável de resultado, então `f` retorna 6. Em `g` o resultado não tem nome: `return n` copia 3 para o resultado oculto antes do defer rodar, e a closure só altera o `n` local, então `g` retorna 3."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "3 3", "pt-BR": "3 3" },
+				"why": {
+					"en": "Deferred functions run after the result is set but before the caller sees it, so they can change a named result.",
+					"pt-BR": "Os defers rodam depois de o resultado ser definido, mas antes de quem chamou recebê-lo, então podem alterar um resultado nomeado."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "6 6", "pt-BR": "6 6" },
+				"why": {
+					"en": "In `g` the closure modifies a local variable; the unnamed result already holds a copy of 3.",
+					"pt-BR": "Em `g` a closure altera uma variável local; o resultado sem nome já tem uma cópia de 3."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "3 6", "pt-BR": "3 6" },
+				"why": {
+					"en": "It is the other way around: only the function with a named result lets the defer change what is returned.",
+					"pt-BR": "É o contrário: só a função com resultado nomeado permite que o defer mude o valor retornado."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: `return 3` with a named result", "pt-BR": "Não compila: `return 3` com resultado nomeado" },
+				"why": {
+					"en": "A function with named results may still return explicit values; they are assigned to the result parameters.",
+					"pt-BR": "Uma função com resultados nomeados pode retornar valores explícitos; eles são atribuídos aos parâmetros de resultado."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "6 3", "pt-BR": "6 3" }
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Defer statements", "url": "https://go.dev/ref/spec#Defer_statements", "kind": "spec" },
+			{ "title": "The Go Blog: Defer, Panic, and Recover", "url": "https://go.dev/blog/defer-panic-and-recover", "kind": "blog" }
+		]
+	},
+	{
+		"id": "loop-variable-per-iteration-go122",
+		"difficulty": "medium",
+		"tags": ["closures", "loops", "go-version-changes"],
+		"code": "var fns []func()\nfor i := 0; i < 3; i++ {\n\tfns = append(fns, func() { fmt.Print(i) })\n}\nfor _, f := range fns {\n\tf()\n}",
+		"question": {
+			"en": "The module's `go.mod` declares `go 1.27`. What does this code print?",
+			"pt-BR": "O `go.mod` do módulo declara `go 1.27`. O que este código imprime?"
+		},
+		"explanation": {
+			"en": "Since Go 1.22, each iteration of a `for` loop with `:=` gets a fresh copy of the loop variable, so each closure captures its own `i` and the output is `012`. The new semantics apply per module, based on the `go` line in `go.mod`: in a module declaring `go 1.21` or older all closures share one `i` and the same code prints `333`.",
+			"pt-BR": "Desde o Go 1.22, cada iteração de um `for` com `:=` ganha uma cópia nova da variável do loop, então cada closure captura o seu próprio `i` e a saída é `012`. A nova semântica vale por módulo, pela linha `go` do `go.mod`: em um módulo que declara `go 1.21` ou anterior todas as closures compartilham um único `i` e o mesmo código imprime `333`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "333", "pt-BR": "333" },
+				"why": {
+					"en": "That was the behavior before Go 1.22 (or with `go 1.21` and older in `go.mod`), when the variable was shared by all iterations.",
+					"pt-BR": "Esse era o comportamento antes do Go 1.22 (ou com `go 1.21` ou anterior no `go.mod`), quando a variável era compartilhada por todas as iterações."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "222", "pt-BR": "222" },
+				"why": {
+					"en": "Even with the old shared variable, the last value is 3, because the loop increments `i` once more before the condition fails.",
+					"pt-BR": "Mesmo com a variável compartilhada antiga, o último valor é 3, porque o loop incrementa `i` mais uma vez antes de a condição falhar."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "012", "pt-BR": "012" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "210", "pt-BR": "210" },
+				"why": {
+					"en": "The closures are called in slice order; LIFO order applies to `defer`, not to a slice of functions.",
+					"pt-BR": "As closures são chamadas na ordem do slice; a ordem LIFO vale para `defer`, não para um slice de funções."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "The output is nondeterministic", "pt-BR": "A saída não é determinística" },
+				"why": {
+					"en": "Everything runs sequentially in one goroutine, so there is no race and the order is fixed.",
+					"pt-BR": "Tudo roda em sequência numa única goroutine, então não há race condition e a ordem é fixa."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Blog: Fixing For Loops in Go 1.22", "url": "https://go.dev/blog/loopvar-preview", "kind": "blog" },
+			{ "title": "Go 1.22 Release Notes: Changes to the language", "url": "https://go.dev/doc/go1.22#language", "kind": "doc" },
+			{ "title": "Go Wiki: LoopvarExperiment", "url": "https://go.dev/wiki/LoopvarExperiment", "kind": "doc" }
+		]
+	},
+	{
+		"id": "errors-as-pointer-target",
+		"difficulty": "medium",
+		"tags": ["errors", "errors-as", "typed-errors"],
+		"code": "_, err := os.Open(\"/does/not/exist\")\nerr = fmt.Errorf(\"config: %w\", err)",
+		"question": {
+			"en": "How do you correctly check whether `err` wraps a `*fs.PathError` and read its `Op` field?",
+			"pt-BR": "Como verificar corretamente se `err` encapsula um `*fs.PathError` e ler o campo `Op`?"
+		},
+		"explanation": {
+			"en": "`errors.As` walks the wrap chain and, on the first error assignable to the target's element type, stores it through the pointer and returns true; the target must be a non-nil pointer to that type, hence `&pe` where `pe` is `*fs.PathError`. A plain type assertion fails because the outer error is the `fmt.Errorf` wrapper. Since Go 1.26 the generic `pe, ok := errors.AsType[*fs.PathError](err)` does the same without the pointer dance.",
+			"pt-BR": "`errors.As` percorre a cadeia de erros encapsulados e, no primeiro erro atribuível ao tipo apontado pelo target, grava esse erro via ponteiro e retorna true; o target precisa ser um ponteiro não nil para esse tipo, por isso `&pe` com `pe` do tipo `*fs.PathError`. Uma type assertion simples falha porque o erro externo é o wrapper do `fmt.Errorf`. Desde o Go 1.26, o genérico `pe, ok := errors.AsType[*fs.PathError](err)` faz o mesmo sem a ginástica com ponteiro."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "`var pe *fs.PathError; if errors.As(err, &pe) { use(pe.Op) }`", "pt-BR": "`var pe *fs.PathError; if errors.As(err, &pe) { use(pe.Op) }`" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "Pass the nil pointer itself: `errors.As(err, pe)` with `var pe *fs.PathError`", "pt-BR": "Passar o próprio ponteiro nil: `errors.As(err, pe)` com `var pe *fs.PathError`" },
+				"why": {
+					"en": "`pe` is a nil pointer, so `errors.As` panics with `errors: target must be a non-nil pointer`; `go vet` also flags it.",
+					"pt-BR": "`pe` é um ponteiro nil, então `errors.As` dá panic com `errors: target must be a non-nil pointer`; o `go vet` também acusa."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "`if pe, ok := err.(*fs.PathError); ok { use(pe.Op) }`", "pt-BR": "`if pe, ok := err.(*fs.PathError); ok { use(pe.Op) }`" },
+				"why": {
+					"en": "A type assertion only inspects the outermost error, which here is the wrapper created by `fmt.Errorf`, so `ok` is false.",
+					"pt-BR": "Uma type assertion só olha o erro mais externo, que aqui é o wrapper criado pelo `fmt.Errorf`, então `ok` é false."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "`if errors.Is(err, &fs.PathError{}) { ... }`", "pt-BR": "`if errors.Is(err, &fs.PathError{}) { ... }`" },
+				"why": {
+					"en": "`errors.Is` compares values; a fresh `&fs.PathError{}` is a different pointer, so it returns false and gives no access to `Op`.",
+					"pt-BR": "`errors.Is` compara valores; um `&fs.PathError{}` novo é outro ponteiro, então retorna false e não dá acesso a `Op`."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "`if strings.Contains(err.Error(), \"open\") { ... }`", "pt-BR": "`if strings.Contains(err.Error(), \"open\") { ... }`" },
+				"why": {
+					"en": "Matching on message text is brittle and does not give you the typed value; error types exist so callers do not parse strings.",
+					"pt-BR": "Comparar o texto da mensagem é frágil e não dá acesso ao valor tipado; tipos de erro existem para que quem chama não precise analisar strings."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "errors package: As", "url": "https://pkg.go.dev/errors#As", "kind": "doc" },
+			{ "title": "errors package: AsType", "url": "https://pkg.go.dev/errors#AsType", "kind": "doc" },
+			{ "title": "Go 1.26 Release Notes: errors", "url": "https://go.dev/doc/go1.26#errorspkgerrors", "kind": "doc" }
+		]
+	},
+	{
+		"id": "module-major-version-suffix",
+		"difficulty": "medium",
+		"tags": ["modules", "semver", "versioning"],
+		"question": {
+			"en": "Your module `example.com/lib` is at v1.8.0 and you need to release breaking changes as v2.0.0. What does Go require?",
+			"pt-BR": "Seu módulo `example.com/lib` está na v1.8.0 e você precisa lançar mudanças incompatíveis como v2.0.0. O que o Go exige?"
+		},
+		"explanation": {
+			"en": "Go follows the import compatibility rule: a new major version is a different module path. From v2 on, the path must end in `/vN`, so `go.mod` declares `module example.com/lib/v2`, the tag is `v2.0.0`, and importers write `import \"example.com/lib/v2\"`. Because the paths differ, v1 and v2 can even be used side by side in one build.",
+			"pt-BR": "Go segue a regra de compatibilidade de imports: uma nova major version é outro caminho de módulo. Da v2 em diante o caminho precisa terminar em `/vN`, então o `go.mod` declara `module example.com/lib/v2`, a tag é `v2.0.0` e quem importa escreve `import \"example.com/lib/v2\"`. Como os caminhos são diferentes, v1 e v2 podem até ser usadas lado a lado no mesmo build."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "Only push the tag `v2.0.0`; users run `go get -u` to upgrade", "pt-BR": "Só criar a tag `v2.0.0`; os usuários rodam `go get -u` para atualizar" },
+				"why": {
+					"en": "Without the `/v2` suffix the tag is ignored or treated as `+incompatible`, and `go get -u` never crosses major versions.",
+					"pt-BR": "Sem o sufixo `/v2` a tag é ignorada ou tratada como `+incompatible`, e `go get -u` nunca muda de major version."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "Add `retract [v1.0.0, v1.8.0]` so users are moved to v2", "pt-BR": "Adicionar `retract [v1.0.0, v1.8.0]` para os usuários irem para a v2" },
+				"why": {
+					"en": "`retract` marks broken versions to avoid; it does not create a new major version or change import paths.",
+					"pt-BR": "`retract` marca versões com problema para serem evitadas; não cria uma nova major version nem muda caminhos de import."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Change the `go` directive to a newer version", "pt-BR": "Mudar a diretiva `go` para uma versão mais nova" },
+				"why": {
+					"en": "The `go` directive sets the language version and minimum toolchain, not the module's own version.",
+					"pt-BR": "A diretiva `go` define a versão da linguagem e o toolchain mínimo, não a versão do próprio módulo."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "Change the module path to `example.com/lib/v2`, tag `v2.0.0`, and importers use the `/v2` path", "pt-BR": "Mudar o caminho do módulo para `example.com/lib/v2`, criar a tag `v2.0.0`, e quem importa usa o caminho `/v2`" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "Nothing special: Minimal Version Selection picks v2.0.0 as the newest version", "pt-BR": "Nada especial: a Minimal Version Selection escolhe a v2.0.0 por ser a mais nova" },
+				"why": {
+					"en": "MVS chooses among versions of the same module path; v1 and v2 are different modules, so it never upgrades across them.",
+					"pt-BR": "A MVS escolhe entre versões do mesmo caminho de módulo; v1 e v2 são módulos diferentes, então ela nunca atualiza de um para o outro."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Go Modules Reference: Major version suffixes", "url": "https://go.dev/ref/mod#major-version-suffixes", "kind": "doc" },
+			{ "title": "The Go Blog: Go Modules: v2 and Beyond", "url": "https://go.dev/blog/v2-go-modules", "kind": "blog" }
+		]
+	},
+	{
+		"id": "recover-must-be-called-by-deferred-function",
+		"difficulty": "hard",
+		"tags": ["panic", "recover", "defer"],
+		"code": "func helper() {\n\tif r := recover(); r != nil {\n\t\tfmt.Println(\"recovered:\", r)\n\t}\n}\n\nfunc main() {\n\tdefer func() {\n\t\thelper()\n\t}()\n\tpanic(\"boom\")\n}",
+		"question": {
+			"en": "What happens when this program runs?",
+			"pt-BR": "O que acontece quando este programa roda?"
+		},
+		"explanation": {
+			"en": "The spec says `recover` returns nil if it was not called directly by a deferred function. Here the deferred function is the anonymous closure, and `recover` runs one level deeper inside `helper`, so it returns nil and the panic continues: the program crashes with `panic: boom` and exit status 2. Writing `defer helper()` would work, because then `helper` itself is the deferred function.",
+			"pt-BR": "A spec diz que `recover` retorna nil se não for chamado diretamente por uma função adiada. Aqui a função adiada é a closure anônima, e `recover` roda um nível abaixo, dentro de `helper`, então retorna nil e o panic continua: o programa cai com `panic: boom` e exit status 2. Escrever `defer helper()` funcionaria, porque aí `helper` é a própria função adiada."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It prints `recovered: boom` and exits normally", "pt-BR": "Imprime `recovered: boom` e termina normalmente" },
+				"why": {
+					"en": "That is what `defer helper()` does. Called from inside another deferred function, `recover` is not called directly by the deferred call and returns nil.",
+					"pt-BR": "É o que `defer helper()` faz. Chamado de dentro de outra função adiada, `recover` não é chamado diretamente pela chamada adiada e retorna nil."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "It crashes with `panic: boom`; nothing is recovered", "pt-BR": "Cai com `panic: boom`; nada é recuperado" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "It prints `recovered: boom` and then crashes with `panic: boom`", "pt-BR": "Imprime `recovered: boom` e depois cai com `panic: boom`" },
+				"why": {
+					"en": "A successful `recover` stops the panic, so you never get both; here `recover` returns nil and nothing is printed.",
+					"pt-BR": "Um `recover` bem-sucedido interrompe o panic, então nunca acontecem as duas coisas; aqui `recover` retorna nil e nada é impresso."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: `recover` must appear inside a deferred function literal", "pt-BR": "Não compila: `recover` precisa estar dentro de uma função literal adiada" },
+				"why": {
+					"en": "`recover` is a builtin that can be called anywhere; outside the right context it simply returns nil.",
+					"pt-BR": "`recover` é um builtin que pode ser chamado em qualquer lugar; fora do contexto certo ele só retorna nil."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It hangs: the deferred call waits for the panic to finish", "pt-BR": "Trava: a chamada adiada espera o panic terminar" },
+				"why": {
+					"en": "Panicking runs the deferred calls synchronously and then terminates the program; nothing blocks.",
+					"pt-BR": "O panic roda as chamadas adiadas de forma síncrona e depois encerra o programa; nada fica bloqueado."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Handling panics", "url": "https://go.dev/ref/spec#Handling_panics", "kind": "spec" },
+			{ "title": "Effective Go: Recover", "url": "https://go.dev/doc/effective_go#recover", "kind": "effective-go" }
+		]
+	},
+	{
+		"id": "package-var-init-dependency-order",
+		"difficulty": "hard",
+		"tags": ["init", "packages", "initialization-order"],
+		"code": "var a = c + b\nvar b = f(\"b\")\nvar c = f(\"c\")\n\nfunc f(s string) int {\n\tfmt.Print(s, \" \")\n\treturn 1\n}\n\nfunc init() { fmt.Print(\"init1 \") }\nfunc init() { fmt.Print(\"init2 \") }\n\nfunc main() { fmt.Println(\"main\", a) }",
+		"question": {
+			"en": "What does this program print?",
+			"pt-BR": "O que este programa imprime?"
+		},
+		"explanation": {
+			"en": "Package-level variables are initialized step by step: at each step the earliest variable in declaration order that has no uninitialized dependencies is initialized. `a` depends on `b` and `c`, so it waits; `b` is next in declaration order and ready, then `c`, then `a`. The order of operands in `c + b` does not matter. After all variables, the `init` functions run in source order, and finally `main`: `b c init1 init2 main 2`.",
+			"pt-BR": "Variáveis de pacote são inicializadas passo a passo: em cada passo é inicializada a variável mais cedo na ordem de declaração que não tem dependências pendentes. `a` depende de `b` e `c`, então espera; `b` é a próxima na ordem de declaração e está pronta, depois `c`, depois `a`. A ordem dos operandos em `c + b` não importa. Depois de todas as variáveis, as funções `init` rodam na ordem do código e por fim `main`: `b c init1 init2 main 2`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "c b init1 init2 main 2", "pt-BR": "c b init1 init2 main 2" },
+				"why": {
+					"en": "Dependencies are resolved by declaration order of the ready variables, not by the order the operands appear in `a`'s expression.",
+					"pt-BR": "As dependências são resolvidas pela ordem de declaração das variáveis prontas, não pela ordem dos operandos na expressão de `a`."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "init1 init2 b c main 2", "pt-BR": "init1 init2 b c main 2" },
+				"why": {
+					"en": "`init` functions run only after every package-level variable has been initialized.",
+					"pt-BR": "As funções `init` só rodam depois que todas as variáveis de pacote foram inicializadas."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "b c init1 init2 main 0", "pt-BR": "b c init1 init2 main 0" },
+				"why": {
+					"en": "`a` is initialized after its dependencies, so it sees `b == 1` and `c == 1` and holds 2, not a zero value.",
+					"pt-BR": "`a` é inicializada depois das suas dependências, então vê `b == 1` e `c == 1` e vale 2, não o zero value."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: `b` and `c` are used before they are declared", "pt-BR": "Não compila: `b` e `c` são usadas antes de serem declaradas" },
+				"why": {
+					"en": "At package level, declaration order does not limit references; the compiler sorts initialization by dependencies (only cycles are errors).",
+					"pt-BR": "No nível do pacote, a ordem de declaração não limita referências; o compilador ordena a inicialização pelas dependências (só ciclos são erro)."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "b c init1 init2 main 2", "pt-BR": "b c init1 init2 main 2" }
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Package initialization", "url": "https://go.dev/ref/spec#Package_initialization", "kind": "spec" },
+			{ "title": "Effective Go: The init function", "url": "https://go.dev/doc/effective_go#init", "kind": "effective-go" }
+		]
+	},
+	{
+		"id": "mvs-selects-minimum-required-version",
+		"difficulty": "hard",
+		"tags": ["modules", "mvs", "dependencies"],
+		"question": {
+			"en": "Your module requires `A v1.0.0` and `B v1.0.0`. `A` requires `C v1.2.0`, `B` requires `C v1.3.0`, and the newest release of `C` is `v1.5.0`. Which version of `C` does the build use?",
+			"pt-BR": "Seu módulo exige `A v1.0.0` e `B v1.0.0`. `A` exige `C v1.2.0`, `B` exige `C v1.3.0`, e a release mais nova de `C` é a `v1.5.0`. Qual versão de `C` o build usa?"
+		},
+		"explanation": {
+			"en": "Minimal Version Selection builds the requirement graph and, for each module path, picks the highest version that anyone requires, which is the minimum version that satisfies everyone. Here that is `v1.3.0`. Releases nobody asks for (`v1.5.0`) are ignored until a `go.mod` requires them, for example after `go get C@latest`, which makes builds reproducible without a lock file.",
+			"pt-BR": "A Minimal Version Selection monta o grafo de requisitos e, para cada caminho de módulo, escolhe a maior versão que alguém exige, que é a menor versão que satisfaz todo mundo. Aqui é a `v1.3.0`. Releases que ninguém pede (`v1.5.0`) são ignoradas até algum `go.mod` exigi-las, por exemplo depois de `go get C@latest`, o que deixa os builds reproduzíveis sem lock file."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "`v1.2.0`, the lowest version mentioned", "pt-BR": "`v1.2.0`, a menor versão mencionada" },
+				"why": {
+					"en": "`B` needs at least `v1.3.0`; requirements are minimums, so the selected version must satisfy all of them.",
+					"pt-BR": "`B` precisa de pelo menos `v1.3.0`; os requisitos são mínimos, então a versão escolhida precisa satisfazer todos."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "`v1.5.0`, the latest compatible release", "pt-BR": "`v1.5.0`, a release compatível mais recente" },
+				"why": {
+					"en": "That is how npm-style resolvers work; Go never picks a version that no `go.mod` in the graph requires.",
+					"pt-BR": "É assim que resolvedores no estilo npm funcionam; o Go nunca escolhe uma versão que nenhum `go.mod` do grafo exige."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "`v1.3.0`", "pt-BR": "`v1.3.0`" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "Both `v1.2.0` and `v1.3.0`, one for each dependent", "pt-BR": "`v1.2.0` e `v1.3.0` ao mesmo tempo, uma para cada dependente" },
+				"why": {
+					"en": "A build has exactly one version per module path; only different major versions (different paths) can coexist.",
+					"pt-BR": "Um build tem exatamente uma versão por caminho de módulo; só major versions diferentes (caminhos diferentes) podem coexistir."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "The build fails until you pick one with a `replace` directive", "pt-BR": "O build falha até você escolher uma com a diretiva `replace`" },
+				"why": {
+					"en": "Differing minor requirements are not a conflict in MVS; the highest requirement is selected automatically.",
+					"pt-BR": "Requisitos de minor diferentes não são conflito na MVS; o maior requisito é escolhido automaticamente."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Go Modules Reference: Minimal version selection (MVS)", "url": "https://go.dev/ref/mod#minimal-version-selection", "kind": "doc" },
+			{ "title": "Russ Cox: Minimal Version Selection", "url": "https://research.swtch.com/vgo-mvs", "kind": "article" }
+		]
+	},
+	{
+		"id": "panic-in-goroutine-crashes-program",
+		"difficulty": "hard",
+		"tags": ["panic", "recover", "goroutines"],
+		"code": "func main() {\n\tdefer func() {\n\t\tif r := recover(); r != nil {\n\t\t\tfmt.Println(\"recovered:\", r)\n\t\t}\n\t}()\n\tgo func() {\n\t\tpanic(\"worker failed\")\n\t}()\n\ttime.Sleep(100 * time.Millisecond)\n\tfmt.Println(\"done\")\n}",
+		"question": {
+			"en": "What happens when this program runs?",
+			"pt-BR": "O que acontece quando este programa roda?"
+		},
+		"explanation": {
+			"en": "A panic unwinds only the stack of the goroutine where it happened, running that goroutine's deferred calls. The worker has no deferred `recover`, so when its stack is exhausted the whole program terminates with `panic: worker failed` and exit status 2. The `recover` in `main` belongs to another goroutine and never sees it; each goroutine that may panic needs its own deferred `recover`.",
+			"pt-BR": "Um panic só desenrola a pilha da goroutine onde aconteceu, rodando os defers dessa goroutine. O worker não tem `recover` adiado, então quando a pilha dele acaba o programa inteiro termina com `panic: worker failed` e exit status 2. O `recover` em `main` pertence a outra goroutine e nunca vê esse panic; cada goroutine que pode dar panic precisa do seu próprio `recover` adiado."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "The program crashes with `panic: worker failed` and `done` is never printed", "pt-BR": "O programa cai com `panic: worker failed` e `done` nunca é impresso" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "It prints `recovered: worker failed` and then `done`", "pt-BR": "Imprime `recovered: worker failed` e depois `done`" },
+				"why": {
+					"en": "Panics do not propagate to the goroutine that started the worker; `recover` only works in the panicking goroutine.",
+					"pt-BR": "Panics não se propagam para a goroutine que iniciou o worker; `recover` só funciona na goroutine que entrou em panic."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Only the worker goroutine dies; `main` prints `done`", "pt-BR": "Só a goroutine do worker morre; `main` imprime `done`" },
+				"why": {
+					"en": "An unrecovered panic in any goroutine terminates the entire process, not just that goroutine.",
+					"pt-BR": "Um panic não recuperado em qualquer goroutine encerra o processo inteiro, não só aquela goroutine."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It prints `done` and then `recovered: worker failed`", "pt-BR": "Imprime `done` e depois `recovered: worker failed`" },
+				"why": {
+					"en": "Deferred calls in `main` cannot observe a panic from another goroutine, and the crash happens long before the sleep ends.",
+					"pt-BR": "Os defers de `main` não conseguem observar um panic de outra goroutine, e a queda acontece bem antes de o sleep terminar."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "The result depends on the scheduler: sometimes it recovers, sometimes it crashes", "pt-BR": "Depende do scheduler: às vezes recupera, às vezes cai" },
+				"why": {
+					"en": "Scheduling only changes when the panic happens; recovery from another goroutine is never possible.",
+					"pt-BR": "O scheduler só muda quando o panic acontece; recuperar a partir de outra goroutine nunca é possível."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Handling panics", "url": "https://go.dev/ref/spec#Handling_panics", "kind": "spec" },
+			{ "title": "The Go Blog: Defer, Panic, and Recover", "url": "https://go.dev/blog/defer-panic-and-recover", "kind": "blog" }
+		]
+	},
+	{
+		"id": "errorf-multiple-w-unwrap",
+		"difficulty": "very-hard",
+		"tags": ["errors", "wrapping", "errors-join", "go-version-changes"],
+		"code": "var (\n\tErrA = errors.New(\"a\")\n\tErrB = errors.New(\"b\")\n)\n\nerr := fmt.Errorf(\"%w + %w\", ErrA, ErrB)\nfmt.Println(err)\nfmt.Println(errors.Is(err, ErrA), errors.Is(err, ErrB))\nfmt.Println(errors.Unwrap(err) == nil)\nfmt.Printf(\"%q\\n\", errors.Join(ErrA, ErrB).Error())",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "Since Go 1.20, `fmt.Errorf` with several `%w` verbs returns an error with `Unwrap() []error`, and `errors.Is`/`errors.As` search that tree depth-first, so both sentinels match. `errors.Unwrap` only calls `Unwrap() error`; it does not understand the slice form and returns nil. `errors.Join` builds a similar multi-error whose message joins the parts with a newline: `\"a\\nb\"`.",
+			"pt-BR": "Desde o Go 1.20, `fmt.Errorf` com vários `%w` retorna um erro com `Unwrap() []error`, e `errors.Is`/`errors.As` percorrem essa árvore em profundidade, então os dois sentinels correspondem. `errors.Unwrap` só chama `Unwrap() error`; não entende a forma com slice e retorna nil. `errors.Join` monta um multi-erro parecido cuja mensagem junta as partes com quebra de linha: `\"a\\nb\"`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "a + b\ntrue false\nfalse\n\"a\\nb\"", "pt-BR": "a + b\ntrue false\nfalse\n\"a\\nb\"" },
+				"why": {
+					"en": "That was the behavior before Go 1.20, when only one `%w` was allowed; now every `%w` operand is wrapped.",
+					"pt-BR": "Esse era o comportamento antes do Go 1.20, quando só um `%w` era permitido; agora todo operando de `%w` é encapsulado."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "a + b\ntrue true\nfalse\n\"a; b\"", "pt-BR": "a + b\ntrue true\nfalse\n\"a; b\"" },
+				"why": {
+					"en": "`errors.Unwrap` ignores `Unwrap() []error` and returns nil, and `errors.Join` separates messages with a newline, not `; `.",
+					"pt-BR": "`errors.Unwrap` ignora `Unwrap() []error` e retorna nil, e `errors.Join` separa as mensagens com quebra de linha, não com `; `."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "%!w(*errors.errorString) + b\ntrue true\ntrue\n\"a\\nb\"", "pt-BR": "%!w(*errors.errorString) + b\ntrue true\ntrue\n\"a\\nb\"" },
+				"why": {
+					"en": "Multiple `%w` verbs are valid since Go 1.20 and each is formatted like `%v`; the `%!w` marker appears only for non-error operands.",
+					"pt-BR": "Vários `%w` são válidos desde o Go 1.20 e cada um é formatado como `%v`; o marcador `%!w` só aparece para operandos que não são error."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": { "en": "a + b\ntrue true\ntrue\n\"a\\nb\"", "pt-BR": "a + b\ntrue true\ntrue\n\"a\\nb\"" }
+			},
+			{
+				"id": "e",
+				"text": { "en": "a + b\ntrue true\ntrue\n\"ab\"", "pt-BR": "a + b\ntrue true\ntrue\n\"ab\"" },
+				"why": {
+					"en": "`errors.Join` inserts a newline between the messages of the joined errors.",
+					"pt-BR": "`errors.Join` insere uma quebra de linha entre as mensagens dos erros combinados."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "Go 1.20 Release Notes: Wrapping multiple errors", "url": "https://go.dev/doc/go1.20#errors", "kind": "doc" },
+			{ "title": "errors package: Unwrap", "url": "https://pkg.go.dev/errors#Unwrap", "kind": "doc" },
+			{ "title": "errors package: Join", "url": "https://pkg.go.dev/errors#Join", "kind": "doc" }
+		]
+	},
+	{
+		"id": "goexit-runs-defers-recover-nil",
+		"difficulty": "very-hard",
+		"tags": ["runtime", "goexit", "recover", "defer"],
+		"code": "var wg sync.WaitGroup\nwg.Add(1)\ngo func() {\n\tdefer wg.Done()\n\tdefer func() {\n\t\tfmt.Println(\"recover:\", recover())\n\t}()\n\truntime.Goexit()\n\tfmt.Println(\"unreachable\")\n}()\nwg.Wait()\nfmt.Println(\"main done\")",
+		"question": {
+			"en": "What does this code print when it runs inside `main`?",
+			"pt-BR": "O que este código imprime quando roda dentro de `main`?"
+		},
+		"explanation": {
+			"en": "`runtime.Goexit` terminates the calling goroutine after running all its deferred calls, but it is not a panic: a `recover` in those deferred calls returns nil and cannot stop the exit. `wg.Done` still runs, so `main` continues. This is how `t.FailNow` stops a test goroutine; it also explains why calling it from a goroutine other than the test's is a bug.",
+			"pt-BR": "`runtime.Goexit` encerra a goroutine que o chama depois de rodar todos os seus defers, mas não é um panic: um `recover` nesses defers retorna nil e não impede a saída. `wg.Done` ainda roda, então `main` continua. É assim que `t.FailNow` encerra a goroutine de um teste; isso também explica por que chamá-lo de outra goroutine que não a do teste é um bug."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "recover: goexit\nunreachable\nmain done", "pt-BR": "recover: goexit\nunreachable\nmain done" },
+				"why": {
+					"en": "Goexit is not a panic, so `recover` has nothing to stop and returns nil; the goroutine still exits and `unreachable` is never printed.",
+					"pt-BR": "Goexit não é panic, então `recover` não tem o que interromper e retorna nil; a goroutine sai mesmo assim e `unreachable` nunca é impresso."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": { "en": "recover: <nil>\nmain done", "pt-BR": "recover: <nil>\nmain done" }
+			},
+			{
+				"id": "c",
+				"text": { "en": "main done", "pt-BR": "main done" },
+				"why": {
+					"en": "Unlike `os.Exit`, `Goexit` runs every deferred call of the goroutine before terminating it.",
+					"pt-BR": "Ao contrário de `os.Exit`, `Goexit` roda todos os defers da goroutine antes de encerrá-la."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "recover: <nil>\nthen a deadlock, because `wg.Done` is skipped", "pt-BR": "recover: <nil>\ne depois deadlock, porque `wg.Done` é pulado" },
+				"why": {
+					"en": "All deferred calls run, including `wg.Done`, so `wg.Wait` returns.",
+					"pt-BR": "Todos os defers rodam, inclusive `wg.Done`, então `wg.Wait` retorna."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "The whole program exits immediately and prints nothing", "pt-BR": "O programa inteiro termina na hora e não imprime nada" },
+				"why": {
+					"en": "`Goexit` only terminates the calling goroutine; other goroutines, including `main`, keep running.",
+					"pt-BR": "`Goexit` só encerra a goroutine que o chama; as outras, inclusive a `main`, continuam rodando."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "runtime package: Goexit", "url": "https://pkg.go.dev/runtime#Goexit", "kind": "doc" },
+			{ "title": "The Go Programming Language Specification: Handling panics", "url": "https://go.dev/ref/spec#Handling_panics", "kind": "spec" }
+		]
+	},
+	{
+		"id": "panic-nil-runtime-panicnilerror",
+		"difficulty": "very-hard",
+		"tags": ["panic", "recover", "go-version-changes"],
+		"code": "func main() {\n\tdefer func() {\n\t\tr := recover()\n\t\tfmt.Println(r == nil)\n\t\tfmt.Printf(\"%T\\n\", r)\n\t}()\n\tpanic(nil)\n}",
+		"question": {
+			"en": "In a module that declares `go 1.27`, what does this program print?",
+			"pt-BR": "Em um módulo que declara `go 1.27`, o que este programa imprime?"
+		},
+		"explanation": {
+			"en": "Before Go 1.21, `panic(nil)` made `recover()` return nil, indistinguishable from \"no panic\". Since Go 1.21, `panic(nil)` (or a nil interface value) is turned into a run-time panic of type `*runtime.PanicNilError`, so `recover` returns a non-nil value. The old behavior returns only with `GODEBUG=panicnil=1`, set automatically when the main module declares `go 1.20` or older.",
+			"pt-BR": "Antes do Go 1.21, `panic(nil)` fazia `recover()` retornar nil, indistinguível de \"não houve panic\". Desde o Go 1.21, `panic(nil)` (ou um valor de interface nil) vira um panic de runtime do tipo `*runtime.PanicNilError`, então `recover` retorna um valor não nil. O comportamento antigo só volta com `GODEBUG=panicnil=1`, ativado automaticamente quando o módulo principal declara `go 1.20` ou anterior."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "true\n<nil>", "pt-BR": "true\n<nil>" },
+				"why": {
+					"en": "That is the pre-Go 1.21 behavior, still available via `GODEBUG=panicnil=1`, but not the default for `go 1.27`.",
+					"pt-BR": "Esse é o comportamento anterior ao Go 1.21, ainda disponível via `GODEBUG=panicnil=1`, mas não é o padrão com `go 1.27`."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It does not compile: `panic` needs a non-nil argument", "pt-BR": "Não compila: `panic` exige um argumento não nil" },
+				"why": {
+					"en": "`panic` accepts any value of type `any`, including the untyped nil; the change happened at run time.",
+					"pt-BR": "`panic` aceita qualquer valor do tipo `any`, inclusive o nil sem tipo; a mudança foi em tempo de execução."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "Nothing: `panic(nil)` is a no-op", "pt-BR": "Nada: `panic(nil)` não faz nada" },
+				"why": {
+					"en": "`panic(nil)` always started panicking; the question was only what `recover` would return.",
+					"pt-BR": "`panic(nil)` sempre iniciou um panic; a dúvida era só o que `recover` retornaria."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "false\nruntime.Error", "pt-BR": "false\nruntime.Error" },
+				"why": {
+					"en": "`%T` prints the dynamic type, which is the concrete `*runtime.PanicNilError`, not the `runtime.Error` interface it implements.",
+					"pt-BR": "`%T` imprime o tipo dinâmico, que é o concreto `*runtime.PanicNilError`, não a interface `runtime.Error` que ele implementa."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": { "en": "false\n*runtime.PanicNilError", "pt-BR": "false\n*runtime.PanicNilError" }
+			}
+		],
+		"sources": [
+			{ "title": "Go 1.21 Release Notes: Changes to the language", "url": "https://go.dev/doc/go1.21#language", "kind": "doc" },
+			{ "title": "runtime package: PanicNilError", "url": "https://pkg.go.dev/runtime#PanicNilError", "kind": "doc" },
+			{ "title": "The Go Programming Language Specification: Handling panics", "url": "https://go.dev/ref/spec#Handling_panics", "kind": "spec" }
+		]
+	},
+	{
+		"id": "comparing-uncomparable-error-values",
+		"difficulty": "very-hard",
+		"tags": ["errors", "comparison", "interfaces"],
+		"code": "type MultiErr struct{ msgs []string }\n\nfunc (m MultiErr) Error() string { return fmt.Sprint(m.msgs) }\n\nfunc main() {\n\tvar e1 error = MultiErr{[]string{\"x\"}}\n\tvar e2 error = MultiErr{[]string{\"x\"}}\n\tfmt.Println(errors.Is(e1, e2))\n\tfmt.Println(e1 == e2)\n}",
+		"question": {
+			"en": "What happens when this program runs?",
+			"pt-BR": "O que acontece quando este programa roda?"
+		},
+		"explanation": {
+			"en": "Comparing two interface values compiles whenever the static types are comparable, but if both hold the same dynamic type and that type is not comparable (a struct with a slice field), `==` panics at run time with `comparing uncomparable type main.MultiErr`. `errors.Is` guards against this: it uses `==` only when the target is comparable, so it just returns false. That is one reason sentinel errors are pointers or comparable values, and error types with slices should be matched with `errors.As` or a custom `Is` method.",
+			"pt-BR": "Comparar dois valores de interface compila sempre que os tipos estáticos são comparáveis, mas se os dois guardam o mesmo tipo dinâmico e esse tipo não é comparável (uma struct com campo slice), `==` dá panic em tempo de execução com `comparing uncomparable type main.MultiErr`. `errors.Is` se protege disso: só usa `==` quando o target é comparável, então apenas retorna false. É um dos motivos de sentinel errors serem ponteiros ou valores comparáveis, e de tipos de erro com slices serem verificados com `errors.As` ou um método `Is` próprio."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": { "en": "It prints `true` twice: both errors have the same message", "pt-BR": "Imprime `true` duas vezes: os dois erros têm a mesma mensagem" },
+				"why": {
+					"en": "Neither `==` nor `errors.Is` compares `Error()` strings; they compare values.",
+					"pt-BR": "Nem `==` nem `errors.Is` comparam as strings de `Error()`; eles comparam valores."
+				}
+			},
+			{
+				"id": "b",
+				"text": { "en": "It prints `false` twice", "pt-BR": "Imprime `false` duas vezes" },
+				"why": {
+					"en": "`==` on interfaces holding the same non-comparable dynamic type does not return false; it panics.",
+					"pt-BR": "`==` em interfaces que guardam o mesmo tipo dinâmico não comparável não retorna false; dá panic."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": { "en": "It prints `false`, then panics: comparing uncomparable type main.MultiErr", "pt-BR": "Imprime `false` e depois dá panic: comparing uncomparable type main.MultiErr" }
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile: `MultiErr` is not comparable", "pt-BR": "Não compila: `MultiErr` não é comparável" },
+				"why": {
+					"en": "The operands have static type `error`, an interface, which is always comparable; the check moves to run time.",
+					"pt-BR": "Os operandos têm tipo estático `error`, uma interface, que é sempre comparável; a verificação fica para o runtime."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "`errors.Is` panics first, so nothing is printed", "pt-BR": "`errors.Is` dá panic primeiro, então nada é impresso" },
+				"why": {
+					"en": "`errors.Is` checks whether the target type is comparable before using `==`, so it returns false safely.",
+					"pt-BR": "`errors.Is` verifica se o tipo do target é comparável antes de usar `==`, então retorna false com segurança."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Comparison operators", "url": "https://go.dev/ref/spec#Comparison_operators", "kind": "spec" },
+			{ "title": "errors package: Is", "url": "https://pkg.go.dev/errors#Is", "kind": "doc" },
+			{ "title": "Dave Cheney: Don't just check errors, handle them gracefully", "url": "https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully", "kind": "article" }
+		]
+	}
+]
