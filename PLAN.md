@@ -58,7 +58,8 @@ The framework pin moves forward during the project. When the coordinator announc
 | D23 | `.editorconfig`: tabs size 4 everywhere except YAML (spec forbids tabs) and Markdown (markdownlint 2-space lists) | Owner + format constraints |
 | D24 | `.claude/settings.local.json` (`disableAllHooks: true`) is a per-developer file, git-ignored | Owner |
 | D25 | `RATE_LIMIT_PER_MINUTE` (default 120 per IP) so CI e2e/DAST, which share one IP, can raise it | Lead |
-| D26 | Bank status 2026-10-17: 133 questions in 7 shards (very-easy 24, easy 31, medium 30, hard 24, very-hard 24), all EN + PT-BR; source links checked with `-tags=links` | Lead |
+| D26 | Bank status 2026-10-17: 133 questions in 7 shards (very-easy 24, easy 31, medium 30, hard 24, very-hard 24), all EN + PT-BR; source links checked with `-tags=links`; technical + PT-BR review done (every snippet run on Go 1.27, no correct answer changed, factual fixes noted in the `fix(questions): review …` commits) | Lead |
+| D27 | `@axe-core/playwright` 4.14.0 (dev dependency, owner-approved via the coordinator) gates serious/critical accessibility violations in e2e | Owner |
 
 ## Stack (exact versions, verified 2026-10-17)
 
@@ -180,7 +181,7 @@ Each item has a test (`tests/security_test.go`, e2e or CI scan) before release.
 - [x] Question content rendered escaped; JSON index via the `json` func
 - [x] Error pages without stack traces in production
 - [ ] Container runs as non-root, read-only filesystem friendly
-- [ ] govulncheck, ZAP baseline and Nuclei clean in CI
+- [x] govulncheck, ZAP baseline and Nuclei clean in CI
 
 ## Phases
 
@@ -242,8 +243,8 @@ Topics to cover: basics/types, zero values, strings/runes/bytes, slices (len/cap
 - [x] Q.2.9 hard batch 2 (10) → verify: same
 - [x] Q.2.10 very-hard batch 1 (10) → verify: same
 - [x] Q.2.11 very-hard batch 2 (5+) → verify: total ≥ 105, every difficulty ≥ 15
-- [ ] Q.2.12 Technical review pass: every correct answer re-checked against the spec/docs for Go 1.27 → verify: review notes in the PR/commit body
-- [ ] Q.2.13 PT-BR review pass (terminology, accents, natural phrasing) → verify: spot-check 20 questions in the UI
+- [x] Q.2.12 Technical review pass: every correct answer re-checked against the spec/docs for Go 1.27 → verify: review notes in the PR/commit body
+- [x] Q.2.13 PT-BR review pass (terminology, accents, natural phrasing) → verify: spot-check 20 questions in the UI
 
 ### U — Quiz UI
 
@@ -263,24 +264,24 @@ Topics to cover: basics/types, zero values, strings/runes/bytes, slices (len/cap
 - [x] U.2.3 Answer flow: lock, explanation, stats update, Next, deep links/back button → verify: e2e full run of 5 questions
 - [x] U.2.4 Keyboard shortcuts (1–5, A–E, Enter) with visible hints → verify: e2e keyboard-only run
 - [x] U.2.5 Navbar: theme toggle (no flash), language switch, progress X/N, accuracy overall + per difficulty, reset with confirm → verify: e2e
-- [ ] U.2.6 Responsive layout (2 columns ≥ md, 1 column mobile), focus styles, `aria-live` explanation → verify: e2e mobile project + axe scan
-- [ ] U.2.7 Visual pass against the reference UX in both themes → verify: screenshots attached to the commit/PR
+- [x] U.2.6 Responsive layout (2 columns ≥ md, 1 column mobile), focus styles, `aria-live` explanation → verify: e2e mobile project + axe scan
+- [x] U.2.7 Visual pass against the reference UX in both themes → verify: screenshots attached to the commit/PR
 
 ### T — Tests and QA
 
-- [ ] T.1 Unit: `internal/quiz` (load, validate, shuffle, queue helpers) → verify: coverage ≥ 85% for the package
+- [x] T.1 Unit: `internal/quiz` (load, validate, shuffle, queue helpers) → verify: coverage ≥ 85% for the package
 - [x] T.2 Integration: HTTP tests for every route × locale → verify: `go test ./tests/...`
 - [x] T.3 E2E: smoke, flows, modes, shortcuts, theme, i18n, mobile → verify: CI e2e green
-- [ ] T.4 Smoke script against any URL (`scripts/smoke.sh <url>`): `/up`, `/`, a question, an answer → verify: run against Docker and production
+- [x] T.4 Smoke script against any URL (`scripts/smoke.sh <url>`): `/up`, `/`, a question, an answer → verify: run against Docker and production
 - [x] T.5 OWASP abuse suite: XSS in params, security headers, CSP, rate limit (429 + `Retry-After`), path traversal, oversized requests, wrong methods, no cookies → verify: `go test -run TestSecurity ./tests/...`
-- [ ] T.6 `docs/qa-checklist.md`: exploratory QA checklist (browsers, keyboard, screen reader, slow 3G, storage disabled, both languages/themes) and one documented run → verify: checklist committed with results
-- [ ] T.7 Accessibility: axe in Playwright, zero serious/critical → verify: CI
-- [ ] T.8 Lighthouse ≥ 95 performance/accessibility/best practices on mobile → verify: report saved
+- [x] T.6 `docs/qa-checklist.md`: exploratory QA checklist (browsers, keyboard, screen reader, slow 3G, storage disabled, both languages/themes) and one documented run → verify: checklist committed with results
+- [x] T.7 Accessibility: axe in Playwright, zero serious/critical → verify: CI
+- [ ] T.8 Lighthouse ≥ 95 performance/accessibility/best practices on mobile → verify: report saved (2026-10-17: 89/100/96/100 from a machine whose antivirus injects a render-blocking script; see docs/qa-checklist.md)
 - [ ] T.9 Gate DAST results: Nuclei findings (medium+) fail the job (JSONL export + check), revisit the ZAP `90004` COEP rule in `.zap/rules.tsv` → verify: a planted header regression fails CI
 
 ### D — Deploy
 
-- [ ] D.1 Railway project + service from GitHub (Dockerfile), env vars set → verify: Railway deploy healthy
+- [x] D.1 Railway project + service from GitHub (Dockerfile), env vars set → verify: Railway deploy healthy
 - [ ] D.2 Custom domain `quiz.vukem.com` (CNAME) + TLS → verify: `curl -I https://quiz.vukem.com/up`
 - [ ] D.3 HSTS and real client IP behind Railway confirmed → verify: headers + rate-limit test against production (low volume)
 - [ ] D.4 Analytics enabled with the owner's site id → verify: event visible in the dashboard

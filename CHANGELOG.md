@@ -20,6 +20,9 @@ All notable changes to this project are documented here. The format follows [Kee
 - Accessibility: axe scan (`@axe-core/playwright` 4.14.0, dev dependency) in the e2e suite on every page state, light/dark, EN/PT-BR, desktop/mobile; serious or critical violations fail CI.
 - `scripts/smoke.sh <url>` smoke test (health, page, question fragment, answer, headers, 404), used by the CI DAST job; Nuclei medium+ findings and `internal/quiz` coverage below 85% fail CI.
 
+- `docs/qa-checklist.md` with the first documented run, and UI screenshots in `docs/screenshots/`.
+- HTML pages and fragments are gzip-compressed.
+
 ### Changed
 
 - vukem bumped to v0.22.0, then v0.23.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
@@ -28,6 +31,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - Alternatives that differ only in punctuation (code literals) are no longer rejected as duplicates.
 - "Next" used a full page load because `htmx` was read before its deferred script ran; the settings panel now closes on Escape or an outside click; Back returns to the first question.
+- Technical and PT-BR review of all 133 questions: every snippet re-run on Go 1.27, factual corrections (unhashable map key panic message, `internal` import rule includes the module root, escape-analysis reason since Go 1.25, `go test` signature error, covmeta write time), sharper "why wrong" texts, PT-BR wording, and better sources.
 - Overlapping question loads (fast setting changes) could finish out of order and leave a stale question on screen.
 
 [Unreleased]: https://github.com/AlexGalhardo/vukem-golang-quiz-htmx/commits/main
