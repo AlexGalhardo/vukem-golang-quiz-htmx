@@ -53,7 +53,7 @@
 		"sources": [
 			{ "title": "A Tour of Go: Interfaces are implemented implicitly", "url": "https://go.dev/tour/methods/10", "kind": "doc" },
 			{ "title": "The Go Programming Language Specification: Implementing an interface", "url": "https://go.dev/ref/spec#Implementing_an_interface", "kind": "spec" },
-			{ "title": "Go FAQ: How can I guarantee my type satisfies an interface?", "url": "https://go.dev/doc/faq#implements_interface", "kind": "faq" }
+			{ "title": "Go FAQ: Why doesn't Go have \"implements\" declarations?", "url": "https://go.dev/doc/faq#implements_interface", "kind": "faq" }
 		]
 	},
 	{
@@ -66,7 +66,7 @@
 		},
 		"explanation": {
 			"en": "Since Go 1.18, `any` is a predeclared alias for `interface{}`, the empty interface. Every type implements it because it requires no methods. The two spellings are identical and interchangeable, and using the value still requires a type assertion or type switch.",
-			"pt-BR": "Desde o Go 1.18, `any` é um alias predeclarado para `interface{}`, a interface vazia. Todo tipo a implementa porque ela não exige nenhum método. As duas formas são idênticas e intercambiáveis, e para usar o valor ainda é preciso um type assertion ou type switch."
+			"pt-BR": "Desde o Go 1.18, `any` é um alias predeclarado para `interface{}`, a interface vazia. Todo tipo a implementa porque ela não exige nenhum método. As duas formas são idênticas e intercambiáveis, e para usar o valor ainda é preciso uma type assertion ou um type switch."
 		},
 		"alternatives": [
 			{
@@ -79,10 +79,10 @@
 			},
 			{
 				"id": "b",
-				"text": { "en": "A dynamic type that turns off compile-time type checking", "pt-BR": "Um tipo dinâmico que desliga a checagem de tipos em compilação" },
+				"text": { "en": "A dynamic type that turns off compile-time type checking", "pt-BR": "Um tipo dinâmico que desliga a checagem de tipos em tempo de compilação" },
 				"why": {
 					"en": "Unlike TypeScript's `any`, you cannot call methods or use operators on it directly; you must assert the concrete type first.",
-					"pt-BR": "Diferente do `any` do TypeScript, não dá para chamar métodos ou usar operadores diretamente; é preciso fazer type assertion antes."
+					"pt-BR": "Diferente do `any` do TypeScript, não dá para chamar métodos ou usar operadores diretamente; é preciso fazer uma type assertion antes."
 				}
 			},
 			{
@@ -150,10 +150,10 @@
 			},
 			{
 				"id": "d",
-				"text": { "en": "It does not compile: `any` cannot be asserted to `int`", "pt-BR": "Não compila: `any` não pode sofrer assertion para `int`" },
+				"text": { "en": "It does not compile: `any` cannot be asserted to `int`", "pt-BR": "Não compila: não dá para fazer type assertion de `any` para `int`" },
 				"why": {
 					"en": "Asserting an interface value to any concrete type is valid; the check happens at run time.",
-					"pt-BR": "Fazer assertion de uma interface para qualquer tipo concreto é válido; a verificação acontece em tempo de execução."
+					"pt-BR": "Fazer type assertion de uma interface para qualquer tipo concreto é válido; a verificação acontece em tempo de execução."
 				}
 			},
 			{
@@ -347,14 +347,14 @@
 		"id": "generic-max-needs-cmp-ordered",
 		"difficulty": "easy",
 		"tags": ["generics", "constraints", "cmp"],
-		"code": "func Max[T comparable](a, b T) T {\n\tif a > b {\n\t\treturn a\n\t}\n\treturn b\n}\n\nfunc main() {\n\tfmt.Println(Max(3, 7))\n}\n\n// invalid operation: a > b (type parameter T cannot use operator >)",
+		"code": "func Max[T comparable](a, b T) T {\n\tif a > b {\n\t\treturn a\n\t}\n\treturn b\n}\n\nfunc main() {\n\tfmt.Println(Max(3, 7))\n}",
 		"question": {
 			"en": "Why does this fail to compile, and what is the fix?",
 			"pt-BR": "Por que isto não compila, e qual é a correção?"
 		},
 		"explanation": {
-			"en": "Inside a generic function you may only use operations allowed by every type in the constraint's type set. `comparable` only guarantees `==` and `!=`, not `<` or `>`. `cmp.Ordered` (Go 1.21) is the constraint for types that support ordering: `func Max[T cmp.Ordered](a, b T) T`. The builtin `max` also exists since Go 1.21.",
-			"pt-BR": "Dentro de uma função genérica só dá para usar operações permitidas por todos os tipos do type set da constraint. `comparable` só garante `==` e `!=`, não `<` ou `>`. `cmp.Ordered` (Go 1.21) é a constraint para tipos ordenáveis: `func Max[T cmp.Ordered](a, b T) T`. O builtin `max` também existe desde o Go 1.21."
+			"en": "Inside a generic function you may only use operations allowed by every type in the constraint's type set. `comparable` only guarantees `==` and `!=`, not `<` or `>`, so the compiler reports `invalid operation: a > b (type parameter T cannot use operator >)`.`cmp.Ordered` (Go 1.21) is the constraint for types that support ordering: `func Max[T cmp.Ordered](a, b T) T`. The builtin `max` also exists since Go 1.21.",
+			"pt-BR": "Dentro de uma função genérica só dá para usar operações permitidas por todos os tipos do type set da constraint. `comparable` só garante `==` e `!=`, não `<` ou `>`, então o compilador reporta `invalid operation: a > b (type parameter T cannot use operator >)`.`cmp.Ordered` (Go 1.21) é a constraint para tipos ordenáveis: `func Max[T cmp.Ordered](a, b T) T`. O builtin `max` também existe desde o Go 1.21."
 		},
 		"alternatives": [
 			{
@@ -469,7 +469,7 @@
 		},
 		"explanation": {
 			"en": "Assigning a typed nil `*Buffer` to a blank variable of type `io.Writer` forces the compiler to check that `*Buffer` implements `io.Writer`. If a method is removed or its signature changes, the build fails right there. The blank identifier discards the value, so nothing is allocated or used at run time.",
-			"pt-BR": "Atribuir um `*Buffer` nil tipado a uma variável blank do tipo `io.Writer` obriga o compilador a verificar que `*Buffer` implementa `io.Writer`. Se um método for removido ou mudar de assinatura, o build quebra ali mesmo. O blank identifier descarta o valor, então nada é alocado ou usado em tempo de execução."
+			"pt-BR": "Atribuir um `*Buffer` nil tipado a uma variável `_` do tipo `io.Writer` obriga o compilador a verificar que `*Buffer` implementa `io.Writer`. Se um método for removido ou mudar de assinatura, o build quebra ali mesmo. O blank identifier descarta o valor, então nada é alocado ou usado em tempo de execução."
 		},
 		"alternatives": [
 			{
@@ -780,14 +780,14 @@
 				"id": "c",
 				"text": { "en": "It does not compile: recursive `String` method", "pt-BR": "Não compila: método `String` recursivo" },
 				"why": {
-					"en": "The compiler cannot see the recursion, which goes through `fmt`'s dynamic interface check; `go vet` may warn about it.",
-					"pt-BR": "O compilador não enxerga a recursão, que passa pela verificação dinâmica de interface do `fmt`; o `go vet` pode avisar."
+					"en": "The language has no rule against it: the recursion goes through `fmt`'s run-time interface check, so the compiler accepts it. Only `go vet` flags it (`causes recursive (x.ID).String method call`).",
+					"pt-BR": "A linguagem não proíbe isso: a recursão passa pela verificação de interface em tempo de execução do `fmt`, então o compilador aceita. Só o `go vet` aponta o problema (`causes recursive (x.ID).String method call`)."
 				}
 			},
 			{
 				"id": "d",
 				"correct": true,
-				"text": { "en": "It crashes with fatal error: stack overflow", "pt-BR": "Quebra com fatal error: stack overflow" }
+				"text": { "en": "It crashes with fatal error: stack overflow", "pt-BR": "Aborta com fatal error: stack overflow" }
 			},
 			{
 				"id": "e",
