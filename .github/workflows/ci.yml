@@ -159,7 +159,7 @@ jobs:
           docker run -d --name quiz -p 8080:3000 -e APP_KEY="$APP_KEY" -e APP_URL=http://localhost:8080 -e RATE_LIMIT_PER_MINUTE=10000 vukem-quiz:ci
           for i in $(seq 1 30); do curl -fsS http://localhost:8080/up && break; sleep 1; done
           scripts/smoke.sh http://localhost:8080
-          curl -fsS -o /dev/null http://localhost:8080/js/htmx.min.js
+          curl -fsS -o /dev/null http://localhost:8080/vendor/htmx-4.0.0/htmx.min.js
           test "$(docker inspect -f '{{.Config.User}}' vukem-quiz:ci)" = "65532:65532"
       - name: ZAP baseline
         uses: zaproxy/action-baseline@v0.15.0

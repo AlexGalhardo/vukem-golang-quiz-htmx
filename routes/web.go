@@ -65,7 +65,11 @@ func Web(bank *quiz.Bank, shuffle quiz.Shuffler) func(r *router.Router, app *vuk
 			middleware.RequestID(),
 			middleware.Logger(app.Log),
 			middleware.SecureHeaders(headers),
-			middleware.StaticFS(resources.Public(), middleware.StaticConfig{Prefix: "/"}),
+			// /vendor paths carry the library version, so they are immutable too.
+			middleware.StaticFS(resources.Public(), middleware.StaticConfig{
+				Prefix:            "/",
+				ImmutablePrefixes: []string{"/build/", "/vendor/"},
+			}),
 		)
 		r.Use(
 			ratelimit.Middleware(limiter, limitKey),

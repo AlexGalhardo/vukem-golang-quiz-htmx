@@ -3,16 +3,19 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="icon" href="/favicon.svg" type="image/svg+xml">
 	<title>{{block "title" .}}{{t "app.name"}}{{end}}</title>
 	<meta name="description" content="{{t "app.description"}}">
 	<meta name="color-scheme" content="light dark">
 	<meta property="csp-nonce" nonce="{{cspNonce}}">
 	<meta name="htmx-config" content='{"includeIndicatorCSS":false}'>
-	{{/* Applies the saved theme before first paint (no flash). */}}
-	<script src="/js/theme.js" nonce="{{cspNonce}}"></script>
+	{{/* Applies the saved theme (or the OS preference) before first paint, so
+	there is no flash. Inline with the request nonce to avoid a render-blocking
+	request; app.ts owns the toggle. */}}
+	<script nonce="{{cspNonce}}">(function(){var t;try{var s=JSON.parse(localStorage.getItem("quiz:v1")||"{}");t=s&&s.settings&&s.settings.theme}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t)})();</script>
 	{{vite "resources/css/app.css" "resources/js/app.ts"}}
 	{{/* Plain path, not (asset ...): see framework-feedback "asset routes public files to the Vite dev server". */}}
-	{{htmxScript "/js/htmx.min.js"}}
+	{{htmxScript "/vendor/htmx-4.0.0/htmx.min.js"}}
 	{{with .Analytics}}{{if .Enabled}}{{if .Plausible}}
 	<script defer data-domain="{{.SiteID}}" src="{{.ScriptURL}}" nonce="{{cspNonce}}"></script>
 	{{else}}
