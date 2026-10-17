@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/AlexGalhardo/vukem-golang-quiz-htmx/actions/workflows/ci.yml/badge.svg)](https://github.com/AlexGalhardo/vukem-golang-quiz-htmx/actions/workflows/ci.yml)
 
-Interactive Go (Golang) interview questions, from very easy to very hard, each with five alternatives, an explanation of every option and links to the sources. English and Brazilian Portuguese. Live at <https://quiz.vukem.com>.
+Interactive Go (Golang) interview questions, from very easy to very hard, each with five alternatives, an explanation of every option and links to the sources. English and Brazilian Portuguese. Live at <https://quiz.vukem.dev>.
 
 Built with [vukem](https://github.com/AlexGalhardo/vukem) (Go), [htmx 4](https://htmx.org) and [Tailwind CSS v4](https://tailwindcss.com). No accounts, no database, no cookies: your progress stays in your browser.
 

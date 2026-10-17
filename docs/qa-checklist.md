@@ -31,7 +31,7 @@ Exploratory checks that complement the automated suites (`go test ./...`, `bun r
 
 ### Production
 
-- [ ] `scripts/smoke.sh https://vukem-quiz.up.railway.app` passes
+- [ ] `scripts/smoke.sh https://quiz.vukem.dev` passes
 - [ ] Analytics script loads (no CSP violation in the console), no cookies set
 - [ ] Lighthouse mobile ≥ 95 in performance, accessibility, best practices
 

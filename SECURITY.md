@@ -2,7 +2,7 @@
 
 ## Supported versions
 
-Only the latest release and the deployment at <https://quiz.vukem.com> receive fixes.
+Only the latest release and the deployment at <https://quiz.vukem.dev> receive fixes.
 
 ## Reporting a vulnerability
 

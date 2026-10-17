@@ -4,7 +4,7 @@ The onboarding file for every session and agent. Read it top to bottom once, the
 
 ## Briefing
 
-An interactive Go (Golang) interview-questions quiz at <https://quiz.vukem.com>. No landing page, no accounts, no database: the visitor lands on the first question. Questions are embedded in the binary; progress lives in the browser.
+An interactive Go (Golang) interview-questions quiz at <https://quiz.vukem.dev>. No landing page, no accounts, no database: the visitor lands on the first question. Questions are embedded in the binary; progress lives in the browser.
 
 The project also battle-tests the [vukem](https://github.com/AlexGalhardo/vukem) framework for its 1.0 release. Every bug, missing feature, awkward API, security issue or wrong/missing docs page found here goes to `../framework-feedback/quiz.md` (format at the top of that file), gets a local workaround, and work continues.
 
@@ -284,7 +284,7 @@ Topics to cover: basics/types, zero values, strings/runes/bytes, slices (len/cap
 ### D — Deploy
 
 - [x] D.1 Railway project + service from GitHub (Dockerfile), env vars set → verify: Railway deploy healthy
-- [ ] D.2 Custom domain `quiz.vukem.com` (CNAME) + TLS → verify: `curl -I https://quiz.vukem.com/up`
+- [x] D.2 Custom domain `quiz.vukem.dev` (CNAME) + TLS → verify: `curl -I https://quiz.vukem.dev/up` (200 with HSTS, 2026-10-17)
 - [ ] D.3 HSTS and real client IP behind Railway confirmed → verify: headers + rate-limit test against production (low volume)
 - [ ] D.4 Analytics enabled with the owner's site id → verify: event visible in the dashboard
 - [ ] D.5 Smoke + ZAP baseline against production → verify: CI manual workflow run
@@ -296,8 +296,8 @@ Topics to cover: basics/types, zero values, strings/runes/bytes, slices (len/cap
 
 ## Developer actions (owner to-do)
 
-- [ ] Railway: create the project/service linked to this repo (or give access so the agent can use the Railway CLI/MCP); set `APP_KEY` (`openssl rand -base64 32`, prefixed `base64:`), `APP_URL=https://quiz.vukem.com`, `APP_ENV=production`; Railway sets `PORT`.
-- [ ] DNS: `CNAME quiz.vukem.com → <service>.up.railway.app` (value shown by Railway when adding the custom domain).
+- [ ] Railway: create the project/service linked to this repo (or give access so the agent can use the Railway CLI/MCP); set `APP_KEY` (`openssl rand -base64 32`, prefixed `base64:`), `APP_URL=https://quiz.vukem.dev`, `APP_ENV=production`; Railway sets `PORT`.
+- [ ] DNS: `CNAME quiz.vukem.dev → <service>.up.railway.app` (value shown by Railway when adding the custom domain).
 - [ ] Analytics: choose Plausible or Umami and provide `ANALYTICS_PROVIDER`, `ANALYTICS_SCRIPT_URL`, `ANALYTICS_SITE_ID` (Plausible: domain; Umami: website UUID).
 - [ ] GitHub: enable GHCR package visibility (public) after the first release; optionally branch protection on `main` requiring CI.
 - [x] Railway trusted proxy range: log the peer address of a few production requests (Railway logs) and, if a stable narrow range shows up, set `TRUSTED_PROXIES` to it with `CLIENT_IP_HEADER=X-Real-IP` and `TRUST_FORWARDED_PROTO=true`, then lower `RATE_LIMIT_PER_MINUTE` (D28).

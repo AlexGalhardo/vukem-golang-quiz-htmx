@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Go interview quiz at <https://quiz.vukem.com>, built on the [vukem](https://github.com/AlexGalhardo/vukem) framework (htmx 4, Tailwind v4, no DB). Module `github.com/AlexGalhardo/vukem-golang-quiz-htmx`.
+Go interview quiz at <https://quiz.vukem.dev>, built on the [vukem](https://github.com/AlexGalhardo/vukem) framework (htmx 4, Tailwind v4, no DB). Module `github.com/AlexGalhardo/vukem-golang-quiz-htmx`.
 
 ## Start here
 
