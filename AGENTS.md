@@ -19,6 +19,7 @@ Go interview quiz at <https://quiz.vukem.dev>, built on the [vukem](https://gith
 - `bun run test:e2e`: Playwright (`E2E_BASE_URL=http://localhost:3100` targets a running app)
 - `docker compose --profile prod up --build prod`: production image on :8080
 - `go tool govulncheck ./...`
+- `bun run test:qa`: human-like QA suite (`e2e/qa`: crawler, flows, security checks; starts two local apps); read-only against a deployment with `QA_BASE_URL=<url> QA_READONLY=1 bun run test:qa --project=desktop`. Results and findings: `docs/qa-checklist.md`
 - `scripts/smoke.sh <url>`: smoke test any deployment (Docker, production)
 - `e2e/a11y.spec.ts`: axe (`@axe-core/playwright`) on every page state; serious/critical violations fail
 - `go run ./internal/tools/quizcheck [shard.json...]`: validate question shards and print counts; `go test -tags=links ./internal/quiz/` checks every source URL (network)

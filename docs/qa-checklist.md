@@ -63,3 +63,28 @@ Exploratory checks that complement the automated suites (`go test ./...`, `bun r
 | Production smoke + HSTS | Pass on <https://quiz.vukem.dev> |
 | Lighthouse mobile, clean runner (run 39068988695) | 100/100/100/100 in runs 2 and 3; run 1 performance 81 (TBT 720 ms on the first, cold run) |
 | Screenshots (production, light/dark × desktop/mobile: answered, settings, history, review) | [`docs/screenshots/`](screenshots/) |
+
+## Automated human-like QA suite
+
+`bun run test:qa` (`e2e/qa`, `playwright.qa.config.ts`) runs the crawler, human-like flows and defensive security checks below on desktop and Pixel 7, starting two local apps (one with a 5 requests/minute limit for the 429 check). CI runs it in the `qa` job. Read-only against a deployment (GET only, one worker, write/load checks skipped): `QA_BASE_URL=https://quiz.vukem.dev QA_READONLY=1 bun run test:qa --project=desktop`.
+
+- Crawler (`crawler.spec.ts`): every page reachable from `/` plus the first, middle and last question and a missing one, in light/dark × EN/PT-BR; status codes, uncaught errors, console errors, CSP violation events, broken images, external links (`https`, `rel=noopener` with `target=_blank`), axe serious/critical, a visible focus ring on every tab stop; then every navbar, toolbar and theme control, every control inside the panels they open, and every shortcut style (`1`–`5`, `a`–`e`, `A`–`E`, Enter).
+- Flows (`flows.spec.ts`, local only): full ordered runs of each difficulty and a random run (each question once, finished card, history entry), reset mid-run, back/forward, reload mid-question, double clicks and key mashing, corrupted and blocked `localStorage`/`sessionStorage`, very long and odd query strings, unknown routes and traversal paths.
+- Security (`security.spec.ts`): headers on pages, fragments, static files, errors and `/up` (CSP with a fresh nonce and no `unsafe-*`, `frame-ancestors 'none'`, HSTS on https, nosniff, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, no cookies, no stack-revealing `Server`); marker payloads in query strings and storage never execute or reflect raw; quiz routes answer 405 to POST/PUT/PATCH/DELETE, cross-origin and with `_method`; 429 with `Retry-After` and `RateLimit-*`, `/up` exempt.
+
+Checks for open framework bugs use `test.fail(...)`: they pass while the bug exists and fail once vukem fixes it, which is the signal to drop the marker.
+
+### 2026-10-17 run
+
+- Local: 60 tests × 2 projects, 4 repeats: 208 passed, 0 flaky (after QA-F1 and the QA-F4 retry); the 2 `test.fail` checks hold.
+- Production, read-only: 11 passed, 20 skipped.
+
+### Findings
+
+| ID | Severity | Kind | Finding | Status |
+| --- | --- | --- | --- | --- |
+| QA-F1 | serious (a11y) | app | On phones the `<pre>` code sample scrolls horizontally but is not keyboard-focusable (axe `scrollable-region-focusable`, WCAG 2.1.1), e.g. `/questions/loop-variable-per-iteration-go122` on Pixel 7, both themes and languages. Evidence: `test-results/qa/crawler-*-crawl-*-mobile/`. | Fixed: the block is a focusable, labelled region with a focus ring |
+| QA-F2 | low | framework | `POST /` gets vukem's fallback 405 page, whose `<body style="…">` is blocked by vukem's own `style-src` nonce CSP (unstyled page, console CSP violation). `security.spec.ts` "framework error pages respect the CSP" (`test.fail`). | Open, in `framework-feedback/quiz.md` |
+| QA-F3 | low (hardening) | framework | A 512 KiB (even 900 KiB) request header gets 200; vukem has no `MaxHeaderBytes` setting, so only Go's 1 MiB default applies. `security.spec.ts` "oversized request headers…" (`test.fail`). | Open, in `framework-feedback/quiz.md` |
+| QA-F4 | low | app | A key pressed a few milliseconds after Next (between the htmx swap and the new buttons being wired) was ignored once in 155 scripted runs. | Open; the flows retry the key like a user would. Fix idea: answer through `htmx.ajax` from the key handler |
+| QA-F5 | info | platform | Production responses carry `Server: railway-hikari` from Railway's edge; the app itself sends no `Server` header. | Accepted; the check asserts it never names the stack |

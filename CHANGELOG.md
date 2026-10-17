@@ -31,6 +31,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - Review panel with a navbar badge: this browser session's wrong answers (`sessionStorage`), served by `GET /review`, with a redo mode that replays them until each is right. It replaces the settings switch "review only wrong answers".
 - Client unit tests with `bun test` (`bun run test:unit`), run in CI.
 
+- Human-like QA suite (`bun run test:qa`, CI job `qa`): a crawler over every page and control in both themes, languages and viewports, full quiz runs and impatient-user flows, broken storage and odd URLs, and defensive security checks (headers, escaping of hostile query/storage values, method and cross-origin refusal, 429). Findings are tracked in `docs/qa-checklist.md`.
+
 ### Changed
 
 - vukem bumped to v0.22.0, v0.23.0, v0.24.0, v0.25.0, then v0.26.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
@@ -41,6 +43,8 @@ All notable changes to this project are documented here. The format follows [Kee
 - The Docker image no longer trusts `100.0.0.0/8` (undocumented Railway range); HSTS is forced with vukem's `HSTS_FORCE=true` (set on Railway; needs an https `APP_URL`). The locale comes only from `?lang=` and `Accept-Language` (no cookie source).
 
 ### Fixed
+
+- Code samples are keyboard-focusable regions, so they can be scrolled without a mouse on small screens (axe `scrollable-region-focusable`).
 
 - Alternatives that differ only in punctuation (code literals) are no longer rejected as duplicates.
 - "Next" used a full page load because `htmx` was read before its deferred script ran; the settings panel now closes on Escape or an outside click; Back returns to the first question.
