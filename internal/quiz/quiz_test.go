@@ -117,6 +117,15 @@ func TestValidateAcrossQuestions(t *testing.T) {
 		t.Errorf("Validate(same text, different code) = %v, want nil", err)
 	}
 
+	// Code-literal alternatives differ only in punctuation ("30" vs 30).
+	quoted := valid("quoted", Easy)
+	quoted.Alternatives[0].Text = both(`{"age":30}`)
+	quoted.Alternatives[1].Text = both(`{"age":"30"}`)
+
+	if err := Validate([]Question{quoted}); err != nil {
+		t.Errorf("Validate(alternatives differing in punctuation) = %v, want nil", err)
+	}
+
 	if err := Validate([]Question{valid("ok", Medium)}); err != nil {
 		t.Errorf("Validate(valid) = %v, want nil", err)
 	}
@@ -194,7 +203,7 @@ func TestShuffled(t *testing.T) {
 	orders := map[string]bool{}
 
 	for range 50 {
-		alts := q.Shuffled(r)
+		alts := q.Shuffled(r.Shuffle)
 
 		var ids strings.Builder
 		for _, a := range alts {

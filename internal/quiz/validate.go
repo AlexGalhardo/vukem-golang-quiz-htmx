@@ -149,7 +149,9 @@ func checkAlternatives(alts []Alternative) []string {
 			p = append(p, checkText("alternative "+want+" why", a.Why)...)
 		}
 
-		if k := normalize(a.Text[DefaultLocale]); k != "" {
+		// Case and spacing only: punctuation is meaningful in code-literal
+		// alternatives ({"age":30} vs {"age":"30"}).
+		if k := strings.Join(strings.Fields(strings.ToLower(a.Text[DefaultLocale])), " "); k != "" {
 			if texts[k] {
 				p = append(p, fmt.Sprintf("alternative %s repeats another alternative", want))
 			}
