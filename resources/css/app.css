@@ -1,0 +1,4 @@
+@import "tailwindcss";
+
+/* Theme is chosen by the user (localStorage) and set on <html data-theme>. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));

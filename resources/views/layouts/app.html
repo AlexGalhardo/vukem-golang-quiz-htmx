@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{block "title" .}}Go Interview Quiz{{end}}</title>
+	<meta name="description" content="Interactive Go (Golang) interview questions quiz with explanations and sources.">
+	<meta property="csp-nonce" nonce="{{cspNonce}}">
+	<meta name="htmx-config" content='{"includeIndicatorCSS":false}'>
+	{{vite "resources/css/app.css" "resources/js/app.ts"}}
+	{{/* Plain path, not (asset ...): see framework-feedback "asset routes public files to the Vite dev server". */}}
+	{{htmxScript "/js/htmx.min.js"}}
+</head>
+<body class="min-h-screen bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
+	<header class="border-b border-zinc-200 dark:border-zinc-800">
+		<nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3" aria-label="Main">
+			<a href="{{route "quiz"}}" class="font-bold tracking-tight">Go Interview Quiz</a>
+			<div class="flex items-center gap-2" data-slot="nav-actions"></div>
+		</nav>
+	</header>
+	<main id="main" class="mx-auto max-w-6xl px-4 py-6">
+		{{block "content" .}}{{end}}
+	</main>
+</body>
+</html>
