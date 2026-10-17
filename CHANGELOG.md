@@ -25,9 +25,15 @@ All notable changes to this project are documented here. The format follows [Kee
 - SVG favicon (removes a 404 on every page load).
 - Manual `Lighthouse` workflow auditing a deployed URL from a clean CI runner.
 
+- Theme control: the docs site's light/dark/system radiogroup (system follows the OS live, arrow keys supported).
+- Settings is a larger modal panel (24rem, 44px targets, segmented order control, difficulties with their accuracy, language, inline reset confirmation) and a bottom sheet below 640px.
+- History panel: one entry per quiz run (completed when the selection is finished, stopped early on reset, plus the run in progress) with accuracy, counts, time and per-difficulty accuracy; stored under `quiz:v1:history`, capped at 200, cleared with an inline confirmation.
+- Review panel with a navbar badge: this browser session's wrong answers (`sessionStorage`), served by `GET /review`, with a redo mode that replays them until each is right. It replaces the settings switch "review only wrong answers".
+- Client unit tests with `bun test` (`bun run test:unit`), run in CI.
+
 ### Changed
 
-- vukem bumped to v0.22.0, v0.23.0, v0.24.0, then v0.25.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
+- vukem bumped to v0.22.0, v0.23.0, v0.24.0, v0.25.0, then v0.26.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
 
 - The theme bootstrap is inlined with the per-request CSP nonce instead of a render-blocking `/js/theme.js` request; htmx moved to `/vendor/htmx-4.0.0/htmx.min.js` and is cached as immutable.
 
