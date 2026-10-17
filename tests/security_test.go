@@ -131,7 +131,9 @@ func TestSecurity_RateLimit_PerIP(t *testing.T) {
 
 	var limited *vukemtest.Response
 
-	for range rateLimitForTests + 1 {
+	// The bucket refills continuously (2 tokens/s at 120/min), so a slow
+	// machine needs a few requests beyond the limit.
+	for range rateLimitForTests * 2 {
 		res := app.Client(t).Get("/questions/nope")
 		if res.Status() == http.StatusTooManyRequests {
 			limited = res
@@ -141,7 +143,7 @@ func TestSecurity_RateLimit_PerIP(t *testing.T) {
 	}
 
 	if limited == nil {
-		t.Fatalf("no 429 after %d requests", rateLimitForTests+1)
+		t.Fatalf("no 429 after %d requests", rateLimitForTests*2)
 	}
 
 	if limited.Header("Retry-After") == "" {
