@@ -67,6 +67,11 @@ jobs:
       - name: go test (race, coverage)
         run: go test -race -count=1 -coverpkg=./... -coverprofile=coverage.out ./...
       - run: go tool cover -func=coverage.out | tail -n 1
+      - name: internal/quiz coverage >= 85%
+        run: |
+          pct="$(go test -count=1 -cover ./internal/quiz/ | grep -oE '[0-9.]+%' | tr -d %)"
+          echo "internal/quiz coverage: ${pct}%"
+          awk -v p="$pct" 'BEGIN { exit !(p >= 85) }'
 
   vuln:
     runs-on: ubuntu-latest
@@ -153,8 +158,7 @@ jobs:
         run: |
           docker run -d --name quiz -p 8080:3000 -e APP_KEY="$APP_KEY" -e APP_URL=http://localhost:8080 -e RATE_LIMIT_PER_MINUTE=10000 vukem-quiz:ci
           for i in $(seq 1 30); do curl -fsS http://localhost:8080/up && break; sleep 1; done
-          curl -fsS http://localhost:8080/up
-          curl -fsS -o /dev/null http://localhost:8080/
+          scripts/smoke.sh http://localhost:8080
           curl -fsS -o /dev/null http://localhost:8080/js/htmx.min.js
           test "$(docker inspect -f '{{.Config.User}}' vukem-quiz:ci)" = "65532:65532"
       - name: ZAP baseline
@@ -171,6 +175,13 @@ jobs:
         uses: projectdiscovery/nuclei-action@v3.1.0
         with:
           version: v3.11.1
-          args: -u http://localhost:8080 -severity medium,high,critical -exclude-tags dos,fuzz -silent -no-interactsh
+          args: -u http://localhost:8080 -severity medium,high,critical -exclude-tags dos,fuzz -silent -no-interactsh -jsonl-export nuclei.jsonl
+      # nuclei exits 0 with findings; any medium+ finding fails the job.
+      - name: nuclei gate
+        run: |
+          if [ -s nuclei.jsonl ]; then
+            jq -r '"\(.info.severity) \(."template-id") \(."matched-at")"' nuclei.jsonl
+            exit 1
+          fi
       - if: always()
         run: docker logs quiz | tail -n 100

@@ -1,4 +1,4 @@
 10049	IGNORE	(Non-Storable Content: HTML pages are intentionally not cached; /build assets are immutable)
-90004	INFO	(Cross-Origin-Embedder-Policy: revisit in U.1.6 once the analytics origin is known)
+90004	INFO	(Cross-Origin-Embedder-Policy: require-corp would block the cross-origin analytics script, which sends no CORP header; the app needs no cross-origin isolation)
 90005	IGNORE	(Sec-Fetch-Dest missing: describes the scanner requests, not the server)
 10031	IGNORE	(User controllable attribute: only allowlisted locales from ?lang= reach lang/href attributes; arbitrary values fall back to en, see TestSecurity_XSS_ParamsNotReflected)
