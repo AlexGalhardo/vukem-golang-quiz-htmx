@@ -14,7 +14,7 @@ RUN bun run build
 
 # --- dev: Go toolchain + vukem CLI for `vukem serve` (compose) -----------
 FROM ${GO_IMAGE} AS dev
-ARG VUKEM_VERSION=v0.23.0
+ARG VUKEM_VERSION=v0.24.0
 RUN go install github.com/AlexGalhardo/vukem/cmd/vukem@${VUKEM_VERSION}
 WORKDIR /app
 COPY go.mod go.sum ./
@@ -28,7 +28,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 COPY --from=assets /src/resources/public/build ./resources/public/build
-RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/app ./cmd/app
+# Tags from .buildtags (one per line, # comments), as in the vukem starters.
+RUN tags="$(sed 's/#.*//' .buildtags 2>/dev/null | tr -s ', \t\r\n' ',' | sed 's/^,//; s/,$//')" \
+	&& CGO_ENABLED=0 go build -tags "$tags" -trimpath -ldflags="-s -w" -o /out/app ./cmd/app
 
 # --- runtime --------------------------------------------------------------
 FROM ${RUNTIME_IMAGE} AS runtime
@@ -42,12 +44,13 @@ ENV APP_ENV=production \
 	HOST=0.0.0.0 \
 	PORT=3000 \
 	LOG_FORMAT=json \
-	TRUSTED_PROXIES=100.0.0.0/8 \
-	TRUST_FORWARDED_PROTO=true
-# Railway's edge reaches the container from 100.0.0.0/8 (the range Railway's
-# own reverse-proxy guide trusts; it is not a documented contract). Without
-# it every visitor shares the edge IP's rate-limit bucket. Override both on
-# other hosts.
+	RATE_LIMIT_PER_MINUTE=1200
+# TRUSTED_PROXIES stays unset: Railway does not document the range its edge
+# connects from, so the client IP is the edge address and every visitor
+# shares one rate-limit bucket. The budget above is a site-wide abuse cap,
+# not a per-person limit. Once a range is verified from the peer addresses,
+# set TRUSTED_PROXIES, CLIENT_IP_HEADER=X-Real-IP and TRUST_FORWARDED_PROTO
+# together and lower the budget.
 EXPOSE 3000
 HEALTHCHECK --interval=15s --timeout=3s --start-period=5s --retries=3 \
 	CMD wget -q -O /dev/null "http://127.0.0.1:${PORT}/up" || exit 1

@@ -95,7 +95,10 @@ jobs:
           bun-version: ${{ env.BUN_VERSION }}
       - run: bun install --frozen-lockfile
       - run: bun run build
-      - run: CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o bin/app ./cmd/app
+      - name: go build (tags from .buildtags)
+        run: |
+          tags="$(sed 's/#.*//' .buildtags | tr -s ', \t\r\n' ',' | sed 's/^,//; s/,$//')"
+          CGO_ENABLED=0 go build -tags "$tags" -trimpath -ldflags="-s -w" -o bin/app ./cmd/app
       - uses: actions/upload-artifact@v7.0.2
         with:
           name: app-linux-amd64

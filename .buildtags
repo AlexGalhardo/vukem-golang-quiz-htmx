@@ -1,0 +1,3 @@
+# Build tags for the production binary (read by the Dockerfile and CI).
+# The quiz has no database, so SQLite stays out of the binary.
+vukem_nosqlite
