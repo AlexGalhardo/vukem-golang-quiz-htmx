@@ -9,6 +9,15 @@
 		@apply m-auto max-h-[85vh] w-[min(24rem,calc(100vw-2rem))] overflow-y-auto overscroll-contain rounded-2xl border border-zinc-200 bg-white p-0 text-zinc-900 shadow-xl dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100;
 	}
 
+	/* Below 640px the panel is a bottom sheet: full width, anchored to the
+	   bottom edge, clear of the home indicator. */
+	@media (width < 40rem) {
+		.dialog-panel {
+			@apply mx-0 mt-auto mb-0 w-full max-w-full rounded-t-2xl rounded-b-none border-x-0 border-b-0 pb-[env(safe-area-inset-bottom)];
+			max-height: 85dvh;
+		}
+	}
+
 	.dialog-panel::backdrop {
 		background: rgb(0 0 0 / 0.45);
 	}

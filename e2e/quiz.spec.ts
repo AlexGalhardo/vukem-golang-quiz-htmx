@@ -311,6 +311,26 @@ test.describe("settings", () => {
 		await expect(dialog).toBeHidden();
 	});
 
+	test("settings opens as a full-width bottom sheet on small screens", async ({ page }) => {
+		await page.setViewportSize({ width: 375, height: 667 });
+		await page.goto("/");
+		await page.getByTestId("settings-open").click();
+		const dialog = page.getByTestId("settings");
+		await expect(dialog).toBeVisible();
+
+		const box = await dialog.boundingBox();
+		expect(box?.width).toBe(375);
+		expect(Math.round((box?.y ?? 0) + (box?.height ?? 0))).toBe(667);
+		expect(box?.height ?? 0).toBeLessThanOrEqual(667 * 0.9);
+		expect(await dialog.evaluate((d) => d.scrollWidth <= d.clientWidth)).toBe(true);
+
+		// The header with the close button stays put while the sheet scrolls.
+		await dialog.evaluate((d) => d.scrollTo({ top: d.scrollHeight }));
+		await expect(page.getByTestId("settings-close")).toBeInViewport();
+		await page.getByTestId("settings-close").click();
+		await expect(dialog).toBeHidden();
+	});
+
 	test("accuracy per difficulty is shown in settings", async ({ page, request }) => {
 		await page.goto("/");
 		await answer(page, await correctAlt(request, await currentId(page)));
