@@ -1,0 +1,32 @@
+# Contributing
+
+Thanks for helping! Question fixes (a wrong answer, a broken link, a better PT-BR translation) are the most welcome contributions.
+
+## Setup
+
+Requirements: Go 1.27.2, Bun 1.4.3, golangci-lint v2.15.0, Docker (optional).
+
+```sh
+bun install                 # JS deps + git hooks (lefthook)
+cp .env.example .env        # set APP_KEY to "base64:" + the output of: openssl rand -base64 32
+go run ./cmd/app            # http://localhost:3000
+docker compose up           # or everything in Docker (app with reload + Vite)
+```
+
+## Workflow
+
+1. Open an issue for anything larger than a typo or a single question.
+2. Write the failing test first (Go tests in `tests/` and next to the code, Playwright in `e2e/`).
+3. Run `golangci-lint run ./...`, `go test ./...`, `bun run typecheck` and `bunx markdownlint-cli2`; the git hooks run most of them.
+4. Commit with [Conventional Commits](https://www.conventionalcommits.org/) (`feat(questions): add slice aliasing question`), one logical change per commit.
+5. Add a line under `[Unreleased]` in [CHANGELOG.md](CHANGELOG.md) for user-visible changes.
+
+## Questions
+
+Every question needs 5 alternatives with exactly one correct, an explanation, a reason for each wrong alternative, English and Brazilian Portuguese text, and 1–3 reputable sources (Go spec, FAQ, Effective Go, the Go blog, well-known articles or talks). The schema test enforces the structure.
+
+## Code style
+
+- Go: `golangci-lint fmt`, tabs, small packages, stdlib and vukem first.
+- Views: `html/template`, Tailwind classes, no inline scripts or styles (strict CSP).
+- TypeScript: strict, no `any`.
