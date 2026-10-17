@@ -1,0 +1,48 @@
+name: Lighthouse
+
+# Mobile Lighthouse against a deployed URL from a clean runner (local
+# machines may have antivirus or extensions that inject scripts).
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: URL to audit
+        default: https://vukem-quiz.up.railway.app/
+        required: true
+      runs:
+        description: Number of runs (the median is reported)
+        default: "3"
+        required: true
+
+permissions:
+  contents: read
+
+env:
+  BUN_VERSION: 1.4.3
+  LIGHTHOUSE_VERSION: 13.5.0
+
+jobs:
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: oven-sh/setup-bun@v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: audit
+        env:
+          URL: ${{ inputs.url }}
+          RUNS: ${{ inputs.runs }}
+        run: |
+          mkdir -p reports
+          for i in $(seq 1 "$RUNS"); do
+            CHROME_PATH="$(command -v google-chrome)" bunx "lighthouse@${LIGHTHOUSE_VERSION}" "$URL" \
+              --form-factor=mobile --only-categories=performance,accessibility,best-practices,seo \
+              --output=json --output=html --output-path="reports/run-$i" \
+              --chrome-flags="--headless=new --no-sandbox" --quiet
+            jq -r --arg i "$i" '"run \($i): " + ([.categories | to_entries[] | "\(.key)=\(.value.score*100|round)"] | join(" ")) + " | FCP " + .audits["first-contentful-paint"].displayValue + " LCP " + .audits["largest-contentful-paint"].displayValue + " TBT " + .audits["total-blocking-time"].displayValue + " CLS " + .audits["cumulative-layout-shift"].displayValue' "reports/run-$i.report.json" | tee -a "$GITHUB_STEP_SUMMARY"
+          done
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: lighthouse
+          path: reports
+          retention-days: 14
