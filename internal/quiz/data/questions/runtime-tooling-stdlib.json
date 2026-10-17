@@ -89,8 +89,8 @@
 				"id": "c",
 				"text": { "en": "`func TestSum() error` in `sum_test.go`", "pt-BR": "`func TestSum() error` em `sum_test.go`" },
 				"why": {
-					"en": "The signature must be exactly `func(t *testing.T)`; tests do not return errors, they report failures through `t`. `go vet` flags this signature as malformed.",
-					"pt-BR": "A assinatura precisa ser exatamente `func(t *testing.T)`; testes não retornam erro, reportam falhas via `t`. O `go vet` aponta essa assinatura como malformada."
+					"en": "The signature must be exactly `func(t *testing.T)`; tests do not return errors, they report failures through `t`. `go test` refuses to build the package with `wrong signature for TestSum, must be: func TestSum(t *testing.T)`.",
+					"pt-BR": "A assinatura precisa ser exatamente `func(t *testing.T)`; testes não retornam erro, reportam falhas via `t`. O `go test` se recusa a compilar o pacote com `wrong signature for TestSum, must be: func TestSum(t *testing.T)`."
 				}
 			},
 			{
@@ -200,7 +200,7 @@
 			},
 			{
 				"id": "c",
-				"text": { "en": "Append to a `[]string` and convert it with `string(parts)`", "pt-BR": "Adicionar em um `[]string` e converter com `string(parts)`" },
+				"text": { "en": "Append to a `[]string` and convert it with `string(parts)`", "pt-BR": "Acrescentar a um `[]string` e converter com `string(parts)`" },
 				"why": {
 					"en": "A `[]string` cannot be converted to `string`; you would need `strings.Join`, which is fine but not what this option says.",
 					"pt-BR": "Um `[]string` não pode ser convertido para `string`; seria preciso `strings.Join`, que funciona, mas não é o que esta opção diz."
@@ -217,12 +217,12 @@
 			{
 				"id": "e",
 				"correct": true,
-				"text": { "en": "`strings.Builder` with `WriteString`, optionally calling `Grow` first", "pt-BR": "`strings.Builder` com `WriteString`, chamando `Grow` antes se possível" }
+				"text": { "en": "`strings.Builder` with `WriteString`, optionally calling `Grow` first", "pt-BR": "`strings.Builder` com `WriteString`, opcionalmente chamando `Grow` antes" }
 			}
 		],
 		"sources": [
 			{ "title": "Package strings: Builder", "url": "https://pkg.go.dev/strings#Builder", "kind": "doc" },
-			{ "title": "100 Go Mistakes: #39 Under-optimized string concatenation", "url": "https://100go.co/", "kind": "book" }
+			{ "title": "100 Go Mistakes: #39 Under-optimized string concatenation", "url": "https://100go.co/#under-optimized-strings-concatenation-39", "kind": "book" }
 		]
 	},
 	{
@@ -306,8 +306,8 @@
 				"id": "b",
 				"text": { "en": "Whatever the operating system's TCP timeout is, about 2 seconds", "pt-BR": "O timeout de TCP do sistema operacional, cerca de 2 segundos" },
 				"why": {
-					"en": "The default transport has a dial timeout, but once connected nothing limits how long the server takes to send the response.",
-					"pt-BR": "O transport padrão tem timeout de conexão, mas depois de conectado nada limita quanto tempo o servidor leva para enviar a resposta."
+					"en": "`http.DefaultTransport` only bounds dialing (30 s) and the TLS handshake (10 s); once connected, nothing limits how long the server takes to send the response.",
+					"pt-BR": "O `http.DefaultTransport` só limita a abertura da conexão (30 s) e o handshake TLS (10 s); depois de conectado, nada limita quanto tempo o servidor leva para enviar a resposta."
 				}
 			},
 			{
@@ -554,7 +554,7 @@
 				"text": { "en": "It panics: the type assertion to map fails", "pt-BR": "Ocorre panic: a type assertion para map falha" },
 				"why": {
 					"en": "JSON objects decoded into `interface{}` are always `map[string]interface{}`, so the assertion succeeds.",
-					"pt-BR": "Objetos JSON decodificados em `interface{}` são sempre `map[string]interface{}`, então a assertion funciona."
+					"pt-BR": "Objetos JSON decodificados em `interface{}` são sempre `map[string]interface{}`, então a type assertion funciona."
 				}
 			}
 		],
@@ -972,7 +972,7 @@
 			"pt-BR": "Qual afirmação sobre `//go:embed` é verdadeira?"
 		},
 		"explanation": {
-			"en": "When a pattern names a directory, files whose names start with `.` or `_` are excluded while walking it; prefixing the pattern with `all:` includes them. Other rules: `//go:embed` only works on package-level variables of type `string`, `[]byte` or `embed.FS`, the file importing `embed` is required, and patterns cannot reach outside the module or contain `..`.",
+			"en": "When a pattern names a directory, files whose names start with `.` or `_` are excluded while walking it; prefixing the pattern with `all:` includes them. Other rules: `//go:embed` only works on package-level variables of type `string`, `[]byte` or `embed.FS`, the file must import `embed`, and patterns cannot reach outside the module or contain `..`.",
 			"pt-BR": "Quando um padrão aponta para um diretório, arquivos cujo nome começa com `.` ou `_` são excluídos ao percorrê-lo; prefixar o padrão com `all:` os inclui. Outras regras: `//go:embed` só funciona em variáveis de nível de pacote do tipo `string`, `[]byte` ou `embed.FS`, o arquivo precisa importar `embed`, e os padrões não podem sair do módulo nem conter `..`."
 		},
 		"alternatives": [
@@ -1028,8 +1028,8 @@
 			"pt-BR": "Compilando com `go build -gcflags=-m` (Go 1.27), quais funções o compilador reporta como alocando no heap no próprio corpo?"
 		},
 		"explanation": {
-			"en": "Escape analysis keeps a value on the stack only if the compiler can prove it does not outlive the frame and its size is known. In `b`, `&x` is returned, so it reports `moved to heap: x`. In `c`, the size `n` is not a compile-time constant, so `make([]int, n) escapes to heap`. In `a` the value is copied out, and in `d` the constant-size slice never leaves the function (`does not escape`).",
-			"pt-BR": "A escape analysis só mantém um valor na stack se o compilador provar que ele não sobrevive ao frame e que o tamanho é conhecido. Em `b`, `&x` é retornado, então aparece `moved to heap: x`. Em `c`, o tamanho `n` não é constante de compilação, então `make([]int, n) escapes to heap`. Em `a` o valor é copiado para fora, e em `d` o slice de tamanho constante nunca sai da função (`does not escape`)."
+			"en": "Escape analysis keeps a value on the stack only if the compiler can prove it does not outlive the function's frame. In `b`, `&x` is returned, so it reports `moved to heap: x`. In `c`, the slice is returned, so its backing array must outlive the call and `make([]int, n) escapes to heap`. In `a` the value is copied out, and in `d` the slice never leaves the function (`make([]int, 8) does not escape`).",
+			"pt-BR": "A escape analysis só mantém um valor na stack se o compilador provar que ele não sobrevive ao frame da função. Em `b`, `&x` é retornado, então aparece `moved to heap: x`. Em `c`, o slice é retornado, então o array subjacente precisa sobreviver à chamada e aparece `make([]int, n) escapes to heap`. Em `a` o valor é copiado para fora, e em `d` o slice nunca sai da função (`make([]int, 8) does not escape`)."
 		},
 		"alternatives": [
 			{
@@ -1052,8 +1052,8 @@
 				"id": "c",
 				"text": { "en": "Only `b`", "pt-BR": "Só `b`" },
 				"why": {
-					"en": "In `c` the slice is returned and its length is only known at run time, so its backing array escapes too.",
-					"pt-BR": "Em `c` o slice é retornado e o tamanho só é conhecido em tempo de execução, então o array subjacente também escapa."
+					"en": "In `c` the slice is returned to the caller, so its backing array outlives the call and escapes to the heap too.",
+					"pt-BR": "Em `c` o slice é retornado para quem chamou, então o array subjacente sobrevive à chamada e também escapa para o heap."
 				}
 			},
 			{
@@ -1130,7 +1130,7 @@
 		],
 		"sources": [
 			{ "title": "Go 1.14 Release Notes: Runtime", "url": "https://go.dev/doc/go1.14#runtime", "kind": "doc" },
-			{ "title": "Ardan Labs: Scheduling In Go, Part II: Go Scheduler", "url": "https://www.ardanlabs.com/blog/2018/08/scheduling-in-go-part2.html", "kind": "article" },
+			{ "title": "Go issue #24543: non-cooperative goroutine preemption", "url": "https://github.com/golang/go/issues/24543", "kind": "issue" },
 			{ "title": "Package runtime: Gosched", "url": "https://pkg.go.dev/runtime#Gosched", "kind": "doc" }
 		]
 	},
