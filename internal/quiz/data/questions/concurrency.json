@@ -23,7 +23,7 @@
 			},
 			{
 				"id": "b",
-				"text": { "en": "It never compiles: a go statement needs a function literal", "pt-BR": "Não compila: o go statement exige uma função literal" },
+				"text": { "en": "It never compiles: a go statement needs a function literal", "pt-BR": "Não compila: o go statement exige um literal de função" },
 				"why": {
 					"en": "Any function or method call can follow `go`, including `fmt.Println(...)`; its arguments are evaluated in the calling goroutine.",
 					"pt-BR": "Qualquer chamada de função ou método pode vir depois do `go`, inclusive `fmt.Println(...)`; os argumentos são avaliados na goroutine que chama."
@@ -352,8 +352,8 @@
 			"pt-BR": "O que está errado neste código?"
 		},
 		"explanation": {
-			"en": "The `sync.WaitGroup` docs require that calls to `Add` with a positive delta that occur when the counter is zero happen before `Wait`. Here `Add` runs inside the goroutines, so `Wait` can observe a zero counter and return before any goroutine has started; some or all numbers may never be printed. Call `wg.Add(1)` before the `go` statement, or use `wg.Go` (Go 1.25+), which does it for you.",
-			"pt-BR": "A documentação de `sync.WaitGroup` exige que chamadas a `Add` com delta positivo, feitas quando o contador está em zero, aconteçam antes de `Wait`. Aqui `Add` roda dentro das goroutines, então `Wait` pode ver o contador em zero e retornar antes de qualquer goroutine começar; alguns ou todos os números podem nunca ser impressos. Chame `wg.Add(1)` antes do `go`, ou use `wg.Go` (Go 1.25+), que faz isso por você."
+			"en": "The `sync.WaitGroup` docs require that calls to `Add` with a positive delta that occur when the counter is zero happen before `Wait`. Here `Add` runs inside the goroutines, so `Wait` can observe a zero counter and return before any goroutine has started; some or all numbers may never be printed. Since Go 1.25, `go vet` flags this with `WaitGroup.Add called from inside new goroutine`. Call `wg.Add(1)` before the `go` statement, or use `wg.Go` (Go 1.25+), which does it for you.",
+			"pt-BR": "A documentação de `sync.WaitGroup` exige que chamadas a `Add` com delta positivo, feitas quando o contador está em zero, aconteçam antes de `Wait`. Aqui `Add` roda dentro das goroutines, então `Wait` pode ver o contador em zero e retornar antes de qualquer goroutine começar; alguns ou todos os números podem nunca ser impressos. Desde o Go 1.25, o `go vet` aponta isso com `WaitGroup.Add called from inside new goroutine`. Chame `wg.Add(1)` antes do `go`, ou use `wg.Go` (Go 1.25+), que faz isso por você."
 		},
 		"alternatives": [
 			{
@@ -396,7 +396,8 @@
 		],
 		"sources": [
 			{ "title": "sync package: WaitGroup.Add", "url": "https://pkg.go.dev/sync#WaitGroup.Add", "kind": "doc" },
-			{ "title": "sync package: WaitGroup.Go", "url": "https://pkg.go.dev/sync#WaitGroup.Go", "kind": "doc" }
+			{ "title": "sync package: WaitGroup.Go", "url": "https://pkg.go.dev/sync#WaitGroup.Go", "kind": "doc" },
+			{ "title": "Go 1.25 Release Notes: vet waitgroup analyzer", "url": "https://go.dev/doc/go1.25#vet", "kind": "doc" }
 		]
 	},
 	{
@@ -409,8 +410,8 @@
 			"pt-BR": "O que acontece ao compilar esta função?"
 		},
 		"explanation": {
-			"en": "`chan<- int` is a send-only channel type: the optional arrow in the type restricts the channel to sending. Receiving from it is a compile-time error: `invalid operation: cannot receive from send-only channel ch`. A bidirectional `chan int` converts implicitly to either direction, which is how functions document and enforce their role in a pipeline.",
-			"pt-BR": "`chan<- int` é um tipo de channel somente para envio: a seta opcional no tipo restringe o channel a enviar. Receber dele é erro de compilação: `invalid operation: cannot receive from send-only channel ch`. Um `chan int` bidirecional é convertido implicitamente para qualquer direção, e é assim que funções documentam e garantem seu papel em um pipeline."
+			"en": "`chan<- int` is a send-only channel type: the optional arrow in the type restricts the channel to sending. Receiving from it is a compile-time error: `invalid operation: cannot receive from send-only channel chan<- int ch (variable of type chan<- int)`. A bidirectional `chan int` converts implicitly to either direction, which is how functions document and enforce their role in a pipeline.",
+			"pt-BR": "`chan<- int` é um tipo de channel somente para envio: a seta opcional no tipo restringe o channel a enviar. Receber dele é erro de compilação: `invalid operation: cannot receive from send-only channel chan<- int ch (variable of type chan<- int)`. Um `chan int` bidirecional é convertido implicitamente para qualquer direção, e é assim que funções documentam e garantem seu papel em um pipeline."
 		},
 		"alternatives": [
 			{
@@ -548,7 +549,7 @@
 				"text": { "en": "panic: invalid memory address or nil pointer dereference", "pt-BR": "panic: invalid memory address or nil pointer dereference" },
 				"why": {
 					"en": "The runtime handles nil channels explicitly: the operation parks the goroutine instead of dereferencing anything.",
-					"pt-BR": "O runtime trata channels nil explicitamente: a operação estaciona a goroutine em vez de desreferenciar algo."
+					"pt-BR": "O runtime trata channels nil explicitamente: a operação suspende a goroutine para sempre em vez de desreferenciar algum ponteiro."
 				}
 			},
 			{
@@ -580,8 +581,8 @@
 			"pt-BR": "O que este programa imprime, e o que o `go vet` diz?"
 		},
 		"explanation": {
-			"en": "`Inc` has a value receiver, so every call works on a copy of the whole `Counter`, including a copy of the mutex. The increment is lost and the program prints `0`. `go vet`'s copylocks check reports `Inc passes lock by value: Counter contains sync.Mutex`; the sync docs say a Mutex must not be copied after first use. Use a pointer receiver `func (c *Counter) Inc()`.",
-			"pt-BR": "`Inc` tem receiver por valor, então cada chamada trabalha em uma cópia do `Counter` inteiro, inclusive uma cópia do mutex. O incremento se perde e o programa imprime `0`. A verificação copylocks do `go vet` reporta `Inc passes lock by value: Counter contains sync.Mutex`; a documentação do sync diz que um Mutex não deve ser copiado depois do primeiro uso. Use receiver ponteiro `func (c *Counter) Inc()`."
+			"en": "`Inc` has a value receiver, so every call works on a copy of the whole `Counter`, including a copy of the mutex. The increment is lost and the program prints `0`. `go vet`'s copylocks check reports `Inc passes lock by value: ... Counter contains sync.Mutex`; the sync docs say a Mutex must not be copied after first use. Use a pointer receiver `func (c *Counter) Inc()`.",
+			"pt-BR": "`Inc` tem receiver por valor, então cada chamada trabalha em uma cópia do `Counter` inteiro, inclusive uma cópia do mutex. O incremento se perde e o programa imprime `0`. A verificação copylocks do `go vet` reporta `Inc passes lock by value: ... Counter contains sync.Mutex`; a documentação do sync diz que um Mutex não deve ser copiado depois do primeiro uso. Use receiver ponteiro `func (c *Counter) Inc()`."
 		},
 		"alternatives": [
 			{
@@ -752,7 +753,7 @@
 		},
 		"explanation": {
 			"en": "The race detector instruments memory accesses and reports races only on code paths that actually ran during that execution, so it has no false positives but can miss races in code the tests never exercised or interleavings that did not occur. It is not a static proof. It also costs roughly 5-10x memory and 2-20x execution time, which is why it is used in tests and canaries rather than everywhere in production.",
-			"pt-BR": "O race detector instrumenta os acessos à memória e só reporta races em caminhos de código que de fato rodaram naquela execução; por isso não tem falsos positivos, mas pode deixar passar races em código que os testes não exercitaram ou em intercalações que não ocorreram. Não é uma prova estática. Ele também custa por volta de 5-10x de memória e 2-20x de tempo de execução, por isso é usado em testes e canários, não em toda a produção."
+			"pt-BR": "O race detector instrumenta os acessos à memória e só reporta races em caminhos de código que de fato rodaram naquela execução; por isso não tem falsos positivos, mas pode deixar passar races em código que os testes não exercitaram ou em intercalações que não ocorreram. Não é uma prova estática. Ele também custa por volta de 5-10x de memória e 2-20x de tempo de execução, por isso é usado em testes e em canary deployments, não em toda a produção."
 		},
 		"alternatives": [
 			{
@@ -1059,10 +1060,10 @@
 			},
 			{
 				"id": "c",
-				"text": { "en": "It is guaranteed never to terminate, because the loop is hoisted", "pt-BR": "É garantido que nunca termina, porque o loop é otimizado para fora" },
+				"text": { "en": "It is guaranteed never to terminate, because the read of done is hoisted out of the loop", "pt-BR": "É garantido que nunca termina, porque a leitura de done é movida para fora do loop" },
 				"why": {
-					"en": "Hoisting is allowed, not required; the outcome is simply not guaranteed either way.",
-					"pt-BR": "Essa otimização é permitida, não obrigatória; o resultado simplesmente não é garantido em nenhum dos sentidos."
+					"en": "Hoisting the read is allowed, not required (a Go 1.27 amd64 run actually printed `finished`); the outcome is simply not guaranteed either way.",
+					"pt-BR": "Mover a leitura é permitido, não obrigatório (uma execução com Go 1.27 em amd64 imprimiu `finished`); o resultado simplesmente não é garantido em nenhum dos sentidos."
 				}
 			},
 			{
