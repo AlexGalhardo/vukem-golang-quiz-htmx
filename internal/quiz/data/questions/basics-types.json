@@ -1,0 +1,116 @@
+[
+	{
+		"id": "zero-value-string",
+		"difficulty": "very-easy",
+		"tags": ["zero-values", "strings"],
+		"code": "var s string\nfmt.Printf(\"%q\", s)",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "Every variable declared without an explicit value holds the zero value of its type. For strings the zero value is the empty string, so `%q` prints `\"\"`.",
+			"pt-BR": "Toda variável declarada sem valor explícito recebe o zero value do seu tipo. Para strings, o zero value é a string vazia, então `%q` imprime `\"\"`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "\"\"", "pt-BR": "\"\"" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "<nil>", "pt-BR": "<nil>" },
+				"why": {
+					"en": "A string is a value type, not a pointer; it can never be nil. Only pointers, slices, maps, channels, functions and interfaces have nil as zero value.",
+					"pt-BR": "string é um tipo de valor, não um ponteiro; nunca pode ser nil. Só ponteiros, slices, maps, channels, funções e interfaces têm nil como zero value."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "\"0\"", "pt-BR": "\"0\"" },
+				"why": {
+					"en": "0 is the zero value of numeric types; the zero value of a string is empty, not the character 0.",
+					"pt-BR": "0 é o zero value dos tipos numéricos; o zero value de uma string é vazio, não o caractere 0."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "Unpredictable garbage left in memory", "pt-BR": "Lixo imprevisível que estava na memória" },
+				"why": {
+					"en": "Go always initializes memory: there are no uninitialized variables, unlike local variables in C.",
+					"pt-BR": "Go sempre inicializa a memória: não existem variáveis não inicializadas, ao contrário de variáveis locais em C."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "It does not compile: variables must be initialized", "pt-BR": "Não compila: variáveis precisam ser inicializadas" },
+				"why": {
+					"en": "Declaring a variable without an initializer is valid Go; the compiler only rejects local variables that are never used.",
+					"pt-BR": "Declarar uma variável sem inicializador é Go válido; o compilador só rejeita variáveis locais que nunca são usadas."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: The zero value", "url": "https://go.dev/ref/spec#The_zero_value", "kind": "spec" },
+			{ "title": "A Tour of Go: Zero values", "url": "https://go.dev/tour/basics/12", "kind": "doc" }
+		]
+	},
+	{
+		"id": "nil-map-write",
+		"difficulty": "easy",
+		"tags": ["maps", "zero-values"],
+		"code": "var m map[string]int\nm[\"a\"] = 1\nfmt.Println(len(m))",
+		"question": {
+			"en": "What happens when this code runs?",
+			"pt-BR": "O que acontece quando este código roda?"
+		},
+		"explanation": {
+			"en": "The zero value of a map is nil. A nil map behaves like an empty map for reads, `len` and `range`, but writing to it panics with \"assignment to entry in nil map\". Create it first with `make(map[string]int)` or a composite literal.",
+			"pt-BR": "O zero value de um map é nil. Um map nil se comporta como um map vazio em leituras, `len` e `range`, mas escrever nele causa panic com \"assignment to entry in nil map\". Crie-o antes com `make(map[string]int)` ou um literal composto."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": { "en": "It panics: assignment to entry in nil map", "pt-BR": "Ocorre panic: assignment to entry in nil map" }
+			},
+			{
+				"id": "b",
+				"text": { "en": "It prints 1", "pt-BR": "Imprime 1" },
+				"why": {
+					"en": "Go does not allocate a map lazily on the first write; the variable stays nil until `make` or a literal creates the map.",
+					"pt-BR": "Go não aloca o map automaticamente na primeira escrita; a variável continua nil até `make` ou um literal criar o map."
+				}
+			},
+			{
+				"id": "c",
+				"text": { "en": "It prints 0: writes to a nil map are ignored", "pt-BR": "Imprime 0: escritas em map nil são ignoradas" },
+				"why": {
+					"en": "Only reads are safe on a nil map. Writes are not silently dropped; they panic at run time.",
+					"pt-BR": "Só leituras são seguras em um map nil. Escritas não são descartadas em silêncio; causam panic em tempo de execução."
+				}
+			},
+			{
+				"id": "d",
+				"text": { "en": "It does not compile", "pt-BR": "Não compila" },
+				"why": {
+					"en": "The code is valid: the compiler cannot know the map is nil, so the failure happens only at run time.",
+					"pt-BR": "O código é válido: o compilador não sabe que o map é nil, então a falha só acontece em tempo de execução."
+				}
+			},
+			{
+				"id": "e",
+				"text": { "en": "The program deadlocks", "pt-BR": "O programa entra em deadlock" },
+				"why": {
+					"en": "Deadlocks involve goroutines blocked on channels or locks; a nil map write is an immediate runtime panic.",
+					"pt-BR": "Deadlocks envolvem goroutines bloqueadas em channels ou locks; escrever em map nil é um panic imediato."
+				}
+			}
+		],
+		"sources": [
+			{ "title": "The Go Programming Language Specification: Map types", "url": "https://go.dev/ref/spec#Map_types", "kind": "spec" },
+			{ "title": "Go maps in action (The Go Blog)", "url": "https://go.dev/blog/maps", "kind": "blog" }
+		]
+	}
+]
