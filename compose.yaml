@@ -12,9 +12,6 @@ services:
       APP_ENV: development
       APP_DEBUG: "true"
       APP_URL: http://localhost:${APP_PORT:-3000}
-      # vukem refuses to boot without APP_KEY even though the quiz uses no
-      # sessions or encryption; a fixed key is fine for local development.
-      APP_KEY: ${APP_KEY:-base64:ZGV2LW9ubHkta2V5LWRvLW5vdC11c2UtaW4tcHJvZCE=}
       HOST: 0.0.0.0
       PORT: "3000"
     ports:

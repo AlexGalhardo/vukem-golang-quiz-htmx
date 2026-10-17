@@ -132,11 +132,8 @@ class Quiz {
 	// The question the latest load asked for; undefined once finished.
 	private wanted: string | undefined;
 	private readonly index = readIndex();
-	// Read at call time: the htmx script is deferred and runs after this
-	// module, so it is not defined yet when the class is constructed.
-	private get htmx(): Htmx | undefined {
-		return (window as unknown as { htmx?: Htmx }).htmx;
-	}
+	// The layout loads htmx before this module (both deferred, in order).
+	private readonly htmx = (window as unknown as { htmx?: Htmx }).htmx;
 
 	start(): void {
 		if (this.index.length === 0) return;

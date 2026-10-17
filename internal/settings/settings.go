@@ -1,11 +1,10 @@
 // Package settings reads the app-specific environment variables (analytics,
-// reverse proxy) and validates them at boot.
+// rate limit) and validates them at boot.
 package settings
 
 import (
 	"errors"
 	"fmt"
-	"net"
 	"net/url"
 	"strconv"
 	"strings"
@@ -64,54 +63,6 @@ func LoadAnalytics(get Getter) (Analytics, error) {
 	a.Origin = u.Scheme + "://" + u.Host
 
 	return a, nil
-}
-
-// Proxy describes the reverse proxy in front of the app (Railway's edge).
-type Proxy struct {
-	// TrustedProxies are the CIDRs whose X-Forwarded-For is honoured.
-	TrustedProxies []*net.IPNet
-	// TrustForwardedProto treats X-Forwarded-Proto: https as HTTPS (HSTS).
-	TrustForwardedProto bool
-}
-
-// LoadProxy reads TRUSTED_PROXIES (comma-separated CIDRs or IPs) and
-// TRUST_FORWARDED_PROTO (bool). vukem has no environment variables for
-// these yet (see framework-feedback/quiz.md).
-func LoadProxy(get Getter) (Proxy, error) {
-	var p Proxy
-
-	for raw := range strings.SplitSeq(get("TRUSTED_PROXIES"), ",") {
-		raw = strings.TrimSpace(raw)
-		if raw == "" {
-			continue
-		}
-
-		if !strings.Contains(raw, "/") {
-			if ip := net.ParseIP(raw); ip != nil && ip.To4() != nil {
-				raw += "/32"
-			} else {
-				raw += "/128"
-			}
-		}
-
-		_, n, err := net.ParseCIDR(raw)
-		if err != nil {
-			return Proxy{}, fmt.Errorf("TRUSTED_PROXIES: %w", err)
-		}
-
-		p.TrustedProxies = append(p.TrustedProxies, n)
-	}
-
-	if v := strings.TrimSpace(get("TRUST_FORWARDED_PROTO")); v != "" {
-		b, err := strconv.ParseBool(v)
-		if err != nil {
-			return Proxy{}, fmt.Errorf("TRUST_FORWARDED_PROTO: %w", err)
-		}
-
-		p.TrustForwardedProto = b
-	}
-
-	return p, nil
 }
 
 // DefaultRateLimit is the per-IP budget per minute. A full quiz run is ~2

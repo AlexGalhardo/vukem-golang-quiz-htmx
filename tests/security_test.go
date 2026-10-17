@@ -170,3 +170,19 @@ func TestSecurity_Oversized_Rejected(t *testing.T) {
 		t.Error("huge query reflected")
 	}
 }
+
+func TestSecurity_HSTS_Production(t *testing.T) {
+	t.Parallel()
+
+	prod := vukemtest.New(t, bootstrap.New, vukemtest.Options{Env: map[string]string{
+		"APP_ENV": "production",
+		"APP_URL": "https://quiz.example",
+	}})
+
+	// Railway's edge talks plain HTTP to the app; HSTS must still be sent.
+	for _, target := range []string{"/", "/up", "/robots.txt"} {
+		prod.Client(t).Get(target).AssertHeaderContains("Strict-Transport-Security", "max-age=63072000")
+	}
+
+	vukemtest.New(t, bootstrap.New).Client(t).Get("/").AssertHeaderMissing("Strict-Transport-Security")
+}

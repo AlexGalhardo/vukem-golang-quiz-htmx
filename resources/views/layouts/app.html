@@ -13,9 +13,9 @@
 	there is no flash. Inline with the request nonce to avoid a render-blocking
 	request; app.ts owns the toggle. */}}
 	<script nonce="{{cspNonce}}">(function(){var t;try{var s=JSON.parse(localStorage.getItem("quiz:v1")||"{}");t=s&&s.settings&&s.settings.theme}catch(e){}if(t!=="light"&&t!=="dark")t=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t)})();</script>
+	{{/* htmx first: both scripts are deferred and run in order, so app.ts finds window.htmx. */}}
+	{{htmxScript (asset "vendor/htmx-4.0.0/htmx.min.js")}}
 	{{vite "resources/css/app.css" "resources/js/app.ts"}}
-	{{/* Plain path, not (asset ...): see framework-feedback "asset routes public files to the Vite dev server". */}}
-	{{htmxScript "/vendor/htmx-4.0.0/htmx.min.js"}}
 	{{with .Analytics}}{{if .Enabled}}{{if .Plausible}}
 	<script defer data-domain="{{.SiteID}}" src="{{.ScriptURL}}" nonce="{{cspNonce}}"></script>
 	{{else}}

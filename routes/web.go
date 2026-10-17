@@ -3,11 +3,10 @@ package routes
 
 import (
 	"net/http"
-	"strings"
+	"net/url"
 	"time"
 
 	vukem "github.com/AlexGalhardo/vukem"
-	"github.com/AlexGalhardo/vukem/i18n"
 	"github.com/AlexGalhardo/vukem/middleware"
 	"github.com/AlexGalhardo/vukem/ratelimit"
 	"github.com/AlexGalhardo/vukem/router"
@@ -25,20 +24,19 @@ const maxBody = 16 << 10
 // rateWindow is the rate limit window; the budget is settings.LoadRateLimit.
 const rateWindow = time.Minute
 
+// hsts is sent on every production response when APP_URL is https.
+const hsts = "max-age=63072000; includeSubDomains"
+
 // Web returns the route file. shuffle orders the alternatives (nil means
 // rand.Shuffle); tests pass a seeded one.
 //
-// vukem.DefaultMiddleware is not used on purpose: it installs sessions and
-// CSRF (the quiz is stateless and cookieless) and does not let the app set
-// the CSP or TrustForwardedProto. See framework-feedback/quiz.md.
+// The stack is vukem's stateless default (no sessions or cookies; CSRF is
+// Origin checks only; maintenance mode; TRUSTED_PROXIES,
+// TRUST_FORWARDED_PROTO and CLIENT_IP_HEADER from the environment) plus
+// static files, the per-IP rate limit, a 16 KiB body cap and gzip.
 func Web(bank *quiz.Bank, shuffle quiz.Shuffler) func(r *router.Router, app *vukem.App) error {
 	return func(r *router.Router, app *vukem.App) error {
 		analytics, err := settings.LoadAnalytics(app.Source.Get)
-		if err != nil {
-			return err
-		}
-
-		proxy, err := settings.LoadProxy(app.Source.Get)
 		if err != nil {
 			return err
 		}
@@ -48,23 +46,26 @@ func Web(bank *quiz.Bank, shuffle quiz.Shuffler) func(r *router.Router, app *vuk
 			return err
 		}
 
-		r.Services().TrustedProxies = proxy.TrustedProxies
-
-		headers := middleware.SecureHeadersConfig{
-			CSP:                 csp(analytics),
-			TrustForwardedProto: proxy.TrustForwardedProto,
+		err = vukem.DefaultMiddlewareWith(app, r, vukem.MiddlewareOptions{
+			Stateless: true,
+			SecureHeaders: func(cfg *middleware.SecureHeadersConfig) {
+				if analytics.Enabled() {
+					cfg.CSPSources = map[string][]string{
+						"script-src":  {analytics.Origin},
+						"connect-src": {analytics.Origin},
+					}
+				}
+			},
+		})
+		if err != nil {
+			return err
 		}
-		if app.Vite != nil && !app.Config.IsProduction() {
-			headers.DevServer = app.Vite.HotURL
-		}
 
-		limiter := ratelimit.NewMemory(rateLimit, rateWindow)
+		if app.Config.IsProduction() && isHTTPS(app.Source.Get("APP_URL")) {
+			r.UseServer(alwaysHSTS)
+		}
 
 		r.UseServer(
-			middleware.Recover(),
-			middleware.RequestID(),
-			middleware.Logger(app.Log),
-			middleware.SecureHeaders(headers),
 			// /vendor paths carry the library version, so they are immutable too.
 			middleware.StaticFS(resources.Public(), middleware.StaticConfig{
 				Prefix:            "/",
@@ -72,12 +73,11 @@ func Web(bank *quiz.Bank, shuffle quiz.Shuffler) func(r *router.Router, app *vuk
 			}),
 		)
 		r.Use(
-			ratelimit.Middleware(limiter, limitKey),
+			ratelimit.Middleware(ratelimit.NewMemory(rateLimit, rateWindow), limitKey),
 			middleware.BodyLimit(maxBody),
 			// Pages carry the question index; responses never echo request
 			// input, so compressing them leaks nothing (no BREACH oracle).
 			middleware.Gzip(),
-			i18n.Middleware(app.I18n, i18n.MiddlewareConfig{Cookie: "-", SessionKey: "-"}),
 		)
 
 		h := controllers.NewQuiz(bank, analytics, shuffle)
@@ -100,15 +100,21 @@ func limitKey(r *http.Request) string {
 	return ratelimit.ByIP(r)
 }
 
-// csp is vukem's default policy plus the analytics origin, when enabled,
-// in script-src and connect-src.
-func csp(a settings.Analytics) string {
-	policy := middleware.DefaultCSP
-	if !a.Enabled() {
-		return policy
-	}
+// alwaysHSTS sends HSTS whatever the request scheme. vukem only adds it to
+// requests it knows are HTTPS, which behind Railway needs a trusted proxy
+// range Railway does not document (TRUSTED_PROXIES stays unset). Every
+// public request reaches the app through Railway's TLS edge, and browsers
+// ignore HSTS received over plain HTTP (RFC 6797 §8.1), so sending it
+// unconditionally is safe. See framework-feedback/quiz.md.
+func alwaysHSTS(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Strict-Transport-Security", hsts)
+		next.ServeHTTP(w, r)
+	})
+}
 
-	policy = strings.Replace(policy, "script-src 'self'", "script-src 'self' "+a.Origin, 1)
+func isHTTPS(raw string) bool {
+	u, err := url.Parse(raw)
 
-	return strings.Replace(policy, "connect-src 'self'", "connect-src 'self' "+a.Origin, 1)
+	return err == nil && u.Scheme == "https" && u.Host != ""
 }

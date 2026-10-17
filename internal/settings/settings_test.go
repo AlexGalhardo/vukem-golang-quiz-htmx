@@ -84,36 +84,6 @@ func TestLoadAnalytics(t *testing.T) {
 	}
 }
 
-func TestLoadProxy(t *testing.T) {
-	t.Parallel()
-
-	p, err := LoadProxy(
-		env(map[string]string{"TRUSTED_PROXIES": "10.0.0.0/8, 100.64.0.1 ,::1", "TRUST_FORWARDED_PROTO": "true"}),
-	)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	var got []string
-	for _, n := range p.TrustedProxies {
-		got = append(got, n.String())
-	}
-
-	if strings.Join(got, ",") != "10.0.0.0/8,100.64.0.1/32,::1/128" || !p.TrustForwardedProto {
-		t.Errorf("LoadProxy() = %v, %v", got, p.TrustForwardedProto)
-	}
-
-	if p, err := LoadProxy(env(nil)); err != nil || len(p.TrustedProxies) != 0 || p.TrustForwardedProto {
-		t.Errorf("LoadProxy(empty) = %+v, %v", p, err)
-	}
-
-	for _, bad := range []map[string]string{{"TRUSTED_PROXIES": "nope"}, {"TRUST_FORWARDED_PROTO": "maybe"}} {
-		if _, err := LoadProxy(env(bad)); err == nil {
-			t.Errorf("LoadProxy(%v) = nil error", bad)
-		}
-	}
-}
-
 func TestLoadRateLimit(t *testing.T) {
 	t.Parallel()
 

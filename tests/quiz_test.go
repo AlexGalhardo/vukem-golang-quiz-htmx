@@ -1,16 +1,13 @@
 package tests
 
 import (
-	"context"
 	"encoding/json"
 	"html"
-	"io"
 	"regexp"
+	"slices"
 	"strings"
 	"testing"
 
-	vukem "github.com/AlexGalhardo/vukem"
-	"github.com/AlexGalhardo/vukem/config"
 	"github.com/AlexGalhardo/vukem/vukemtest"
 
 	"github.com/AlexGalhardo/vukem-golang-quiz-htmx/bootstrap"
@@ -229,40 +226,29 @@ func TestAnalytics(t *testing.T) {
 
 			origin := tt.script[:strings.Index(tt.script[len("https://"):], "/")+len("https://")]
 
-			app.Client(t).Get("/").
+			res := app.Client(t).Get("/").
 				AssertOK().
 				AssertSee(tt.attr).
-				AssertSee(`src="`+tt.script+`"`).
-				AssertHeaderContains("Content-Security-Policy", "script-src 'self' "+origin).
-				AssertHeaderContains("Content-Security-Policy", "connect-src 'self' "+origin)
+				AssertSee(`src="` + tt.script + `"`)
+
+			for _, d := range []string{"script-src", "connect-src"} {
+				if src := directive(res.Header("Content-Security-Policy"), d); !slices.Contains(src, origin) ||
+					!slices.Contains(src, "'self'") {
+					t.Errorf("%s = %v, want 'self' and %s", d, src, origin)
+				}
+			}
 		})
 	}
 }
 
-// vukemtest.New fails the test when the app does not build, so a boot
-// error is asserted by building the app by hand (framework-feedback/quiz.md:
-// "vukemtest cannot assert that an app fails to build").
 func TestInvalidAnalyticsAbortsBoot(t *testing.T) {
 	t.Parallel()
 
-	app, err := bootstrap.New(
-		vukem.WithSource(config.MapSource(map[string]string{
-			"APP_ENV":              "test",
-			"APP_KEY":              config.GenerateKey(),
-			"ANALYTICS_PROVIDER":   "plausible",
-			"ANALYTICS_SCRIPT_URL": "http://evil.example/script.js",
-			"ANALYTICS_SITE_ID":    "x",
-		})),
-		vukem.WithKind(vukem.KindTest),
-		vukem.WithoutHTTP(),
-		vukem.WithLogOutput(io.Discard),
-		vukem.WithStdout(io.Discard),
-	)
-	if err == nil {
-		t.Cleanup(func() { _ = app.Shutdown(context.Background()) })
-		err = app.Boot(t.Context())
-	}
-
+	_, err := vukemtest.Build(t, bootstrap.New, vukemtest.Options{Env: map[string]string{
+		"ANALYTICS_PROVIDER":   "plausible",
+		"ANALYTICS_SCRIPT_URL": "http://evil.example/script.js",
+		"ANALYTICS_SITE_ID":    "x",
+	}})
 	if err == nil || !strings.Contains(err.Error(), "ANALYTICS_SCRIPT_URL") {
 		t.Fatalf("app with an http analytics script: err = %v, want ANALYTICS_SCRIPT_URL error", err)
 	}
@@ -279,4 +265,15 @@ func TestPagesAreCompressed(t *testing.T) {
 			AssertOK().
 			AssertHeader("Content-Encoding", "gzip")
 	}
+}
+
+// directive returns the sources of one CSP directive.
+func directive(policy, name string) []string {
+	for d := range strings.SplitSeq(policy, ";") {
+		if f := strings.Fields(d); len(f) > 0 && f[0] == name {
+			return f[1:]
+		}
+	}
+
+	return nil
 }
