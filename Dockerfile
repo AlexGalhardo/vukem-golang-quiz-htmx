@@ -43,14 +43,11 @@ ENV APP_ENV=production \
 	APP_DEBUG=false \
 	HOST=0.0.0.0 \
 	PORT=3000 \
-	LOG_FORMAT=json \
-	RATE_LIMIT_PER_MINUTE=1200
-# TRUSTED_PROXIES stays unset: Railway does not document the range its edge
-# connects from, so the client IP is the edge address and every visitor
-# shares one rate-limit bucket. The budget above is a site-wide abuse cap,
-# not a per-person limit. Once a range is verified from the peer addresses,
-# set TRUSTED_PROXIES, CLIENT_IP_HEADER=X-Real-IP and TRUST_FORWARDED_PROTO
-# together and lower the budget.
+	LOG_FORMAT=json
+# The rate limit (RATE_LIMIT_PER_MINUTE, app default 120) is per visitor
+# only when the platform sets TRUSTED_PROXIES and CLIENT_IP_HEADER for its
+# proxy; without them every request carries the proxy's address and all
+# visitors share one bucket. Railway values: PLAN.md D28.
 EXPOSE 3000
 HEALTHCHECK --interval=15s --timeout=3s --start-period=5s --retries=3 \
 	CMD wget -q -O /dev/null "http://127.0.0.1:${PORT}/up" || exit 1
