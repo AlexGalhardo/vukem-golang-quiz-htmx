@@ -633,9 +633,9 @@
 				"kind": "doc"
 			},
 			{
-				"title": "Redowan Delowar: Lifecycle management in Go tests",
-				"url": "https://rednafi.com/go/lifecycle-management-in-tests/",
-				"kind": "article"
+				"title": "Go 1.15 Release Notes: testing (TestMain no longer required to call os.Exit)",
+				"url": "https://go.dev/doc/go1.15#testingpkgtesting",
+				"kind": "doc"
 			}
 		]
 	},
@@ -815,7 +815,7 @@
 		},
 		"explanation": {
 			"en": "The fuzz function must be fast, deterministic and must not depend on shared state. It also must not retain mutable arguments (or pointers to them) between executions, because the engine may mutate the memory backing them in a later call. Keeping `data` in a global breaks both rules: stored slices can change under you and failures become irreproducible. Copy with `bytes.Clone` if you really need to keep an input, and avoid cross-execution state.",
-			"pt-BR": "A função de fuzz precisa ser rápida, determinística e não pode depender de estado compartilhado. Ela também não pode guardar argumentos mutáveis (ou ponteiros para eles) entre execuções, porque o engine pode alterar a memória por trás deles numa chamada seguinte. Guardar `data` numa global quebra as duas regras: os slices armazenados podem mudar por baixo e as falhas viram irreproduzíveis. Copie com `bytes.Clone` se precisar mesmo guardar uma entrada, e evite estado entre execuções."
+			"pt-BR": "A função de fuzz precisa ser rápida, determinística e não pode depender de estado compartilhado. Ela também não pode guardar argumentos mutáveis (ou ponteiros para eles) entre execuções, porque o engine pode alterar a memória por trás deles numa chamada seguinte. Guardar `data` numa global quebra as duas regras: os slices armazenados podem mudar sem aviso e as falhas ficam impossíveis de reproduzir. Copie com `bytes.Clone` se precisar mesmo guardar uma entrada, e evite estado entre execuções."
 		},
 		"alternatives": [
 			{
@@ -893,8 +893,8 @@
 			"pt-BR": "Para um teste de integração você compila um binário com `go build -cover` e o roda com `GOCOVERDIR=covdata`. A execução termina com um panic não recuperado no `main`. O que acontece com a cobertura dessa execução?"
 		},
 		"explanation": {
-			"en": "A `-cover` binary writes its profile data files (`covmeta.*`, `covcounters.*`) into `GOCOVERDIR` at the end of execution, and complete data is only written if the program calls `os.Exit` or returns normally from `main.main`. On an unrecovered panic or a fatal fault, the counters for statements executed during that run are lost. The files that are written are binary and are read with `go tool covdata` (`percent`, `textfmt`, ...).",
-			"pt-BR": "Um binário `-cover` grava os arquivos de profile (`covmeta.*`, `covcounters.*`) no `GOCOVERDIR` ao fim da execução, e os dados completos só são gravados se o programa chamar `os.Exit` ou retornar normalmente de `main.main`. Num panic não recuperado ou num erro fatal, os contadores dos statements executados naquela execução se perdem. Os arquivos gravados são binários e são lidos com `go tool covdata` (`percent`, `textfmt`, ...)."
+			"en": "A `-cover` binary writes a meta-data file (`covmeta.*`) into `GOCOVERDIR` when it starts, but the counter data (`covcounters.*`) only at the end of execution, and only if the program calls `os.Exit` or returns normally from `main.main`. On an unrecovered panic or a fatal fault, the counters for statements executed during that run are lost. These files are binary and are read with `go tool covdata` (`percent`, `textfmt`, ...).",
+			"pt-BR": "Um binário `-cover` grava um arquivo de metadados (`covmeta.*`) no `GOCOVERDIR` ao iniciar, mas os contadores (`covcounters.*`) só ao fim da execução, e apenas se o programa chamar `os.Exit` ou retornar normalmente de `main.main`. Num panic não recuperado ou num erro fatal, os contadores dos statements executados naquela execução se perdem. Esses arquivos são binários e são lidos com `go tool covdata` (`percent`, `textfmt`, ...)."
 		},
 		"alternatives": [
 			{

@@ -529,7 +529,7 @@
 		},
 		"explanation": {
 			"en": "A `strings.Builder` must not be copied once it is non-zero. It records its own address on first write and checks it on every later write; the copy `cp` has a different address but still shares the buffer, so `WriteString` panics with `strings: illegal use of non-zero Builder copied by value`. Pass `*strings.Builder` around instead of copying the value.",
-			"pt-BR": "Um `strings.Builder` não pode ser copiado depois de deixar de ser zero. Ele grava o próprio endereço na primeira escrita e confere em todas as seguintes; a cópia `cp` tem outro endereço, mas ainda compartilha o buffer, então `WriteString` dá panic com `strings: illegal use of non-zero Builder copied by value`. Passe `*strings.Builder` em vez de copiar o valor."
+			"pt-BR": "Um `strings.Builder` não pode ser copiado depois de usado (quando deixa de ser zero value). Ele grava o próprio endereço na primeira escrita e confere em todas as seguintes; a cópia `cp` tem outro endereço, mas ainda compartilha o buffer, então `WriteString` dá panic com `strings: illegal use of non-zero Builder copied by value`. Passe `*strings.Builder` em vez de copiar o valor."
 		},
 		"alternatives": [
 			{
@@ -580,8 +580,8 @@
 					"pt-BR": "Imprime `hi!` e `sb.String()` também vira `hi!`"
 				},
 				"why": {
-					"en": "The Builder is not reference-like; and the write on the copy panics before changing anything.",
-					"pt-BR": "O Builder não se comporta como referência; e a escrita na cópia dá panic antes de mudar qualquer coisa."
+					"en": "The copy does share the underlying buffer, but the write on `cp` panics before appending, so neither builder ever holds `hi!`.",
+					"pt-BR": "A cópia até compartilha o buffer interno, mas a escrita em `cp` dá panic antes de acrescentar algo, então nenhum dos builders chega a conter `hi!`."
 				}
 			}
 		],
@@ -741,8 +741,8 @@
 				"id": "d",
 				"correct": true,
 				"text": {
-					"en": "Any stored item may be removed at any time without notification, so `Get` can return a fresh `New()` value right after a `Put`",
-					"pt-BR": "Qualquer item guardado pode ser removido a qualquer momento sem aviso, então `Get` pode retornar um valor novo de `New()` logo depois de um `Put`"
+					"en": "Stored items may be removed at any time without notice, so `Get` may return a new `New()` value right after a `Put`",
+					"pt-BR": "Itens guardados podem ser removidos a qualquer momento sem aviso, então `Get` pode retornar um valor novo de `New()` logo após um `Put`"
 				}
 			},
 			{
@@ -784,7 +784,7 @@
 		},
 		"explanation": {
 			"en": "`iter.Pull` suspends the iterator function between `next` calls. When the caller stops early without exhausting the sequence, it must call `stop`, which makes the pending `yield` return false so the iterator can finish and run its deferred cleanup. Here `stop` is discarded, so the output is `1` then `done`, and `cleanup` never runs: the suspended iterator and its resources leak. The idiom is `next, stop := iter.Pull(seq); defer stop()`.",
-			"pt-BR": "`iter.Pull` suspende a função do iterator entre as chamadas a `next`. Quando quem chama para antes de esgotar a sequência, precisa chamar `stop`, que faz o `yield` pendente retornar false para o iterator terminar e rodar o cleanup do defer. Aqui `stop` é descartado, então a saída é `1` e depois `done`, e `cleanup` nunca roda: o iterator suspenso e seus recursos vazam. O idioma é `next, stop := iter.Pull(seq); defer stop()`."
+			"pt-BR": "`iter.Pull` suspende a função do iterator entre as chamadas a `next`. Quando quem chama para antes de esgotar a sequência, precisa chamar `stop`, que faz o `yield` pendente retornar false para o iterator terminar e rodar o cleanup do defer. Aqui `stop` é descartado, então a saída é `1` e depois `done`, e `cleanup` nunca roda: o iterator suspenso e seus recursos vazam. O padrão idiomático é `next, stop := iter.Pull(seq); defer stop()`."
 		},
 		"alternatives": [
 			{
