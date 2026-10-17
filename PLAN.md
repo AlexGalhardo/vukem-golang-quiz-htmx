@@ -276,7 +276,7 @@ Topics to cover: basics/types, zero values, strings/runes/bytes, slices (len/cap
 - [x] T.5 OWASP abuse suite: XSS in params, security headers, CSP, rate limit (429 + `Retry-After`), path traversal, oversized requests, wrong methods, no cookies → verify: `go test -run TestSecurity ./tests/...`
 - [x] T.6 `docs/qa-checklist.md`: exploratory QA checklist (browsers, keyboard, screen reader, slow 3G, storage disabled, both languages/themes) and one documented run → verify: checklist committed with results
 - [x] T.7 Accessibility: axe in Playwright, zero serious/critical → verify: CI
-- [ ] T.8 Lighthouse ≥ 95 performance/accessibility/best practices on mobile → verify: report saved (2026-10-17: 89/100/96/100 from a machine whose antivirus injects a render-blocking script; see docs/qa-checklist.md)
+- [x] T.8 Lighthouse ≥ 95 performance/accessibility/best practices on mobile → verify: report saved (2026-10-17: 100/100/100/100 from a clean CI runner, `Lighthouse` workflow run 39048889814; see docs/qa-checklist.md)
 - [x] T.9 Gate DAST results: Nuclei findings (medium+) fail the job (JSONL export + check), revisit the ZAP `90004` COEP rule in `.zap/rules.tsv` → verify: a planted header regression fails CI (2026-10-17: run 39046905131 on a throwaway branch dropping X-Frame-Options/X-Content-Type-Options failed `test` and `docker-dast` via `scripts/smoke.sh`)
 
 ### D — Deploy
