@@ -3,10 +3,7 @@
 // the app boots.
 package quiz
 
-import (
-	"math/rand/v2"
-	"slices"
-)
+import "slices"
 
 // Difficulty is one of the five question levels.
 type Difficulty string
@@ -98,11 +95,15 @@ func (q Question) Alternative(id string) (Alternative, bool) {
 	return Alternative{}, false
 }
 
+// Shuffler is the signature of rand.Shuffle; math/rand/v2 is enough because
+// the order is cosmetic.
+type Shuffler func(n int, swap func(i, j int))
+
 // Shuffled returns the alternatives in a random order; q is not modified.
-// Shuffling is cosmetic, so math/rand/v2 is enough.
-func (q Question) Shuffled(r *rand.Rand) []Alternative {
+// Pass rand.Shuffle in production and a seeded (*rand.Rand).Shuffle in tests.
+func (q Question) Shuffled(shuffle Shuffler) []Alternative {
 	alts := slices.Clone(q.Alternatives)
-	r.Shuffle(len(alts), func(i, j int) { alts[i], alts[j] = alts[j], alts[i] })
+	shuffle(len(alts), func(i, j int) { alts[i], alts[j] = alts[j], alts[i] })
 
 	return alts
 }

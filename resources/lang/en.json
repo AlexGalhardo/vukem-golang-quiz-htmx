@@ -1,0 +1,49 @@
+{
+	"app": {
+		"name": "Go Interview Quiz",
+		"description": "Interactive Go (Golang) interview questions with explanations for every option and links to the sources."
+	},
+	"nav": {
+		"label": "Main",
+		"theme": "Toggle dark mode",
+		"language": "Language"
+	},
+	"toolbar": {
+		"label": "Quiz controls",
+		"progress": "Progress",
+		"accuracy": "Accuracy",
+		"settings": "Settings",
+		"mode": "Order",
+		"ordered": "By difficulty",
+		"random": "Random",
+		"difficulties": "Difficulties",
+		"review": "Review only wrong answers",
+		"stats": "Accuracy by difficulty",
+		"reset": "Reset progress",
+		"reset_confirm": "Reset all progress and statistics?"
+	},
+	"difficulty": {
+		"very-easy": "Very easy",
+		"easy": "Easy",
+		"medium": "Medium",
+		"hard": "Hard",
+		"very-hard": "Very hard"
+	},
+	"quiz": {
+		"pick": "Pick an answer to see the explanation.",
+		"shortcuts": "Keys: 1–5 or A–E to answer, Enter for the next question.",
+		"correct": "Correct!",
+		"wrong": "Not quite.",
+		"answer_is": "Correct answer",
+		"why_wrong": "Why the other options are wrong",
+		"your_answer": "your answer",
+		"sources": "Sources",
+		"next": "Next question",
+		"finished": "You answered every question in this selection.",
+		"finished_text": "Change the difficulties, review your wrong answers, or reset your progress in Settings."
+	},
+	"errors": {
+		"not_found": "Page not found.",
+		"back": "Back to the quiz"
+	}
+}

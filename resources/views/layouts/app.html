@@ -1,25 +1,43 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="{{locale}}" data-theme="light">
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>{{block "title" .}}Go Interview Quiz{{end}}</title>
-	<meta name="description" content="Interactive Go (Golang) interview questions quiz with explanations and sources.">
+	<title>{{block "title" .}}{{t "app.name"}}{{end}}</title>
+	<meta name="description" content="{{t "app.description"}}">
+	<meta name="color-scheme" content="light dark">
 	<meta property="csp-nonce" nonce="{{cspNonce}}">
 	<meta name="htmx-config" content='{"includeIndicatorCSS":false}'>
+	{{/* Applies the saved theme before first paint (no flash). */}}
+	<script src="/js/theme.js" nonce="{{cspNonce}}"></script>
 	{{vite "resources/css/app.css" "resources/js/app.ts"}}
 	{{/* Plain path, not (asset ...): see framework-feedback "asset routes public files to the Vite dev server". */}}
 	{{htmxScript "/js/htmx.min.js"}}
+	{{with .Analytics}}{{if .Enabled}}{{if .Plausible}}
+	<script defer data-domain="{{.SiteID}}" src="{{.ScriptURL}}" nonce="{{cspNonce}}"></script>
+	{{else}}
+	<script defer data-website-id="{{.SiteID}}" src="{{.ScriptURL}}" nonce="{{cspNonce}}"></script>
+	{{end}}{{end}}{{end}}
 </head>
 <body class="min-h-screen bg-white text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100">
 	<header class="border-b border-zinc-200 dark:border-zinc-800">
-		<nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-3" aria-label="Main">
-			<a href="{{route "quiz"}}" class="font-bold tracking-tight">Go Interview Quiz</a>
-			<div class="flex items-center gap-2" data-slot="nav-actions"></div>
+		<nav class="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3" aria-label="{{t "nav.label"}}">
+			<a href="/?lang={{locale}}" class="font-bold tracking-tight" data-testid="brand">{{t "app.name"}}</a>
+			<div class="flex items-center gap-2 text-sm">
+				<span class="sr-only">{{t "nav.language"}}</span>
+				<a href="?lang=en" hreflang="en" lang="en" data-lang="en" data-testid="lang-en" class="rounded-md px-2 py-1 {{if eq locale "en"}}bg-zinc-200 font-semibold dark:bg-zinc-800{{else}}hover:bg-zinc-100 dark:hover:bg-zinc-900{{end}}"{{if eq locale "en"}} aria-current="true"{{end}}>EN</a>
+				<a href="?lang=pt-BR" hreflang="pt-BR" lang="pt-BR" data-lang="pt-BR" data-testid="lang-pt-BR" class="rounded-md px-2 py-1 {{if eq locale "pt-BR"}}bg-zinc-200 font-semibold dark:bg-zinc-800{{else}}hover:bg-zinc-100 dark:hover:bg-zinc-900{{end}}"{{if eq locale "pt-BR"}} aria-current="true"{{end}}>PT-BR</a>
+				<button type="button" data-action="theme" data-testid="theme-toggle" aria-label="{{t "nav.theme"}}" title="{{t "nav.theme"}}" class="rounded-md border border-zinc-300 px-2 py-1 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:border-zinc-700 dark:hover:bg-zinc-800">
+					<span class="dark:hidden" aria-hidden="true">&#9790;</span><span class="hidden dark:inline" aria-hidden="true">&#9728;</span>
+				</button>
+			</div>
 		</nav>
 	</header>
 	<main id="main" class="mx-auto max-w-6xl px-4 py-6">
 		{{block "content" .}}{{end}}
 	</main>
+	<footer class="mx-auto max-w-6xl px-4 pb-8 text-xs text-zinc-500 dark:text-zinc-400">
+		<a class="underline" href="https://github.com/AlexGalhardo/vukem-golang-quiz-htmx" rel="noopener noreferrer">GitHub</a> · Built with <a class="underline" href="https://github.com/AlexGalhardo/vukem" rel="noopener noreferrer">vukem</a> and htmx
+	</footer>
 </body>
 </html>

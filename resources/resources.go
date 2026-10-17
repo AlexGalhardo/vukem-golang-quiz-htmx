@@ -11,20 +11,21 @@ import (
 
 // all: keeps build/.vite/manifest.json (a dot directory) in the binary.
 //
-//go:embed views all:public
+//go:embed views all:public lang
 var embedded embed.FS
 
 // Views returns the html/template views.
 func Views() fs.FS { return dirOrEmbedded("views") }
 
+// Lang returns the UI translations (en.json, pt-BR.json).
+func Lang() fs.FS { return dirOrEmbedded("lang") }
+
 // Public returns the static assets served at /.
 func Public() fs.FS { return dirOrEmbedded("public") }
 
 // dirOrEmbedded serves files from disk during development so edits show up
-// on refresh. Production always uses the embedded copy: the vukem starter
-// prefers disk whenever resources/ exists in the working directory, so a
-// production binary started from a checkout without a Vite build fails to
-// render (see framework-feedback/quiz.md).
+// on refresh; production always uses the embedded copy (same as the vukem
+// v0.22.0 starter).
 func dirOrEmbedded(dir string) fs.FS {
 	if os.Getenv("APP_ENV") == "production" {
 		return embeddedSub(dir)

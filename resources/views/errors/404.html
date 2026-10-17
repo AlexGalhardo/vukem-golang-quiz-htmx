@@ -1,0 +1,18 @@
+{{/* layout: none */}}
+<!doctype html>
+<html lang="{{locale}}">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>{{.Status}} · {{t "app.name"}}</title>
+	<script src="/js/theme.js" nonce="{{cspNonce}}"></script>
+	{{vite "resources/css/app.css"}}
+</head>
+<body class="min-h-screen bg-white text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+	<main class="mx-auto max-w-xl px-4 py-16 text-center" data-testid="not-found">
+		<p class="text-5xl font-bold">{{.Status}}</p>
+		<h1 class="mt-4 text-xl">{{t "errors.not_found"}}</h1>
+		<p class="mt-6"><a class="text-indigo-700 underline dark:text-indigo-300" href="/">{{t "errors.back"}}</a></p>
+	</main>
+</body>
+</html>

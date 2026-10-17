@@ -1,0 +1,49 @@
+{
+	"app": {
+		"name": "Quiz de Entrevista Go",
+		"description": "Perguntas interativas de entrevista de Go (Golang) com explicação de cada alternativa e links para as fontes."
+	},
+	"nav": {
+		"label": "Principal",
+		"theme": "Alternar modo escuro",
+		"language": "Idioma"
+	},
+	"toolbar": {
+		"label": "Controles do quiz",
+		"progress": "Progresso",
+		"accuracy": "Acertos",
+		"settings": "Configurações",
+		"mode": "Ordem",
+		"ordered": "Por dificuldade",
+		"random": "Aleatória",
+		"difficulties": "Dificuldades",
+		"review": "Revisar só as respostas erradas",
+		"stats": "Acertos por dificuldade",
+		"reset": "Zerar progresso",
+		"reset_confirm": "Zerar todo o progresso e as estatísticas?"
+	},
+	"difficulty": {
+		"very-easy": "Muito fácil",
+		"easy": "Fácil",
+		"medium": "Média",
+		"hard": "Difícil",
+		"very-hard": "Muito difícil"
+	},
+	"quiz": {
+		"pick": "Escolha uma alternativa para ver a explicação.",
+		"shortcuts": "Teclas: 1–5 ou A–E para responder, Enter para a próxima pergunta.",
+		"correct": "Correto!",
+		"wrong": "Não foi dessa vez.",
+		"answer_is": "Resposta correta",
+		"why_wrong": "Por que as outras alternativas estão erradas",
+		"your_answer": "sua resposta",
+		"sources": "Fontes",
+		"next": "Próxima pergunta",
+		"finished": "Você respondeu todas as perguntas desta seleção.",
+		"finished_text": "Mude as dificuldades, revise as respostas erradas ou zere o progresso em Configurações."
+	},
+	"errors": {
+		"not_found": "Página não encontrada.",
+		"back": "Voltar ao quiz"
+	}
+}
