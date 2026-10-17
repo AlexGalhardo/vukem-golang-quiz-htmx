@@ -267,3 +267,16 @@ func TestInvalidAnalyticsAbortsBoot(t *testing.T) {
 		t.Fatalf("app with an http analytics script: err = %v, want ANALYTICS_SCRIPT_URL error", err)
 	}
 }
+
+func TestPagesAreCompressed(t *testing.T) {
+	t.Parallel()
+
+	app := vukemtest.New(t, bootstrap.New)
+	id := bank(t).First().ID
+
+	for _, target := range []string{"/", "/questions/" + id} {
+		app.Client(t).WithHeader("Accept-Encoding", "gzip").Get(target).
+			AssertOK().
+			AssertHeader("Content-Encoding", "gzip")
+	}
+}

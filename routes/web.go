@@ -70,6 +70,9 @@ func Web(bank *quiz.Bank, shuffle quiz.Shuffler) func(r *router.Router, app *vuk
 		r.Use(
 			ratelimit.Middleware(limiter, limitKey),
 			middleware.BodyLimit(maxBody),
+			// Pages carry the question index; responses never echo request
+			// input, so compressing them leaks nothing (no BREACH oracle).
+			middleware.Gzip(),
 			i18n.Middleware(app.I18n, i18n.MiddlewareConfig{Cookie: "-", SessionKey: "-"}),
 		)
 
