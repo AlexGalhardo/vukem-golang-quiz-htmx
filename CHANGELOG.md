@@ -19,7 +19,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
-- vukem bumped to v0.22.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
+- vukem bumped to v0.22.0, then v0.23.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
 
 ### Fixed
 

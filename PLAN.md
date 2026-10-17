@@ -65,7 +65,7 @@ The framework pin moves forward during the project. When the coordinator announc
 | Piece | Version | Notes |
 | --- | --- | --- |
 | Go | 1.27.2 | `go.mod` |
-| vukem | v0.22.0 | `go.mod`; CLI in the dev image |
+| vukem | v0.23.0 | `go.mod`; CLI in the dev image |
 | htmx | 4.0.0 | vendored |
 | Tailwind CSS / `@tailwindcss/vite` | 4.3.3 | CSS-first config |
 | Vite | 8.3.4 | |
