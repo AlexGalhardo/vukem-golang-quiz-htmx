@@ -1,0 +1,17 @@
+.git
+.github
+.claude
+node_modules
+bin
+dist
+storage
+coverage.out
+test-results
+playwright-report
+blob-report
+resources/public/build
+resources/public/hot
+.env
+.env.*
+!.env.example
+*.md

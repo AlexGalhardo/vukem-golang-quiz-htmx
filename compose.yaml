@@ -1,0 +1,60 @@
+# Local development: `docker compose up` runs the Go app with reload
+# (vukem serve) and the Vite dev server (Tailwind + HMR).
+# `docker compose --profile prod up --build prod` runs the production image.
+name: vukem-quiz
+
+services:
+  app:
+    build:
+      context: .
+      target: dev
+    environment:
+      APP_ENV: development
+      APP_DEBUG: "true"
+      APP_URL: http://localhost:${APP_PORT:-3000}
+      # vukem refuses to boot without APP_KEY even though the quiz uses no
+      # sessions or encryption; a fixed key is fine for local development.
+      APP_KEY: ${APP_KEY:-base64:ZGV2LW9ubHkta2V5LWRvLW5vdC11c2UtaW4tcHJvZCE=}
+      HOST: 0.0.0.0
+      PORT: "3000"
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    volumes:
+      - .:/app
+      - go-mod:/go/pkg/mod
+      - go-build:/root/.cache/go-build
+    depends_on:
+      - vite
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/up"]
+      interval: 10s
+      timeout: 3s
+      retries: 12
+      start_period: 60s
+
+  vite:
+    image: oven/bun:1.4.3-alpine
+    working_dir: /app
+    command: sh -c "bun install --frozen-lockfile --ignore-scripts && bun run dev"
+    ports:
+      - "${VITE_PORT:-5173}:5173"
+    volumes:
+      - .:/app
+      - node-modules:/app/node_modules
+
+  prod:
+    profiles: ["prod"]
+    build:
+      context: .
+      target: runtime
+    environment:
+      APP_URL: http://localhost:${PROD_PORT:-8080}
+      # Throwaway key for local runs only; Railway gets its own secret.
+      APP_KEY: ${APP_KEY:-base64:ZGV2LW9ubHkta2V5LWRvLW5vdC11c2UtaW4tcHJvZCE=}
+    ports:
+      - "${PROD_PORT:-8080}:3000"
+
+volumes:
+  go-mod:
+  go-build:
+  node-modules:
