@@ -22,10 +22,14 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - `docs/qa-checklist.md` with the first documented run, and UI screenshots in `docs/screenshots/`.
 - HTML pages and fragments are gzip-compressed.
+- SVG favicon (removes a 404 on every page load).
+- Manual `Lighthouse` workflow auditing a deployed URL from a clean CI runner.
 
 ### Changed
 
 - vukem bumped to v0.22.0, then v0.23.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
+
+- The theme bootstrap is inlined with the per-request CSP nonce instead of a render-blocking `/js/theme.js` request; htmx moved to `/vendor/htmx-4.0.0/htmx.min.js` and is cached as immutable.
 
 ### Fixed
 

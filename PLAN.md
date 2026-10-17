@@ -45,7 +45,7 @@ The framework pin moves forward during the project. When the coordinator announc
 | D10 | Navbar: dark/light toggle, EN/PT-BR switch | Owner |
 | D11 | Cookieless analytics (Plausible or Umami), env-configured, off by default | Owner |
 | D12 | vukem renders pages and htmx fragments; Tailwind CSS v4; minimal TypeScript for state | Owner |
-| D13 | **htmx 4.0.0**: stable since 2026-08-28 (GitHub release not marked pre-release). npm's `latest` dist-tag still points at 2.0.11 (2.x maintenance line) and 4.0.0 sits under `next`, so always install by exact version. Vendored at `resources/public/js/htmx.min.js` (SHA-256 `e484d917…593f`, identical to the npm tarball) | Verified 2026-10-17 |
+| D13 | **htmx 4.0.0**: stable since 2026-08-28 (GitHub release not marked pre-release). npm's `latest` dist-tag still points at 2.0.11 (2.x maintenance line) and 4.0.0 sits under `next`, so always install by exact version. Vendored at `resources/public/vendor/htmx-4.0.0/htmx.min.js` (versioned path, served immutable) (SHA-256 `e484d917…593f`, identical to the npm tarball) | Verified 2026-10-17 |
 | D14 | vukem pinned by exact tag (no `replace`), bumped by the [framework bump flow](#framework-bump-flow) | Owner |
 | D15 | Bun for all JS tooling; Vite 8 + `@tailwindcss/vite` as in the vukem starter, to exercise `vukem/vite` | Owner + battle-test |
 | D16 | Git hooks with lefthook (installed by `bun install`), not `.githooks`: same tool as the framework, cross-platform | Lead |
@@ -148,7 +148,7 @@ All accept `?lang=en|pt-BR`. Unknown ids/alternatives → 404 page/fragment; any
 4. The answer response renders the explanation card (correct/incorrect, explanation, why each wrong option is wrong, sources) and an `hx-swap-oob` replacement of the alternatives with disabled, colour-coded buttons (the lock). `HX-Trigger: {"quiz:answered": {"id", "alt", "correct", "difficulty"}}` lets `app.ts` update stats.
 5. "Next" (button or Enter) is handled by `app.ts`: next id from the queue → step 2's `htmx.ajax`, plus `history.pushState` to `/questions/{id}`.
 6. Shortcuts: `1`–`5` / `A`–`E` click the n-th alternative, `Enter` next; ignored while focus is in a form field.
-7. Theme sets `<html data-theme>` (Tailwind `dark:` custom variant); a tiny external script in `<head>` (`/js/theme.js`, nonce'd) applies it before paint to avoid a flash.
+7. Theme sets `<html data-theme>` (Tailwind `dark:` custom variant); a tiny inline script in `<head>` carrying the per-request CSP nonce applies it before paint (no flash, no render-blocking request).
 8. Language switch saves to `localStorage` and reloads the current question with `?lang=`.
 
 ### Analytics
