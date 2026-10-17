@@ -130,7 +130,11 @@ function shuffle<T>(items: T[]): T[] {
 class Quiz {
 	private state = loadState();
 	private readonly index = readIndex();
-	private readonly htmx = (window as unknown as { htmx?: Htmx }).htmx;
+	// Read at call time: the htmx script is deferred and runs after this
+	// module, so it is not defined yet when the class is constructed.
+	private get htmx(): Htmx | undefined {
+		return (window as unknown as { htmx?: Htmx }).htmx;
+	}
 
 	start(): void {
 		if (this.index.length === 0) return;
@@ -143,7 +147,9 @@ class Quiz {
 		this.bindEvents();
 
 		// "/" always renders the easiest question; move to where the user is.
+		// The entry remembers its question so Back can return to it.
 		const current = this.currentId();
+		if (current && window.history.state === null) window.history.replaceState({ id: current }, "");
 		if (location.pathname === "/" && current && !this.isNext(current)) {
 			this.goNext(true);
 		}
@@ -360,6 +366,10 @@ class Quiz {
 		});
 
 		document.addEventListener("click", (e) => {
+			// The settings panel floats over the question: a click elsewhere closes it.
+			const settings = document.querySelector<HTMLDetailsElement>('[data-testid="settings"]');
+			if (settings?.open && !settings.contains(e.target as Node | null)) settings.open = false;
+
 			const target = (e.target as Element | null)?.closest<HTMLElement>("[data-action], a[data-lang]");
 			if (!target) return;
 
@@ -389,15 +399,25 @@ class Quiz {
 
 		document.addEventListener("keydown", (e) => this.onKey(e));
 
-		window.addEventListener("popstate", () => {
+		window.addEventListener("popstate", (e) => {
+			const fromState = (e.state as { id?: unknown } | null)?.id;
 			const m = /^\/questions\/([a-z0-9-]+)$/.exec(location.pathname);
-			if (m?.[1]) this.load(m[1], "none");
+			const id = typeof fromState === "string" ? fromState : m?.[1];
+			if (id) this.load(id, "none");
 		});
 	}
 
 	private onKey(e: KeyboardEvent): void {
 		if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
 		const t = e.target as HTMLElement | null;
+
+		const settings = document.querySelector<HTMLDetailsElement>('[data-testid="settings"]');
+		if (e.key === "Escape" && settings?.open) {
+			settings.open = false;
+			settings.querySelector("summary")?.focus();
+			return;
+		}
+
 		if (t?.closest("input, select, textarea, [contenteditable], summary, details[open]")) return;
 
 		const key = e.key.toLowerCase();
