@@ -21,10 +21,10 @@ func TestLoadAnalytics(t *testing.T) {
 			name: "plausible",
 			env: map[string]string{
 				"ANALYTICS_PROVIDER": "Plausible", "ANALYTICS_SCRIPT_URL": "https://plausible.io/js/script.js",
-				"ANALYTICS_SITE_ID": "quiz.vukem.com",
+				"ANALYTICS_SITE_ID": "quiz.vukem.dev",
 			},
 			want: Analytics{
-				Provider: "plausible", ScriptURL: "https://plausible.io/js/script.js", SiteID: "quiz.vukem.com",
+				Provider: "plausible", ScriptURL: "https://plausible.io/js/script.js", SiteID: "quiz.vukem.dev",
 				Origin: "https://plausible.io",
 			},
 		},

@@ -211,10 +211,10 @@ func TestAnalytics(t *testing.T) {
 	tests := []struct {
 		provider, script, attr string
 	}{
-		{"plausible", "https://plausible.io/js/script.js", `data-domain="quiz.vukem.com"`},
-		{"umami", "https://cloud.umami.is/script.js", `data-website-id="quiz.vukem.com"`},
+		{"plausible", "https://plausible.io/js/script.js", `data-domain="quiz.vukem.dev"`},
+		{"umami", "https://cloud.umami.is/script.js", `data-website-id="quiz.vukem.dev"`},
 		// Self-hosted Umami used in production.
-		{"umami", "https://vukem-analytics.up.railway.app/script.js", `data-website-id="quiz.vukem.com"`},
+		{"umami", "https://vukem-analytics.up.railway.app/script.js", `data-website-id="quiz.vukem.dev"`},
 	}
 
 	for _, tt := range tests {
@@ -224,7 +224,7 @@ func TestAnalytics(t *testing.T) {
 			app := vukemtest.New(t, bootstrap.New, vukemtest.Options{Env: map[string]string{
 				"ANALYTICS_PROVIDER":   tt.provider,
 				"ANALYTICS_SCRIPT_URL": tt.script,
-				"ANALYTICS_SITE_ID":    "quiz.vukem.com",
+				"ANALYTICS_SITE_ID":    "quiz.vukem.dev",
 			}})
 
 			origin := tt.script[:strings.Index(tt.script[len("https://"):], "/")+len("https://")]

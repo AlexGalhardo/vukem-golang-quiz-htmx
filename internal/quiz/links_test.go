@@ -30,7 +30,7 @@ func TestSourceLinks(t *testing.T) {
 					t.Fatal(err)
 				}
 
-				req.Header.Set("User-Agent", "Mozilla/5.0 (link checker; quiz.vukem.com)")
+				req.Header.Set("User-Agent", "Mozilla/5.0 (link checker; quiz.vukem.dev)")
 
 				res, err := client.Do(req)
 				if err != nil {
