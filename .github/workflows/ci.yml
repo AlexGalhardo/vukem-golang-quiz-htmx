@@ -143,6 +143,36 @@ jobs:
           path: playwright-report
           retention-days: 7
 
+  qa:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      # playwright.qa.config.ts starts two apps from this binary (one with a
+      # tiny rate limit for the 429 check).
+      QA_APP_CMD: bin/app
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: oven-sh/setup-bun@v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun install --frozen-lockfile
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: app-linux-amd64
+          path: bin
+      - run: chmod +x bin/app
+      - run: bunx playwright install --with-deps chromium
+      - name: QA suite (crawler, human-like flows, security checks)
+        run: bun run test:qa
+      - uses: actions/upload-artifact@v7.0.2
+        if: failure()
+        with:
+          name: playwright-report-qa
+          path: |
+            playwright-report-qa
+            test-results/qa
+          retention-days: 7
+
   docker-dast:
     runs-on: ubuntu-latest
     permissions:
