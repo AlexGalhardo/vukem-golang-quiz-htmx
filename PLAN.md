@@ -58,7 +58,7 @@ The framework pin moves forward during the project. When the coordinator announc
 | D23 | `.editorconfig`: tabs size 4 everywhere except YAML (spec forbids tabs) and Markdown (markdownlint 2-space lists) | Owner + format constraints |
 | D24 | `.claude/settings.local.json` (`disableAllHooks: true`) is a per-developer file, git-ignored | Owner |
 | D25 | `RATE_LIMIT_PER_MINUTE` (default 120 per IP) so CI e2e/DAST, which share one IP, can raise it | Lead |
-| D28 | `TRUSTED_PROXIES` stays unset on Railway: its edge range is undocumented and the framework logger does not record peer addresses, so it could not be verified. The client IP is the edge address, so the Dockerfile sets `RATE_LIMIT_PER_MINUTE=1200` as a site-wide abuse cap, and HSTS is forced with `HSTS_FORCE=true` on Railway (vukem v0.25.0; browsers ignore HSTS over HTTP) | Lead, vukem docs deployment/docker-and-railway |
+| D28 | Railway trusts its edge: production logs showed `peer` addresses 100.64.0.1 to 100.64.0.7, so the quiz service sets `TRUSTED_PROXIES=100.64.0.0/24`, `CLIENT_IP_HEADER=X-Real-IP` and `TRUST_FORWARDED_PROTO=true` (owner approved on 2026-10-17), and `RATE_LIMIT_PER_MINUTE=120` per visitor. Railway does not document the range: if the edge moves outside it, the client IP falls back to the edge address (stricter limits, never spoofable). `HSTS_FORCE=true` stays as a belt-and-braces setting | Lead, vukem docs deployment/docker-and-railway |
 | D29 | Production binary built with the `vukem_nosqlite` tag from `.buildtags` (no database; 18.1 MB → 14.3 MB) | Lead |
 | D26 | Bank status 2026-10-17: 133 questions in 7 shards (very-easy 24, easy 31, medium 30, hard 24, very-hard 24), all EN + PT-BR; source links checked with `-tags=links`; technical + PT-BR review done (every snippet run on Go 1.27, no correct answer changed, factual fixes noted in the `fix(questions): review …` commits) | Lead |
 | D27 | `@axe-core/playwright` 4.14.0 (dev dependency, owner-approved via the coordinator) gates serious/critical accessibility violations in e2e | Owner |
@@ -300,7 +300,7 @@ Topics to cover: basics/types, zero values, strings/runes/bytes, slices (len/cap
 - [ ] DNS: `CNAME quiz.vukem.com → <service>.up.railway.app` (value shown by Railway when adding the custom domain).
 - [ ] Analytics: choose Plausible or Umami and provide `ANALYTICS_PROVIDER`, `ANALYTICS_SCRIPT_URL`, `ANALYTICS_SITE_ID` (Plausible: domain; Umami: website UUID).
 - [ ] GitHub: enable GHCR package visibility (public) after the first release; optionally branch protection on `main` requiring CI.
-- [ ] Railway trusted proxy range: log the peer address of a few production requests (Railway logs) and, if a stable narrow range shows up, set `TRUSTED_PROXIES` to it with `CLIENT_IP_HEADER=X-Real-IP` and `TRUST_FORWARDED_PROTO=true`, then lower `RATE_LIMIT_PER_MINUTE` (D28).
+- [x] Railway trusted proxy range: log the peer address of a few production requests (Railway logs) and, if a stable narrow range shows up, set `TRUSTED_PROXIES` to it with `CLIENT_IP_HEADER=X-Real-IP` and `TRUST_FORWARDED_PROTO=true`, then lower `RATE_LIMIT_PER_MINUTE` (D28).
 
 ## Definition of Done
 
