@@ -160,6 +160,7 @@ jobs:
         with:
           target: http://localhost:8080
           docker_name: zaproxy/zap-stable:2.17.0
+          rules_file_name: .zap/rules.tsv
           cmd_options: -a -j
           allow_issue_writing: false
           fail_action: true
