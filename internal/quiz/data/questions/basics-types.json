@@ -616,7 +616,7 @@
 		},
 		"explanation": {
 			"en": "For `s[low:high]` the length is `high - low` = 2, and the capacity runs from `low` to the end of the underlying array: `cap(s) - low` = 5 - 1 = 4. The new slice shares the same backing array as `s`, so it can be resliced up to that capacity.",
-			"pt-BR": "Para `s[low:high]` o comprimento é `high - low` = 2, e a capacidade vai de `low` até o fim do array subjacente: `cap(s) - low` = 5 - 1 = 4. O novo slice compartilha o mesmo backing array de `s`, por isso pode ser refatiado até essa capacidade."
+			"pt-BR": "Para `s[low:high]` o comprimento é `high - low` = 2, e a capacidade vai de `low` até o fim do array subjacente: `cap(s) - low` = 5 - 1 = 4. O novo slice compartilha o mesmo backing array de `s`, por isso pode ser fatiado novamente até essa capacidade."
 		},
 		"alternatives": [
 			{
@@ -667,8 +667,8 @@
 					"pt-BR": "3 3"
 				},
 				"why": {
-					"en": "Neither value is 3: the length is `high - low` and the capacity is `cap(s) - low`.",
-					"pt-BR": "Nenhum dos valores é 3: o comprimento é `high - low` e a capacidade é `cap(s) - low`."
+					"en": "That treats the high bound as inclusive and stops the capacity at `high`; in fact the length is `high - low` = 2 and the capacity is `cap(s) - low` = 4.",
+					"pt-BR": "Isso trata o limite superior como inclusivo e corta a capacidade em `high`; na verdade o comprimento é `high - low` = 2 e a capacidade é `cap(s) - low` = 4."
 				}
 			}
 		],
@@ -723,8 +723,8 @@
 					"pt-BR": "true true 0 0"
 				},
 				"why": {
-					"en": "An empty composite literal allocates a slice header with a non-nil pointer, so it is not nil even though it is empty.",
-					"pt-BR": "Um literal composto vazio cria um slice com ponteiro não nil, então ele não é nil mesmo estando vazio."
+					"en": "An empty composite literal produces a slice whose data pointer is non-nil (it points to a zero-size array), so it is not nil even though it is empty.",
+					"pt-BR": "Um literal composto vazio produz um slice cujo ponteiro de dados não é nil (aponta para um array de tamanho zero), então ele não é nil mesmo estando vazio."
 				}
 			},
 			{
@@ -745,8 +745,8 @@
 					"pt-BR": "Ocorre panic ao chamar len em um slice nil"
 				},
 				"why": {
-					"en": "`len` and `cap` of a nil slice are simply 0; nil slices are safe to read, range over and append to.",
-					"pt-BR": "`len` e `cap` de um slice nil são simplesmente 0; slices nil podem ser lidos, percorridos com range e usados em append."
+					"en": "`len` and `cap` of a nil slice are simply 0; nil slices are safe to pass to `len`/`cap`, range over and append to.",
+					"pt-BR": "`len` e `cap` de um slice nil são simplesmente 0; slices nil podem ser passados para `len`/`cap`, percorridos com range e usados em append."
 				}
 			},
 			{
@@ -972,8 +972,8 @@
 			"pt-BR": "O que este código imprime?"
 		},
 		"explanation": {
-			"en": "Each `if` body is a new block. Inside it, `x := 2` declares a brand new `x` that shadows the outer one; `x++` changes only the inner variable, which goes out of scope at the closing brace. The outer `x` is still 1. This is a classic bug with `err` or a result variable redeclared via `:=` inside a block; `go vet -vettool` with the shadow analyzer can catch it.",
-			"pt-BR": "Cada corpo de `if` é um novo bloco. Dentro dele, `x := 2` declara um `x` totalmente novo que faz shadowing do externo; `x++` altera só a variável interna, que sai de escopo ao fechar a chave. O `x` externo continua 1. É um bug clássico com `err` ou uma variável de resultado redeclarada com `:=` dentro de um bloco; o analisador shadow (via `go vet -vettool`) detecta isso."
+			"en": "Each `if` body is a new block. Inside it, `x := 2` declares a brand new `x` that shadows the outer one; `x++` changes only the inner variable, which goes out of scope at the closing brace. The outer `x` is still 1. This is a classic bug with `err` or a result variable redeclared via `:=` inside a block; the `shadow` analyzer from golang.org/x/tools (run with `go vet -vettool`) can catch it.",
+			"pt-BR": "Cada corpo de `if` é um novo bloco. Dentro dele, `x := 2` declara um `x` totalmente novo que faz shadowing do externo; `x++` altera só a variável interna, que sai de escopo ao fechar a chave. O `x` externo continua 1. É um bug clássico com `err` ou uma variável de resultado redeclarada com `:=` dentro de um bloco; o analisador `shadow` do golang.org/x/tools (rodado com `go vet -vettool`) detecta isso."
 		},
 		"alternatives": [
 			{
@@ -994,8 +994,8 @@
 					"pt-BR": "2"
 				},
 				"why": {
-					"en": "Neither the inner initial value nor its increment leaks out of the block; the outer `x` is never touched.",
-					"pt-BR": "Nem o valor inicial interno nem o incremento vazam para fora do bloco; o `x` externo nunca é tocado."
+					"en": "That assumes `x := 2` assigned to the outer variable; it declares a new inner `x`, so neither the 2 nor the increment reaches the outer one.",
+					"pt-BR": "Isso supõe que `x := 2` atribuiu à variável externa; ele declara um novo `x` interno, então nem o 2 nem o incremento chegam ao externo."
 				}
 			},
 			{
@@ -1262,8 +1262,8 @@
 					"pt-BR": "Ocorre panic: integer overflow"
 				},
 				"why": {
-					"en": "Go never panics on arithmetic overflow; only integer division by zero panics.",
-					"pt-BR": "Go nunca causa panic em overflow aritmético; só divisão inteira por zero causa panic."
+					"en": "Integer overflow is defined behaviour in Go and never panics; the arithmetic panic you may be thinking of is integer division by zero.",
+					"pt-BR": "Overflow de inteiro é comportamento definido em Go e nunca causa panic; o panic aritmético que talvez você tenha em mente é a divisão inteira por zero."
 				}
 			},
 			{
@@ -1586,8 +1586,8 @@
 			"pt-BR": "O que acontece quando este código roda?"
 		},
 		"explanation": {
-			"en": "A struct is comparable when all its fields are comparable, and an `any` field is comparable as far as the compiler knows, so `a == b` compiles. At run time, comparing two interface values with identical dynamic types compares the dynamic values, and `[]int` is not comparable, so the program panics with `runtime error: comparing uncomparable type []int`. The same panic happens when such a value is used as a map key.",
-			"pt-BR": "Uma struct é comparável quando todos os campos são comparáveis, e um campo `any` é comparável do ponto de vista do compilador, então `a == b` compila. Em tempo de execução, comparar dois valores interface com o mesmo tipo dinâmico compara os valores dinâmicos, e `[]int` não é comparável, então o programa causa panic com `runtime error: comparing uncomparable type []int`. O mesmo panic ocorre ao usar esse valor como chave de map."
+			"en": "A struct is comparable when all its fields are comparable, and an `any` field is comparable as far as the compiler knows, so `a == b` compiles. At run time, comparing two interface values with identical dynamic types compares the dynamic values, and `[]int` is not comparable, so the program panics with `runtime error: comparing uncomparable type []int`. Using such a value as a map key panics in a similar way (`runtime error: hash of unhashable type []int`).",
+			"pt-BR": "Uma struct é comparável quando todos os campos são comparáveis, e um campo `any` é comparável do ponto de vista do compilador, então `a == b` compila. Em tempo de execução, comparar dois valores interface com o mesmo tipo dinâmico compara os valores dinâmicos, e `[]int` não é comparável, então o programa causa panic com `runtime error: comparing uncomparable type []int`. Usar esse valor como chave de map causa um panic parecido (`runtime error: hash of unhashable type []int`)."
 		},
 		"alternatives": [
 			{
