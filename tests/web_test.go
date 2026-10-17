@@ -2,7 +2,6 @@
 package tests
 
 import (
-	"strings"
 	"testing"
 
 	"github.com/AlexGalhardo/vukem/vukemtest"
@@ -23,15 +22,12 @@ func TestQuizPage(t *testing.T) {
 
 	app := vukemtest.New(t, bootstrap.New)
 
-	res := app.Client(t).Get("/").
+	app.Client(t).Get("/").
 		AssertOK().
 		AssertSee(`data-testid="quiz-grid"`).
 		AssertSee(`/js/htmx.min.js`).
-		AssertHeader("X-Content-Type-Options", "nosniff")
-
-	if csp := res.Header("Content-Security-Policy"); !strings.Contains(csp, "default-src 'self'") {
-		t.Errorf("Content-Security-Policy = %q, want default-src 'self'", csp)
-	}
+		AssertHeader("X-Content-Type-Options", "nosniff").
+		AssertHeaderContains("Content-Security-Policy", "default-src 'self'")
 }
 
 func TestStaticAssets(t *testing.T) {
