@@ -53,3 +53,13 @@ Exploratory checks that complement the automated suites (`go test ./...`, `bun r
 | `scripts/smoke.sh` against production | Pass |
 | Analytics in production | Pass: Umami script 200, no console/CSP errors, no cookies |
 | Lighthouse mobile (13.5.0, production) | Local machine: 89 (its antivirus injects a render-blocking script; not representative). Clean CI runner via the `Lighthouse` workflow, 3 runs each: before (run 39047883407) performance 96/100/100, best practices 96 (`/favicon.ico` 404); after inlining the nonce'd theme bootstrap, immutable vendored htmx and an SVG favicon (run 39048889814) 100/100/100/100 in every run (FCP 0.9–1.0 s, LCP 1.1–1.6 s, TBT ≤ 30 ms, CLS 0) |
+
+### 2026-10-17 (lead agent, main at `f4d014b`: theme radiogroup, settings panel/sheet, History, Review)
+
+| Check | Result |
+| --- | --- |
+| e2e + axe (chromium + Pixel 7), production binary | 90 passed: theme radiogroup (arrow keys, live system), settings dialog (44px targets, Escape, backdrop, focus return) and 375px bottom sheet, history (in progress, stopped early, completed, inline clear), review (badge, redo until right, session-only), axe on every panel in light/dark × EN/PT-BR |
+| Client unit tests (`bun run test:unit`) | 9 passed (history storage/runs, review session) |
+| Production smoke + HSTS | Pass on <https://quiz.vukem.dev> |
+| Lighthouse mobile, clean runner (run 39068988695) | 100/100/100/100 in runs 2 and 3; run 1 performance 81 (TBT 720 ms on the first, cold run) |
+| Screenshots (production, light/dark × desktop/mobile: answered, settings, history, review) | [`docs/screenshots/`](screenshots/) |
