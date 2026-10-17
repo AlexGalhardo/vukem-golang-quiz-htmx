@@ -41,7 +41,8 @@
 		"sources": "Fontes",
 		"next": "Próxima pergunta",
 		"finished": "Você respondeu todas as perguntas desta seleção.",
-		"finished_text": "Mude as dificuldades, refaça seus erros em Revisar ou zere o progresso em Configurações."
+		"finished_text": "Mude as dificuldades, refaça seus erros em Revisar ou zere o progresso em Configurações.",
+		"code": "Exemplo de código"
 	},
 	"errors": {
 		"not_found": "Página não encontrada.",

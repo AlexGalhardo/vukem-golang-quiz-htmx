@@ -41,7 +41,8 @@
 		"sources": "Sources",
 		"next": "Next question",
 		"finished": "You answered every question in this selection.",
-		"finished_text": "Change the difficulties, redo your wrong answers from Review, or reset your progress in Settings."
+		"finished_text": "Change the difficulties, redo your wrong answers from Review, or reset your progress in Settings.",
+		"code": "Code sample"
 	},
 	"errors": {
 		"not_found": "Page not found.",
