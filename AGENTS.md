@@ -19,6 +19,8 @@ Go interview quiz at <https://quiz.vukem.com>, built on the [vukem](https://gith
 - `bun run test:e2e`: Playwright (`E2E_BASE_URL=http://localhost:3100` targets a running app)
 - `docker compose --profile prod up --build prod`: production image on :8080
 - `go tool govulncheck ./...`
+- `go run ./internal/tools/quizcheck [shard.json...]`: validate question shards and print counts; `go test -tags=links ./internal/quiz/` checks every source URL (network)
+- e2e against the production binary: `bun run build && go build -o bin/app ./cmd/app`, start it with `APP_ENV=production APP_KEY=... PORT=3100 RATE_LIMIT_PER_MINUTE=100000`, then `E2E_BASE_URL=http://localhost:3100 bun run test:e2e`
 
 ## Rules
 
@@ -36,7 +38,8 @@ Go interview quiz at <https://quiz.vukem.com>, built on the [vukem](https://gith
 | --- | --- |
 | `routes/web.go` | middleware stack and routes |
 | `app/controllers/` | handlers |
-| `internal/quiz/` | question bank (planned) |
+| `internal/quiz/` | question model, loader, validation; shards in `internal/quiz/data/questions/<topic>.json` |
+| `internal/settings/` | env settings: analytics, proxy, rate limit |
 | `resources/` | views, CSS, TS, public assets |
 | `tests/`, `e2e/` | Go HTTP tests, Playwright |
 | `.claude/rules/`, `.claude/skills/` | agent rules and skills |

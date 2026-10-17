@@ -57,13 +57,15 @@ The framework pin moves forward during the project. When the coordinator announc
 | D22 | Hosting on Railway, Dockerfile builder, healthcheck `/up` (`railway.json`) | Owner |
 | D23 | `.editorconfig`: tabs size 4 everywhere except YAML (spec forbids tabs) and Markdown (markdownlint 2-space lists) | Owner + format constraints |
 | D24 | `.claude/settings.local.json` (`disableAllHooks: true`) is a per-developer file, git-ignored | Owner |
+| D25 | `RATE_LIMIT_PER_MINUTE` (default 120 per IP) so CI e2e/DAST, which share one IP, can raise it | Lead |
+| D26 | Bank status 2026-10-17: 133 questions in 7 shards (very-easy 24, easy 31, medium 30, hard 24, very-hard 24), all EN + PT-BR; source links checked with `-tags=links` | Lead |
 
 ## Stack (exact versions, verified 2026-10-17)
 
 | Piece | Version | Notes |
 | --- | --- | --- |
 | Go | 1.27.2 | `go.mod` |
-| vukem | v0.21.1 | `go.mod`; CLI in the dev image |
+| vukem | v0.22.0 | `go.mod`; CLI in the dev image |
 | htmx | 4.0.0 | vendored |
 | Tailwind CSS / `@tailwindcss/vite` | 4.3.3 | CSS-first config |
 | Vite | 8.3.4 | |
@@ -89,7 +91,7 @@ bootstrap/app.go             vukem.New: views, Vite, routes (later: translations
 routes/web.go                middleware stack + routes
 app/controllers/             quiz handlers
 internal/quiz/               question model, loader, validation, shuffling (Phase Q/U)
-internal/quiz/data/          questions-*.json (embedded), one file per difficulty
+internal/quiz/data/questions/ <topic>.json shards (embedded), any difficulty mix
 resources/views/             layouts/app.html, quiz/*.html (page + fragments as blocks)
 resources/lang/              en.json, pt-BR.json (UI strings, vukem i18n)
 resources/css/app.css        Tailwind v4 entry (@theme tokens, dark variant)
@@ -103,7 +105,7 @@ docs/                        qa-checklist.md, questions-style-guide.md
 
 ### Question JSON schema
 
-Files `internal/quiz/data/questions-<difficulty>.json`, each an array:
+Files `internal/quiz/data/questions/<topic>.json` (one shard per topic, so writers do not conflict), each an array:
 
 ```json
 {
@@ -123,7 +125,7 @@ Files `internal/quiz/data/questions-<difficulty>.json`, each an array:
 }
 ```
 
-Rules enforced at boot (fail to start) and by `internal/quiz` tests: `id` unique, kebab-case; `difficulty` in the 5 values; exactly 5 alternatives with ids `a`–`e`, exactly one `correct`; every wrong alternative has `why`; `question`, `explanation`, every `text`/`why` present and non-empty in `en` and `pt-BR`; 1–3 sources with `https://` URLs and a `kind` in `spec|faq|effective-go|memory-model|doc|blog|reddit|forum|video|talk`; `code` optional (rendered escaped in `<pre><code>`).
+Rules enforced at boot (fail to start) and by `internal/quiz` tests: `id` unique, kebab-case; `difficulty` in the 5 values; exactly 5 alternatives with ids `a`–`e`, exactly one `correct`; every wrong alternative has `why`; `question`, `explanation`, every `text`/`why` present and non-empty in `en` and `pt-BR`; 1–3 sources with `https://` URLs and a `kind` in `spec|faq|effective-go|memory-model|doc|blog|reddit|forum|video|talk|article|book|source-code|issue`; alternatives must differ after case/space folding; question text + code must be unique across the bank (`go run ./internal/tools/quizcheck [shard...]` checks shards in isolation); `code` optional (rendered escaped in `<pre><code>`).
 
 ### Routes
 
@@ -168,15 +170,15 @@ Each item has a test (`tests/security_test.go`, e2e or CI scan) before release.
 - [x] Strict CSP with per-request nonce (vukem `SecureHeaders`), no inline scripts/styles/handlers in views
 - [x] `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, COOP
 - [ ] HSTS in production behind Railway's TLS proxy (`TrustForwardedProto`, Railway edge)
-- [ ] Rate limit per IP on every route except `/up` (vukem `ratelimit`), correct client IP behind the proxy
+- [x] Rate limit per IP on every route except `/up` (vukem `ratelimit`), correct client IP behind the proxy
 - [x] Request body cap (16 KiB)
-- [ ] Only `GET`/`HEAD` on quiz routes (405 otherwise)
-- [ ] Params allowlisted: question id, alternative `a`–`e`, `lang`; XSS payloads in params never reflected
-- [ ] Path traversal on static files and ids rejected (`../`, encoded variants)
-- [ ] Oversized URLs/headers rejected (server limits)
-- [ ] No cookies set on any response (cookieless by design)
-- [ ] Question content rendered escaped; JSON index via the `json` func
-- [ ] Error pages without stack traces in production
+- [x] Only `GET`/`HEAD` on quiz routes (405 otherwise)
+- [x] Params allowlisted: question id, alternative `a`–`e`, `lang`; XSS payloads in params never reflected
+- [x] Path traversal on static files and ids rejected (`../`, encoded variants)
+- [x] Oversized URLs/headers rejected (server limits)
+- [x] No cookies set on any response (cookieless by design)
+- [x] Question content rendered escaped; JSON index via the `json` func
+- [x] Error pages without stack traces in production
 - [ ] Container runs as non-root, read-only filesystem friendly
 - [ ] govulncheck, ZAP baseline and Nuclei clean in CI
 
@@ -221,25 +223,25 @@ Each item has a test (`tests/security_test.go`, e2e or CI scan) before release.
 
 #### Q.1 Engine for the bank
 
-- [ ] Q.1.1 `internal/quiz`: types + `Load(fs.FS)` + `Validate` with every schema rule → verify: `go test ./internal/quiz/...` (table of invalid fixtures in `testdata/`)
-- [ ] Q.1.2 Bank loaded in `bootstrap` and passed to controllers; invalid bank aborts boot → verify: test boots with a broken fixture and expects an error
-- [ ] Q.1.3 `docs/questions-style-guide.md`: tone, length, code snippet rules, PT-BR terminology (keep Go terms in English: goroutine, channel, slice), source priorities → verify: markdownlint
+- [x] Q.1.1 `internal/quiz`: types + `Load(fs.FS)` + `Validate` with every schema rule → verify: `go test ./internal/quiz/...` (table of invalid fixtures in `testdata/`)
+- [x] Q.1.2 Bank loaded in `bootstrap` and passed to controllers; invalid bank aborts boot → verify: test boots with a broken fixture and expects an error
+- [x] Q.1.3 `docs/questions-style-guide.md`: tone, length, code snippet rules, PT-BR terminology (keep Go terms in English: goroutine, channel, slice), source priorities → verify: markdownlint
 
 #### Q.2 Research and writing (batches of 10, each with sources)
 
 Topics to cover: basics/types, zero values, strings/runes/bytes, slices (len/cap/append aliasing), maps, structs/embedding, methods/receivers, interfaces (nil interface, type assertions, type sets), errors (wrapping, `errors.Is/As`, `AsType`), defer/panic/recover, closures and loop variables (Go 1.22 semantics), goroutines, channels, select, `sync` (Mutex, WaitGroup, Once, `WaitGroup.Go`), `context`, memory model/data races, generics, iterators (`range over func`), packages/modules/`go.mod`/MVS, `init` order, testing (table tests, `t.Parallel`, fuzzing, `synctest`, benchmarks `b.Loop`), escape analysis/GC, runtime/scheduler (GMP), `unsafe`, reflection, `net/http`, `encoding/json`, tooling (`go vet`, race detector, pprof).
 
-- [ ] Q.2.1 very-easy batch 1 (10) → verify: schema test green, every source URL returns 2xx/3xx (`go test -tags=links ./internal/quiz/...`)
-- [ ] Q.2.2 very-easy batch 2 (10) → verify: same
-- [ ] Q.2.3 easy batch 1 (10) → verify: same
-- [ ] Q.2.4 easy batch 2 (10) → verify: same
-- [ ] Q.2.5 medium batch 1 (10) → verify: same
-- [ ] Q.2.6 medium batch 2 (10) → verify: same
-- [ ] Q.2.7 medium batch 3 (10) → verify: same
-- [ ] Q.2.8 hard batch 1 (10) → verify: same
-- [ ] Q.2.9 hard batch 2 (10) → verify: same
-- [ ] Q.2.10 very-hard batch 1 (10) → verify: same
-- [ ] Q.2.11 very-hard batch 2 (5+) → verify: total ≥ 105, every difficulty ≥ 15
+- [x] Q.2.1 very-easy batch 1 (10) → verify: schema test green, every source URL returns 2xx/3xx (`go test -tags=links ./internal/quiz/...`)
+- [x] Q.2.2 very-easy batch 2 (10) → verify: same
+- [x] Q.2.3 easy batch 1 (10) → verify: same
+- [x] Q.2.4 easy batch 2 (10) → verify: same
+- [x] Q.2.5 medium batch 1 (10) → verify: same
+- [x] Q.2.6 medium batch 2 (10) → verify: same
+- [x] Q.2.7 medium batch 3 (10) → verify: same
+- [x] Q.2.8 hard batch 1 (10) → verify: same
+- [x] Q.2.9 hard batch 2 (10) → verify: same
+- [x] Q.2.10 very-hard batch 1 (10) → verify: same
+- [x] Q.2.11 very-hard batch 2 (5+) → verify: total ≥ 105, every difficulty ≥ 15
 - [ ] Q.2.12 Technical review pass: every correct answer re-checked against the spec/docs for Go 1.27 → verify: review notes in the PR/commit body
 - [ ] Q.2.13 PT-BR review pass (terminology, accents, natural phrasing) → verify: spot-check 20 questions in the UI
 
@@ -247,30 +249,30 @@ Topics to cover: basics/types, zero values, strings/runes/bytes, slices (len/cap
 
 #### U.1 Server side
 
-- [ ] U.1.1 i18n: `resources/lang/{en,pt-BR}.json`, `vukem.WithTranslations`, `i18n.Middleware` with cookie/session sources off → verify: test `?lang=pt-BR` renders PT-BR UI strings, `Accept-Language` fallback
-- [ ] U.1.2 `GET /questions/{id}` page + fragment (`web.Block("question")`), alternatives shuffled per request → verify: HTTP tests (full vs `HTMX()` fragment, order varies across requests, 404 unknown id)
-- [ ] U.1.3 `GET /questions/{id}/answers/{alt}`: explanation card, OOB lock, `HX-Trigger` → verify: tests (`AssertFragment`, `AssertHXTrigger("quiz:answered")`, 404 for bad alt)
-- [ ] U.1.4 Question index JSON in the page → verify: test parses `#quiz-index` and checks count and order
-- [ ] U.1.5 Middleware: rate limit (memory, per IP, `/up` exempt), `TrustedProxies`/`TrustForwardedProto` from env for Railway, method allowlist → verify: security tests
-- [ ] U.1.6 Analytics config + CSP origin → verify: tests for off (no script), plausible, umami, invalid config boot error
+- [x] U.1.1 i18n: `resources/lang/{en,pt-BR}.json`, `vukem.WithTranslations`, `i18n.Middleware` with cookie/session sources off → verify: test `?lang=pt-BR` renders PT-BR UI strings, `Accept-Language` fallback
+- [x] U.1.2 `GET /questions/{id}` page + fragment (`web.Block("question")`), alternatives shuffled per request → verify: HTTP tests (full vs `HTMX()` fragment, order varies across requests, 404 unknown id)
+- [x] U.1.3 `GET /questions/{id}/answers/{alt}`: explanation card, OOB lock, `HX-Trigger` → verify: tests (`AssertFragment`, `AssertHXTrigger("quiz:answered")`, 404 for bad alt)
+- [x] U.1.4 Question index JSON in the page → verify: test parses `#quiz-index` and checks count and order
+- [x] U.1.5 Middleware: rate limit (memory, per IP, `/up` exempt), `TrustedProxies`/`TrustForwardedProto` from env for Railway, method allowlist → verify: security tests
+- [x] U.1.6 Analytics config + CSP origin → verify: tests for off (no script), plausible, umami, invalid config boot error
 
 #### U.2 Client side
 
-- [ ] U.2.1 `app.ts` storage module: versioned keys, guarded parse, reset → verify: Playwright test with corrupted storage still loads
-- [ ] U.2.2 Queue: ordered/random, difficulty filter, review-wrong mode → verify: e2e for each mode
-- [ ] U.2.3 Answer flow: lock, explanation, stats update, Next, deep links/back button → verify: e2e full run of 5 questions
-- [ ] U.2.4 Keyboard shortcuts (1–5, A–E, Enter) with visible hints → verify: e2e keyboard-only run
-- [ ] U.2.5 Navbar: theme toggle (no flash), language switch, progress X/N, accuracy overall + per difficulty, reset with confirm → verify: e2e
+- [x] U.2.1 `app.ts` storage module: versioned keys, guarded parse, reset → verify: Playwright test with corrupted storage still loads
+- [x] U.2.2 Queue: ordered/random, difficulty filter, review-wrong mode → verify: e2e for each mode
+- [x] U.2.3 Answer flow: lock, explanation, stats update, Next, deep links/back button → verify: e2e full run of 5 questions
+- [x] U.2.4 Keyboard shortcuts (1–5, A–E, Enter) with visible hints → verify: e2e keyboard-only run
+- [x] U.2.5 Navbar: theme toggle (no flash), language switch, progress X/N, accuracy overall + per difficulty, reset with confirm → verify: e2e
 - [ ] U.2.6 Responsive layout (2 columns ≥ md, 1 column mobile), focus styles, `aria-live` explanation → verify: e2e mobile project + axe scan
 - [ ] U.2.7 Visual pass against the reference UX in both themes → verify: screenshots attached to the commit/PR
 
 ### T — Tests and QA
 
 - [ ] T.1 Unit: `internal/quiz` (load, validate, shuffle, queue helpers) → verify: coverage ≥ 85% for the package
-- [ ] T.2 Integration: HTTP tests for every route × locale → verify: `go test ./tests/...`
-- [ ] T.3 E2E: smoke, flows, modes, shortcuts, theme, i18n, mobile → verify: CI e2e green
+- [x] T.2 Integration: HTTP tests for every route × locale → verify: `go test ./tests/...`
+- [x] T.3 E2E: smoke, flows, modes, shortcuts, theme, i18n, mobile → verify: CI e2e green
 - [ ] T.4 Smoke script against any URL (`scripts/smoke.sh <url>`): `/up`, `/`, a question, an answer → verify: run against Docker and production
-- [ ] T.5 OWASP abuse suite: XSS in params, security headers, CSP, rate limit (429 + `Retry-After`), path traversal, oversized requests, wrong methods, no cookies → verify: `go test -run TestSecurity ./tests/...`
+- [x] T.5 OWASP abuse suite: XSS in params, security headers, CSP, rate limit (429 + `Retry-After`), path traversal, oversized requests, wrong methods, no cookies → verify: `go test -run TestSecurity ./tests/...`
 - [ ] T.6 `docs/qa-checklist.md`: exploratory QA checklist (browsers, keyboard, screen reader, slow 3G, storage disabled, both languages/themes) and one documented run → verify: checklist committed with results
 - [ ] T.7 Accessibility: axe in Playwright, zero serious/critical → verify: CI
 - [ ] T.8 Lighthouse ≥ 95 performance/accessibility/best practices on mobile → verify: report saved
