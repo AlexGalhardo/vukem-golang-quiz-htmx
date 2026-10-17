@@ -12,7 +12,7 @@ Go interview quiz at <https://quiz.vukem.com>, built on the [vukem](https://gith
 
 - `bun install`: JS deps and git hooks (lefthook)
 - `docker compose up`: app with reload on :3000 + Vite on :5173 (`APP_PORT=3100` moves the app)
-- `go run ./cmd/app`: app without Docker (needs `.env` from `.env.example` with `APP_KEY`)
+- `go run ./cmd/app`: app without Docker (`.env` from `.env.example`; `APP_KEY` only needed in production)
 - `go test ./...` / `go test -race ./...`: Go tests
 - `golangci-lint fmt ./... && golangci-lint run ./...`: format and lint (v2.15.0)
 - `bun run build` / `bun run typecheck` / `bunx markdownlint-cli2`

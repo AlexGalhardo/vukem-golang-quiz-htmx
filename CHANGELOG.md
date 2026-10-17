@@ -14,7 +14,7 @@ All notable changes to this project are documented here. The format follows [Kee
 - Question bank: 133 Go interview questions in 7 topic shards (very-easy 24, easy 31, medium 30, hard 24, very-hard 24), each in English and Brazilian Portuguese with five alternatives, an explanation, why every wrong option is wrong, and 1–3 sources; validated at boot, by the schema test and by `quizcheck`.
 - Quiz UI: question pages and htmx fragments with shuffled alternatives, answer lock with explanation and sources, Next/Back, ordered or random mode, difficulty filter, review-wrong mode, progress and accuracy per difficulty in `localStorage`, reset, keyboard shortcuts (1–5, A–E, Enter), dark/light theme without flash, EN/PT-BR switch, 404 page.
 - Cookieless analytics (Plausible or Umami) configured by environment, off by default, with the script origin added to the CSP.
-- `TRUSTED_PROXIES`, `TRUST_FORWARDED_PROTO` and `RATE_LIMIT_PER_MINUTE` (default 120 per IP; `/up` exempt).
+- `RATE_LIMIT_PER_MINUTE` (default 120 per client IP; `/up` exempt; the Docker image sets 1200 because behind Railway every visitor shares the edge IP). Proxy settings (`TRUSTED_PROXIES`, `TRUST_FORWARDED_PROTO`, `CLIENT_IP_HEADER`) come from vukem.
 - Tests: HTTP tests for every route and locale, security abuse suite (headers, no cookies, GET only, reflected XSS, path traversal, error pages, rate limit, oversized URLs), Playwright e2e for every button, link, shortcut and setting on desktop and mobile.
 
 - Accessibility: axe scan (`@axe-core/playwright` 4.14.0, dev dependency) in the e2e suite on every page state, light/dark, EN/PT-BR, desktop/mobile; serious or critical violations fail CI.
@@ -27,9 +27,12 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
-- vukem bumped to v0.22.0, then v0.23.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
+- vukem bumped to v0.22.0, v0.23.0, then v0.24.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
 
 - The theme bootstrap is inlined with the per-request CSP nonce instead of a render-blocking `/js/theme.js` request; htmx moved to `/vendor/htmx-4.0.0/htmx.min.js` and is cached as immutable.
+
+- The middleware stack is vukem's stateless `DefaultMiddlewareWith` (adds maintenance mode); the analytics origin goes through `CSPSources`; the app's own proxy settings were removed; htmx loads before the Vite entry; development runs without `APP_KEY`; the production binary is built without SQLite (`vukem_nosqlite`).
+- The Docker image no longer trusts `100.0.0.0/8` (undocumented Railway range); HSTS is sent unconditionally in production with an https `APP_URL`.
 
 ### Fixed
 

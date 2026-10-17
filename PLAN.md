@@ -49,15 +49,17 @@ The framework pin moves forward during the project. When the coordinator announc
 | D14 | vukem pinned by exact tag (no `replace`), bumped by the [framework bump flow](#framework-bump-flow) | Owner |
 | D15 | Bun for all JS tooling; Vite 8 + `@tailwindcss/vite` as in the vukem starter, to exercise `vukem/vite` | Owner + battle-test |
 | D16 | Git hooks with lefthook (installed by `bun install`), not `.githooks`: same tool as the framework, cross-platform | Lead |
-| D17 | `vukem.DefaultMiddleware` is not used: it installs sessions + CSRF (unneeded, stateless app) and cannot take a CSP or `TrustForwardedProto`. Routes build the stack explicitly | Lead, see feedback |
+| D17 | Since vukem v0.24.0 routes use `vukem.DefaultMiddlewareWith(..., MiddlewareOptions{Stateless: true})` (no sessions/cookies, Origin-only CSRF, maintenance mode, proxy settings from env) with `CSPSources` for the analytics origin, plus static files, rate limit, 16 KiB body cap and gzip | Lead |
 | D18 | Server is stateless. The page embeds a question index (ids + difficulty) as JSON; the client builds the queue (mode, filter, review-wrong) and fetches fragments by id | Lead |
 | D19 | Answer check is `GET` (idempotent, no state change, no CSRF surface) | Lead |
-| D20 | Locale comes from `?lang=` (the client adds it from `localStorage`), then `Accept-Language`, then `en`; the i18n cookie and session sources are disabled | Lead |
+| D20 | Locale comes from `?lang=` (the client adds it from `localStorage`), then `Accept-Language`, then `en`; no session exists; the framework's i18n middleware may read a `lang` cookie but the app never sets one | Lead |
 | D21 | Runtime image `alpine:3.24.2` with a non-root user (UID 65532), so `HEALTHCHECK` can use busybox `wget` | Lead |
 | D22 | Hosting on Railway, Dockerfile builder, healthcheck `/up` (`railway.json`) | Owner |
 | D23 | `.editorconfig`: tabs size 4 everywhere except YAML (spec forbids tabs) and Markdown (markdownlint 2-space lists) | Owner + format constraints |
 | D24 | `.claude/settings.local.json` (`disableAllHooks: true`) is a per-developer file, git-ignored | Owner |
 | D25 | `RATE_LIMIT_PER_MINUTE` (default 120 per IP) so CI e2e/DAST, which share one IP, can raise it | Lead |
+| D28 | `TRUSTED_PROXIES` stays unset on Railway: its edge range is undocumented and the framework logger does not record peer addresses, so it could not be verified. The client IP is the edge address, so the Dockerfile sets `RATE_LIMIT_PER_MINUTE=1200` as a site-wide abuse cap, and HSTS is sent unconditionally in production when `APP_URL` is https (browsers ignore it over HTTP) | Lead, vukem docs deployment/docker-and-railway |
+| D29 | Production binary built with the `vukem_nosqlite` tag from `.buildtags` (no database; 18.1 MB → 14.3 MB) | Lead |
 | D26 | Bank status 2026-10-17: 133 questions in 7 shards (very-easy 24, easy 31, medium 30, hard 24, very-hard 24), all EN + PT-BR; source links checked with `-tags=links`; technical + PT-BR review done (every snippet run on Go 1.27, no correct answer changed, factual fixes noted in the `fix(questions): review …` commits) | Lead |
 | D27 | `@axe-core/playwright` 4.14.0 (dev dependency, owner-approved via the coordinator) gates serious/critical accessibility violations in e2e | Owner |
 
@@ -66,7 +68,7 @@ The framework pin moves forward during the project. When the coordinator announc
 | Piece | Version | Notes |
 | --- | --- | --- |
 | Go | 1.27.2 | `go.mod` |
-| vukem | v0.23.0 | `go.mod`; CLI in the dev image |
+| vukem | v0.24.0 | `go.mod`; CLI in the dev image |
 | htmx | 4.0.0 | vendored |
 | Tailwind CSS / `@tailwindcss/vite` | 4.3.3 | CSS-first config |
 | Vite | 8.3.4 | |
@@ -170,7 +172,7 @@ Each item has a test (`tests/security_test.go`, e2e or CI scan) before release.
 
 - [x] Strict CSP with per-request nonce (vukem `SecureHeaders`), no inline scripts/styles/handlers in views
 - [x] `X-Content-Type-Options`, `X-Frame-Options: DENY`, `Referrer-Policy`, `Permissions-Policy`, COOP
-- [ ] HSTS in production behind Railway's TLS proxy (`TrustForwardedProto`, Railway edge)
+- [x] HSTS in production behind Railway's TLS proxy (sent unconditionally in production with an https `APP_URL`, see D28)
 - [x] Rate limit per IP on every route except `/up` (vukem `ratelimit`), correct client IP behind the proxy
 - [x] Request body cap (16 KiB)
 - [x] Only `GET`/`HEAD` on quiz routes (405 otherwise)
@@ -298,7 +300,7 @@ Topics to cover: basics/types, zero values, strings/runes/bytes, slices (len/cap
 - [ ] DNS: `CNAME quiz.vukem.com → <service>.up.railway.app` (value shown by Railway when adding the custom domain).
 - [ ] Analytics: choose Plausible or Umami and provide `ANALYTICS_PROVIDER`, `ANALYTICS_SCRIPT_URL`, `ANALYTICS_SITE_ID` (Plausible: domain; Umami: website UUID).
 - [ ] GitHub: enable GHCR package visibility (public) after the first release; optionally branch protection on `main` requiring CI.
-- [ ] Railway trusted proxy range (if Railway documents one) for `TRUSTED_PROXIES`; otherwise accept Railway's `X-Forwarded-For` as documented.
+- [ ] Railway trusted proxy range: log the peer address of a few production requests (Railway logs) and, if a stable narrow range shows up, set `TRUSTED_PROXIES` to it with `CLIENT_IP_HEADER=X-Real-IP` and `TRUST_FORWARDED_PROTO=true`, then lower `RATE_LIMIT_PER_MINUTE` (D28).
 
 ## Definition of Done
 

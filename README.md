@@ -15,7 +15,7 @@ bun install
 docker compose up            # http://localhost:3000 (Go app with reload + Vite dev server)
 ```
 
-Without Docker: `cp .env.example .env`, set `APP_KEY`, then `bun run dev` and `go run ./cmd/app` in two terminals.
+Without Docker: `cp .env.example .env`, then `bun run dev` and `go run ./cmd/app` in two terminals.
 
 ## Test
 
