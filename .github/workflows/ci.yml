@@ -1,0 +1,173 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GOLANGCI_LINT_VERSION: v2.15.0
+  BUN_VERSION: 1.4.3
+  # Throwaway key: CI boots the app in production mode, which requires one.
+  APP_KEY: base64:Y2ktb25seS1rZXktZG8tbm90LXVzZS1pbi1wcm9kISE=
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version-file: go.mod
+      - uses: golangci/golangci-lint-action@v9.3.0
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+      - name: go mod tidy
+        run: go mod tidy -diff
+      - uses: oven-sh/setup-bun@v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun install --frozen-lockfile
+      - name: markdownlint
+        run: bunx markdownlint-cli2
+      - name: typecheck
+        run: bun run typecheck
+      - name: commitlint (pull request)
+        if: github.event_name == 'pull_request'
+        run: bunx commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }} --verbose
+      - name: commitlint (push)
+        if: github.event_name == 'push'
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          if [ "$BEFORE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BEFORE" 2>/dev/null; then
+            bunx commitlint --from "$(git rev-list --max-parents=0 HEAD)" --to HEAD --verbose
+          else
+            bunx commitlint --from "$BEFORE" --to HEAD --verbose
+          fi
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version-file: go.mod
+      - run: go vet ./...
+      - name: go test (race, coverage)
+        run: go test -race -count=1 -coverpkg=./... -coverprofile=coverage.out ./...
+      - run: go tool cover -func=coverage.out | tail -n 1
+
+  vuln:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version-file: go.mod
+      - name: govulncheck
+        run: go tool govulncheck ./...
+
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version-file: go.mod
+      - uses: oven-sh/setup-bun@v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - run: CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o bin/app ./cmd/app
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: app-linux-amd64
+          path: bin/app
+          retention-days: 7
+
+  e2e:
+    needs: build
+    runs-on: ubuntu-latest
+    env:
+      APP_ENV: production
+      APP_URL: http://localhost:3000
+      E2E_BASE_URL: http://localhost:3000
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: oven-sh/setup-bun@v2.2.0
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun install --frozen-lockfile
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: app-linux-amd64
+          path: bin
+      - name: start app
+        run: |
+          chmod +x bin/app
+          nohup bin/app > app.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://localhost:3000/up && exit 0; sleep 1; done
+          cat app.log; exit 1
+      - run: bunx playwright install --with-deps chromium
+      - run: bun run test:e2e
+      - if: failure()
+        run: cat app.log
+      - uses: actions/upload-artifact@v7.0.2
+        if: failure()
+        with:
+          name: playwright-report
+          path: playwright-report
+          retention-days: 7
+
+  docker-dast:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: docker/setup-buildx-action@v4.4.1
+      - uses: docker/build-push-action@v7.4.0
+        with:
+          context: .
+          target: runtime
+          load: true
+          tags: vukem-quiz:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: run container and smoke test
+        run: |
+          docker run -d --name quiz -p 8080:3000 -e APP_KEY="$APP_KEY" -e APP_URL=http://localhost:8080 vukem-quiz:ci
+          for i in $(seq 1 30); do curl -fsS http://localhost:8080/up && break; sleep 1; done
+          curl -fsS http://localhost:8080/up
+          curl -fsS -o /dev/null http://localhost:8080/
+          curl -fsS -o /dev/null http://localhost:8080/js/htmx.min.js
+          test "$(docker inspect -f '{{.Config.User}}' vukem-quiz:ci)" = "65532:65532"
+      - name: ZAP baseline
+        uses: zaproxy/action-baseline@v0.15.0
+        with:
+          target: http://localhost:8080
+          docker_name: zaproxy/zap-stable:2.17.0
+          cmd_options: -a -j
+          allow_issue_writing: false
+          fail_action: true
+          artifact_name: zap-baseline
+      - name: nuclei
+        uses: projectdiscovery/nuclei-action@v3.1.0
+        with:
+          version: v3.11.1
+          args: -u http://localhost:8080 -severity medium,high,critical -exclude-tags dos,fuzz -silent -no-interactsh
+      - if: always()
+        run: docker logs quiz | tail -n 100
