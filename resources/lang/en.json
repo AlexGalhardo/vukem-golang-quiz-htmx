@@ -19,7 +19,8 @@
 		"review": "Review only wrong answers",
 		"stats": "Accuracy by difficulty",
 		"reset": "Reset progress",
-		"reset_confirm": "Reset all progress and statistics?"
+		"reset_confirm": "Reset all progress and statistics?",
+		"reset_yes": "Yes, reset"
 	},
 	"difficulty": {
 		"very-easy": "Very easy",
@@ -50,5 +51,9 @@
 		"light": "Light theme",
 		"dark": "Dark theme",
 		"system": "System theme"
+	},
+	"dialog": {
+		"close": "Close",
+		"cancel": "Cancel"
 	}
 }

@@ -31,7 +31,7 @@ for (const theme of themes) {
 				await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
 				await audit(page, "question");
 
-				await page.getByTestId("settings").locator("summary").click();
+				await page.getByTestId("settings-open").click();
 				await audit(page, "settings open");
 				await page.keyboard.press("Escape");
 
@@ -45,7 +45,7 @@ for (const theme of themes) {
 
 			test("finished card", async ({ page }) => {
 				await page.goto(`/?lang=${lang}`);
-				await page.getByTestId("settings").locator("summary").click();
+				await page.getByTestId("settings-open").click();
 				await page.getByTestId("review").check();
 				await expect(page.getByTestId("finished")).toBeVisible();
 				await page.keyboard.press("Escape");

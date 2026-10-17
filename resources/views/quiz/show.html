@@ -8,34 +8,59 @@
 	<p>
 		{{t "toolbar.accuracy"}}: <span data-testid="accuracy" data-stat="accuracy">–</span>
 	</p>
-	<details class="relative" data-testid="settings">
-		<summary class="cursor-pointer rounded-md border border-zinc-300 px-3 py-1 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:border-zinc-700 dark:hover:bg-zinc-800">{{t "toolbar.settings"}}</summary>
-		<div class="absolute left-0 z-10 mt-2 w-72 space-y-4 rounded-lg border border-zinc-200 bg-white p-4 shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
-			<fieldset>
-				<legend class="mb-1 font-semibold">{{t "toolbar.mode"}}</legend>
-				<label class="mr-4 inline-flex items-center gap-1"><input type="radio" name="mode" value="ordered" data-setting="mode" data-testid="mode-ordered" checked> {{t "toolbar.ordered"}}</label>
-				<label class="inline-flex items-center gap-1"><input type="radio" name="mode" value="random" data-setting="mode" data-testid="mode-random"> {{t "toolbar.random"}}</label>
-			</fieldset>
-			<fieldset>
-				<legend class="mb-1 font-semibold">{{t "toolbar.difficulties"}}</legend>
-				{{range $d := $.Difficulties}}
-				<label class="flex items-center gap-2"><input type="checkbox" value="{{$d}}" data-setting="difficulty" data-testid="difficulty-{{$d}}" checked> {{t (printf "difficulty.%s" $d)}}</label>
-				{{end}}
-			</fieldset>
-			<label class="flex items-center gap-2"><input type="checkbox" data-setting="review" data-testid="review"> {{t "toolbar.review"}}</label>
-			<div>
-				<p class="mb-1 font-semibold">{{t "toolbar.stats"}}</p>
-				<ul class="space-y-0.5" data-testid="stats">
-					{{range $d := $.Difficulties}}
-					<li class="flex justify-between"><span>{{t (printf "difficulty.%s" $d)}}</span> <span data-stat="accuracy-{{$d}}" data-testid="accuracy-{{$d}}">–</span></li>
-					{{end}}
-				</ul>
-			</div>
-			<button type="button" class="rounded-md border border-red-300 px-3 py-1 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-950" data-action="reset" data-confirm="{{t "toolbar.reset_confirm"}}" data-testid="reset">{{t "toolbar.reset"}}</button>
-		</div>
-	</details>
+	<button type="button" data-action="open-dialog" data-dialog="settings" data-testid="settings-open" aria-haspopup="dialog" aria-controls="settings" class="inline-flex min-h-9 items-center gap-2 rounded-md border border-zinc-300 px-3 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:border-zinc-700 dark:hover:bg-zinc-800">
+		<svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 17H5"/><path d="M19 7h-9"/><circle cx="17" cy="17" r="3"/><circle cx="7" cy="7" r="3"/></svg>
+		{{t "toolbar.settings"}}
+	</button>
 	<p class="hidden text-zinc-500 md:block dark:text-zinc-400">{{t "quiz.shortcuts"}}</p>
 </section>
+
+{{/* Settings is a modal <dialog>: the browser traps focus, closes it on Escape
+and returns focus to the button. */}}
+<dialog id="settings" data-testid="settings" aria-labelledby="settings-title" class="dialog-panel">
+	<div class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-zinc-200 bg-white px-5 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+		<h2 id="settings-title" class="text-lg font-semibold">{{t "toolbar.settings"}}</h2>
+		<button type="button" data-action="close-dialog" data-testid="settings-close" aria-label="{{t "dialog.close"}}" class="inline-flex size-11 items-center justify-center rounded-full hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:bg-zinc-800">
+			<svg aria-hidden="true" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+		</button>
+	</div>
+	<div class="space-y-6 px-5 py-5 text-base">
+		<fieldset>
+			<legend class="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{t "toolbar.mode"}}</legend>
+			<div class="flex gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800">
+				<label class="flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-md px-3 text-center font-medium hover:bg-white has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-indigo-500 dark:hover:bg-zinc-700 dark:has-[:checked]:bg-zinc-700"><input class="sr-only" type="radio" name="mode" value="ordered" data-setting="mode" data-testid="mode-ordered" checked>{{t "toolbar.ordered"}}</label>
+				<label class="flex min-h-11 flex-1 cursor-pointer items-center justify-center rounded-md px-3 text-center font-medium hover:bg-white has-[:checked]:bg-white has-[:checked]:shadow-sm has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-indigo-500 dark:hover:bg-zinc-700 dark:has-[:checked]:bg-zinc-700"><input class="sr-only" type="radio" name="mode" value="random" data-setting="mode" data-testid="mode-random">{{t "toolbar.random"}}</label>
+			</div>
+		</fieldset>
+		<fieldset>
+			<legend class="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{t "toolbar.difficulties"}}</legend>
+			<p class="mb-2 text-sm text-zinc-600 dark:text-zinc-400">{{t "toolbar.stats"}}</p>
+			<div class="space-y-2" data-testid="stats">
+				{{range $d := $.Difficulties}}
+				<label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-zinc-200 px-3 hover:bg-zinc-50 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-indigo-500 dark:border-zinc-700 dark:hover:bg-zinc-800 dark:has-[:checked]:bg-indigo-950"><input type="checkbox" class="size-5 accent-indigo-600" value="{{$d}}" data-setting="difficulty" data-testid="difficulty-{{$d}}" checked><span class="flex-1">{{t (printf "difficulty.%s" $d)}}</span><span class="text-sm tabular-nums text-zinc-600 dark:text-zinc-400" data-stat="accuracy-{{$d}}" data-testid="accuracy-{{$d}}">–</span></label>
+				{{end}}
+			</div>
+		</fieldset>
+		<label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-zinc-200 px-3 hover:bg-zinc-50 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-indigo-500 dark:border-zinc-700 dark:hover:bg-zinc-800 dark:has-[:checked]:bg-indigo-950"><input type="checkbox" class="size-5 accent-indigo-600" data-setting="review" data-testid="review"><span>{{t "toolbar.review"}}</span></label>
+		<div role="group" aria-labelledby="settings-lang">
+			<p id="settings-lang" class="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{t "nav.language"}}</p>
+			<div class="flex gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800">
+				<a href="?lang=en" hreflang="en" lang="en" data-lang="en" data-testid="settings-lang-en" class="flex min-h-11 flex-1 items-center justify-center rounded-md px-3 font-medium focus-visible:outline-2 focus-visible:outline-indigo-500 {{if eq .Locale "en"}}bg-white shadow-sm dark:bg-zinc-700{{else}}hover:bg-white dark:hover:bg-zinc-700{{end}}"{{if eq .Locale "en"}} aria-current="true"{{end}}>English</a>
+				<a href="?lang=pt-BR" hreflang="pt-BR" lang="pt-BR" data-lang="pt-BR" data-testid="settings-lang-pt-BR" class="flex min-h-11 flex-1 items-center justify-center rounded-md px-3 font-medium focus-visible:outline-2 focus-visible:outline-indigo-500 {{if eq .Locale "pt-BR"}}bg-white shadow-sm dark:bg-zinc-700{{else}}hover:bg-white dark:hover:bg-zinc-700{{end}}"{{if eq .Locale "pt-BR"}} aria-current="true"{{end}}>Português (BR)</a>
+			</div>
+		</div>
+		<div class="border-t border-zinc-200 pt-5 dark:border-zinc-800">
+			<button type="button" data-action="reset" data-testid="reset" class="inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 w-full border border-red-300 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-950">{{t "toolbar.reset"}}</button>
+			<div class="hidden space-y-3 rounded-lg border border-red-300 p-3 dark:border-red-800" data-testid="reset-confirm" role="alertdialog" aria-labelledby="reset-confirm-text">
+				<p id="reset-confirm-text" class="text-sm">{{t "toolbar.reset_confirm"}}</p>
+				<div class="flex gap-2">
+					<button type="button" data-action="reset-yes" data-testid="reset-yes" class="inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 flex-1 bg-red-600 text-white hover:bg-red-700">{{t "toolbar.reset_yes"}}</button>
+					<button type="button" data-action="reset-no" data-testid="reset-no" class="inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 flex-1 border border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800">{{t "dialog.cancel"}}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</dialog>
 
 <div id="quiz" class="grid gap-6 md:grid-cols-2" data-testid="quiz-grid">{{block "quiz" .}}
 	<section id="question" class="rounded-xl border border-zinc-200 p-6 dark:border-zinc-800" aria-labelledby="question-title" data-question-id="{{.Q.ID}}" data-difficulty="{{.Q.Difficulty}}" data-testid="question">

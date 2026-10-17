@@ -52,12 +52,13 @@ async function stored(page: Page): Promise<Record<string, unknown>> {
 
 async function closeSettings(page: Page): Promise<void> {
 	await page.keyboard.press("Escape");
-	await expect(page.getByTestId("settings")).not.toHaveAttribute("open", "");
+	await expect(page.getByTestId("settings")).toBeHidden();
 }
 
 async function openSettings(page: Page): Promise<void> {
-	const settings = page.getByTestId("settings");
-	if ((await settings.getAttribute("open")) === null) await settings.locator("summary").click();
+	if (await page.getByTestId("settings").isVisible()) return;
+	await page.getByTestId("settings-open").click();
+	await expect(page.getByTestId("settings")).toBeVisible();
 }
 
 // Every test fails on uncaught page errors or console errors (CSP
@@ -202,10 +203,10 @@ test.describe("keyboard shortcuts", () => {
 		expect(Object.keys(answers)).toEqual([first]);
 	});
 
-	test("shortcuts are ignored while a settings control has focus", async ({ page }) => {
+	test("shortcuts are ignored while the settings panel is open", async ({ page }) => {
 		await page.goto("/");
 		await openSettings(page);
-		await page.getByTestId("mode-ordered").focus();
+		await page.getByTestId("mode-random").focus();
 
 		await page.keyboard.press("a");
 
@@ -217,7 +218,7 @@ test.describe("settings", () => {
 	test("random mode follows the stored shuffled order", async ({ page, request }) => {
 		await page.goto("/");
 		await openSettings(page);
-		await page.getByTestId("mode-random").check();
+		await page.locator('label:has([data-testid="mode-random"])').click();
 
 		const s = await stored(page);
 		expect((s.settings as { mode: string }).mode).toBe("random");
@@ -275,6 +276,41 @@ test.describe("settings", () => {
 		await expect(page.getByTestId("finished")).toBeVisible();
 	});
 
+	test("settings dialog: large targets, Escape, backdrop and focus return", async ({ page }) => {
+		await page.goto("/");
+		const open = page.getByTestId("settings-open");
+		await open.click();
+		const dialog = page.getByTestId("settings");
+		await expect(dialog).toBeVisible();
+		// Native modal: the quiz behind it is inert.
+		await expect(page.getByTestId("settings-close")).toBeFocused();
+
+		const box = await dialog.boundingBox();
+		if (test.info().project.name !== "mobile") expect(box?.width ?? 0).toBeGreaterThanOrEqual(320);
+		for (const id of ["mode-ordered", "mode-random", "difficulty-easy", "settings-lang-en", "reset", "settings-close"]) {
+			const el = page.getByTestId(id);
+			const target = (await el.evaluate((n) => n.tagName)) === "INPUT" ? el.locator("xpath=ancestor::label[1]") : el;
+			const b = await target.boundingBox();
+			expect(b?.height ?? 0, `${id} height`).toBeGreaterThanOrEqual(44);
+		}
+
+		await page.keyboard.press("1"); // shortcuts are off while a panel is open
+		await expect(page.getByTestId("verdict")).toHaveCount(0);
+
+		// Arrow keys move inside the mode radiogroup.
+		await page.getByTestId("mode-ordered").focus();
+		await page.keyboard.press("ArrowRight");
+		await expect(page.getByTestId("mode-random")).toBeChecked();
+
+		await page.keyboard.press("Escape");
+		await expect(dialog).toBeHidden();
+		await expect(open).toBeFocused();
+
+		await open.click();
+		await page.mouse.click(5, 5); // backdrop
+		await expect(dialog).toBeHidden();
+	});
+
 	test("accuracy per difficulty is shown in settings", async ({ page, request }) => {
 		await page.goto("/");
 		await answer(page, await correctAlt(request, await currentId(page)));
@@ -292,15 +328,20 @@ test.describe("settings", () => {
 		await answer(page, await correctAlt(request, await currentId(page)));
 		await openSettings(page);
 
-		page.once("dialog", (d) => void d.dismiss());
-		await page.getByTestId("reset").click();
-		await expect(page.getByTestId("progress")).toHaveText(`1/${idx.length}`);
-
-		page.once("dialog", (d) => {
-			expect(d.message()).toContain("Reset all progress");
-			void d.accept();
+		// Inline confirmation, no browser dialog.
+		page.on("dialog", () => {
+			throw new Error("unexpected browser dialog");
 		});
 		await page.getByTestId("reset").click();
+		await expect(page.getByTestId("reset-confirm")).toBeVisible();
+		await expect(page.getByTestId("reset-confirm")).toContainText("Reset all progress");
+		await expect(page.getByTestId("reset-no")).toBeFocused();
+		await page.getByTestId("reset-no").click();
+		await expect(page.getByTestId("reset-confirm")).toBeHidden();
+		await expect(page.getByTestId("progress")).toHaveText(`1/${idx.length}`);
+
+		await page.getByTestId("reset").click();
+		await page.getByTestId("reset-yes").click();
 		await expect(page.getByTestId("progress")).toHaveText(`0/${idx.length}`);
 		await expect(page.getByTestId("accuracy")).toHaveText("–");
 		await expect(page.getByTestId("question")).toHaveAttribute("data-question-id", idx[0]?.id ?? "");
@@ -362,7 +403,7 @@ test.describe("navbar", () => {
 
 		await expect(page).toHaveURL(/lang=pt-BR/);
 		await expect(page.locator("html")).toHaveAttribute("lang", "pt-BR");
-		await expect(page.getByTestId("settings").locator("summary")).toHaveText("Configurações");
+		await expect(page.getByTestId("settings-open")).toHaveText("Configurações");
 		await expect(page.getByTestId("lang-pt-BR")).toHaveAttribute("aria-current", "true");
 
 		await page.goto("/");
@@ -371,7 +412,7 @@ test.describe("navbar", () => {
 
 		await page.getByTestId("lang-en").click();
 		await expect(page.locator("html")).toHaveAttribute("lang", "en");
-		await expect(page.getByTestId("settings").locator("summary")).toHaveText("Settings");
+		await expect(page.getByTestId("settings-open")).toHaveText("Settings");
 	});
 
 	test("answers and next question keep the chosen language", async ({ page }) => {

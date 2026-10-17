@@ -19,7 +19,8 @@
 		"review": "Revisar só as respostas erradas",
 		"stats": "Acertos por dificuldade",
 		"reset": "Zerar progresso",
-		"reset_confirm": "Zerar todo o progresso e as estatísticas?"
+		"reset_confirm": "Zerar todo o progresso e as estatísticas?",
+		"reset_yes": "Sim, zerar"
 	},
 	"difficulty": {
 		"very-easy": "Muito fácil",
@@ -50,5 +51,9 @@
 		"light": "Tema claro",
 		"dark": "Tema escuro",
 		"system": "Tema do sistema"
+	},
+	"dialog": {
+		"close": "Fechar",
+		"cancel": "Cancelar"
 	}
 }

@@ -345,9 +345,17 @@ class Quiz {
 		if (!current || answered || !this.queue().includes(current)) this.goNext();
 	}
 
-	private reset(button: HTMLElement): void {
-		if (!window.confirm(button.dataset.confirm ?? "Reset?")) return;
+	// Reset asks inline (no window.confirm): the button gives way to Yes/Cancel.
+	private askReset(ask: boolean, focus = true): void {
+		const button = document.querySelector<HTMLElement>('[data-testid="reset"]');
+		const confirm = document.querySelector<HTMLElement>('[data-testid="reset-confirm"]');
+		button?.classList.toggle("hidden", ask);
+		confirm?.classList.toggle("hidden", !ask);
+		if (focus) (ask ? confirm?.querySelector<HTMLElement>('[data-action="reset-no"]') : button)?.focus();
+	}
 
+	private reset(): void {
+		this.askReset(false);
 		this.update((s) => {
 			s.answers = {};
 			s.order = shuffle(this.index.map((e) => e.id));
@@ -403,9 +411,11 @@ class Quiz {
 		});
 
 		document.addEventListener("click", (e) => {
-			// The settings panel floats over the question: a click elsewhere closes it.
-			const settings = document.querySelector<HTMLDetailsElement>('[data-testid="settings"]');
-			if (settings?.open && !settings.contains(e.target as Node | null)) settings.open = false;
+			// A click on the backdrop lands on the <dialog> itself: close it.
+			if (e.target instanceof HTMLDialogElement && e.target.open) {
+				e.target.close();
+				return;
+			}
 
 			const choice = (e.target as Element | null)?.closest<HTMLElement>("[data-theme-choice]");
 			if (choice) {
@@ -426,8 +436,20 @@ class Quiz {
 				case "next":
 					this.goNext();
 					break;
+				case "open-dialog":
+					this.openDialog(target.dataset.dialog ?? "");
+					break;
+				case "close-dialog":
+					target.closest("dialog")?.close();
+					break;
 				case "reset":
-					this.reset(target);
+					this.askReset(true);
+					break;
+				case "reset-no":
+					this.askReset(false);
+					break;
+				case "reset-yes":
+					this.reset();
 					break;
 			}
 		});
@@ -452,18 +474,20 @@ class Quiz {
 		});
 	}
 
+	private openDialog(id: string): void {
+		const dialog = document.getElementById(id);
+		if (!(dialog instanceof HTMLDialogElement) || dialog.open) return;
+		if (id === "settings") this.askReset(false, false);
+		dialog.showModal();
+	}
+
 	private onKey(e: KeyboardEvent): void {
 		if (e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
 		const t = e.target as HTMLElement | null;
 
-		const settings = document.querySelector<HTMLDetailsElement>('[data-testid="settings"]');
-		if (e.key === "Escape" && settings?.open) {
-			settings.open = false;
-			settings.querySelector("summary")?.focus();
-			return;
-		}
-
-		if (t?.closest("input, select, textarea, [contenteditable], summary, details[open]")) return;
+		// Shortcuts belong to the quiz, not to open panels (Escape closes them natively).
+		if (document.querySelector("dialog[open]")) return;
+		if (t?.closest("input, select, textarea, [contenteditable]")) return;
 
 		const key = e.key.toLowerCase();
 		const num = "12345".indexOf(key) + 1 || "abcde".indexOf(key) + 1;
