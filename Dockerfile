@@ -41,7 +41,13 @@ ENV APP_ENV=production \
 	APP_DEBUG=false \
 	HOST=0.0.0.0 \
 	PORT=3000 \
-	LOG_FORMAT=json
+	LOG_FORMAT=json \
+	TRUSTED_PROXIES=100.0.0.0/8 \
+	TRUST_FORWARDED_PROTO=true
+# Railway's edge reaches the container from 100.0.0.0/8 (the range Railway's
+# own reverse-proxy guide trusts; it is not a documented contract). Without
+# it every visitor shares the edge IP's rate-limit bucket. Override both on
+# other hosts.
 EXPOSE 3000
 HEALTHCHECK --interval=15s --timeout=3s --start-period=5s --retries=3 \
 	CMD wget -q -O /dev/null "http://127.0.0.1:${PORT}/up" || exit 1
