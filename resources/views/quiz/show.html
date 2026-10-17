@@ -63,13 +63,13 @@ and returns focus to the button. */}}
 </dialog>
 
 <div id="quiz" class="grid gap-6 md:grid-cols-2" data-testid="quiz-grid">{{block "quiz" .}}
-	<section id="question" class="rounded-xl border border-zinc-200 p-6 dark:border-zinc-800" aria-labelledby="question-title" data-question-id="{{.Q.ID}}" data-difficulty="{{.Q.Difficulty}}" data-testid="question">
+	<section id="question" class="min-w-0 rounded-xl border border-zinc-200 p-6 dark:border-zinc-800" aria-labelledby="question-title" data-question-id="{{.Q.ID}}" data-difficulty="{{.Q.Difficulty}}" data-testid="question">
 		<p class="mb-3 inline-block rounded-full bg-indigo-50 px-3 py-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300" data-testid="difficulty">{{t (printf "difficulty.%s" .Q.Difficulty)}}</p>
 		<h1 id="question-title" class="text-xl font-semibold leading-snug" tabindex="-1">{{.Q.Text}}</h1>
 		{{with .Q.Code}}<pre class="mt-4 overflow-x-auto rounded-lg bg-zinc-900 p-4 text-sm leading-relaxed text-zinc-100" data-testid="code"><code>{{.}}</code></pre>{{end}}
 		{{template "alternatives" .}}
 	</section>
-	<aside id="explanation" class="rounded-xl border border-zinc-200 p-6 dark:border-zinc-800" aria-live="polite" data-testid="explanation">
+	<aside id="explanation" class="min-w-0 rounded-xl border border-zinc-200 p-6 dark:border-zinc-800" aria-live="polite" data-testid="explanation">
 		{{if .Q.Answered}}{{template "explanation" .}}{{else}}<p class="text-zinc-600 dark:text-zinc-400">{{t "quiz.pick"}}</p>{{end}}
 	</aside>
 {{end}}</div>

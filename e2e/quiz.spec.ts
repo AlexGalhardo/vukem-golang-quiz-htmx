@@ -493,4 +493,12 @@ test.describe("resilience and layout", () => {
 		const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth);
 		expect(overflow).toBe(false);
 	});
+
+	test("long inline code wraps instead of widening the page", async ({ page }) => {
+		await page.setViewportSize({ width: 375, height: 700 });
+		await page.goto("/questions/t-context-canceled-before-cleanup");
+		await page.keyboard.press("1");
+		await expect(page.getByTestId("verdict")).toBeVisible();
+		expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
+	});
 });

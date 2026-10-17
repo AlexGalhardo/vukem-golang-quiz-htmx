@@ -212,7 +212,7 @@ func richText(s string) template.HTML {
 			b.WriteString("`" + part)
 		default:
 			b.WriteString(
-				`<code class="rounded bg-zinc-100 px-1 font-mono text-[0.9em] dark:bg-zinc-800">` + part + "</code>",
+				`<code class="rounded bg-zinc-100 px-1 font-mono text-[0.9em] [overflow-wrap:anywhere] dark:bg-zinc-800">` + part + "</code>",
 			)
 		}
 	}
