@@ -7,7 +7,7 @@ on:
     inputs:
       url:
         description: URL to audit
-        default: https://vukem-quiz.up.railway.app/
+        default: https://quiz.vukem.dev/
         required: true
       runs:
         description: Number of runs (the median is reported)

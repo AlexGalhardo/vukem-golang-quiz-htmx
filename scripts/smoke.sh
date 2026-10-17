@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Smoke test against any deployment: health check, home page, one question
 # fragment and one answer, plus the security headers that must always be
-# there. Usage: scripts/smoke.sh https://vukem-quiz.up.railway.app
+# there. Usage: scripts/smoke.sh https://quiz.vukem.dev
 set -euo pipefail
 
 base="${1:?usage: scripts/smoke.sh <base-url>}"
