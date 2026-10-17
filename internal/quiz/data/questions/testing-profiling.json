@@ -1,0 +1,966 @@
+[
+	{
+		"id": "build-constraint-go-build-line",
+		"difficulty": "very-easy",
+		"tags": ["tooling", "build-tags"],
+		"code": "//go:build linux\n\npackage netutil\n\nfunc defaultIface() string { return \"eth0\" }",
+		"question": {
+			"en": "What does the `//go:build linux` line at the top of this file do?",
+			"pt-BR": "O que a linha `//go:build linux` no topo deste arquivo faz?"
+		},
+		"explanation": {
+			"en": "`//go:build` is a build constraint: a boolean expression of build tags evaluated by the `go` command to decide whether the file is part of the package for this build. `linux` is satisfied when the target OS (`GOOS`) is Linux, so on other systems the file is simply left out. The line must come before the `package` clause, followed by a blank line.",
+			"pt-BR": "`//go:build` é uma build constraint: uma expressão booleana de build tags que o comando `go` avalia para decidir se o arquivo entra no pacote naquele build. `linux` é satisfeita quando o sistema operacional alvo (`GOOS`) é Linux, então em outros sistemas o arquivo é simplesmente deixado de fora. A linha precisa vir antes da cláusula `package`, seguida de uma linha em branco."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "It makes the build fail on any OS other than Linux",
+					"pt-BR": "Faz o build falhar em qualquer sistema que não seja Linux"
+				},
+				"why": {
+					"en": "A non-matching constraint only excludes this file; the rest of the package still compiles. The build fails only if something else then references the missing code.",
+					"pt-BR": "Uma constraint que não bate só exclui este arquivo; o resto do pacote continua compilando. O build só falha se algum outro código depender do que ficou de fora."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": {
+					"en": "The file is only compiled when the target OS is Linux",
+					"pt-BR": "O arquivo só é compilado quando o sistema alvo é Linux"
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "Nothing: it is an ordinary comment the compiler ignores",
+					"pt-BR": "Nada: é um comentário comum que o compilador ignora"
+				},
+				"why": {
+					"en": "The `go` command parses `//go:build` lines placed before the `package` clause and uses them to select files.",
+					"pt-BR": "O comando `go` interpreta linhas `//go:build` colocadas antes da cláusula `package` e as usa para selecionar arquivos."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It tells `go build` to cross-compile the whole program for Linux",
+					"pt-BR": "Manda o `go build` fazer cross-compile do programa inteiro para Linux"
+				},
+				"why": {
+					"en": "The target is chosen with `GOOS`/`GOARCH`; build constraints only filter files for whatever target was chosen.",
+					"pt-BR": "O alvo é escolhido com `GOOS`/`GOARCH`; build constraints só filtram arquivos para o alvo que já foi escolhido."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It runs a command named `linux` before the file is compiled",
+					"pt-BR": "Executa um comando chamado `linux` antes de compilar o arquivo"
+				},
+				"why": {
+					"en": "Running commands is the job of `//go:generate` directives, and only when `go generate` is invoked; `//go:build` never executes anything.",
+					"pt-BR": "Executar comandos é papel das diretivas `//go:generate`, e só quando alguém roda `go generate`; `//go:build` nunca executa nada."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "cmd/go: Build constraints",
+				"url": "https://pkg.go.dev/cmd/go#hdr-Build_constraints",
+				"kind": "doc"
+			}
+		]
+	},
+	{
+		"id": "go-generate-runs-only-explicitly",
+		"difficulty": "very-easy",
+		"tags": ["tooling", "go-generate"],
+		"code": "//go:generate stringer -type=Color\n\npackage paint\n\ntype Color int",
+		"question": {
+			"en": "When does the `stringer` command in this directive run?",
+			"pt-BR": "Quando o comando `stringer` desta diretiva é executado?"
+		},
+		"explanation": {
+			"en": "`go generate` scans source files for `//go:generate` lines and runs the commands they describe, usually to create or update Go files. It is never run automatically by `go build`, `go test` or any other command: someone has to run `go generate` explicitly, and the generated files are then compiled like any other source.",
+			"pt-BR": "O `go generate` varre os arquivos atrás de linhas `//go:generate` e executa os comandos descritos, normalmente para criar ou atualizar arquivos Go. Ele nunca roda automaticamente no `go build`, no `go test` ou em qualquer outro comando: alguém precisa rodar `go generate` explicitamente, e os arquivos gerados são compilados como qualquer outro código."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "Every time `go build` compiles the package",
+					"pt-BR": "Toda vez que o `go build` compila o pacote"
+				},
+				"why": {
+					"en": "The documentation is explicit: `go generate` is never run automatically by `go build`.",
+					"pt-BR": "A documentação é explícita: o `go generate` nunca roda automaticamente pelo `go build`."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "Every time `go test` runs the package's tests",
+					"pt-BR": "Toda vez que o `go test` roda os testes do pacote"
+				},
+				"why": {
+					"en": "`go test` builds and runs tests but does not process `//go:generate` directives either.",
+					"pt-BR": "O `go test` compila e roda os testes, mas também não processa diretivas `//go:generate`."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "When another module downloads this one with `go get`",
+					"pt-BR": "Quando outro módulo baixa este com `go get`"
+				},
+				"why": {
+					"en": "Downloading a module never runs code from it; the generated files have to already be in the module.",
+					"pt-BR": "Baixar um módulo nunca executa código dele; os arquivos gerados já precisam estar no módulo."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": {
+					"en": "Only when someone runs `go generate` explicitly",
+					"pt-BR": "Só quando alguém roda `go generate` explicitamente"
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "At program start-up, before the `init` functions",
+					"pt-BR": "Na inicialização do programa, antes das funções `init`"
+				},
+				"why": {
+					"en": "The directive is a comment read by tooling at development time; it is not part of the compiled program.",
+					"pt-BR": "A diretiva é um comentário lido por ferramentas em tempo de desenvolvimento; não faz parte do programa compilado."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "cmd/go: Generate Go files by processing source",
+				"url": "https://pkg.go.dev/cmd/go#hdr-Generate_Go_files_by_processing_source",
+				"kind": "doc"
+			},
+			{
+				"title": "The Go Blog: Generating code",
+				"url": "https://go.dev/blog/generate",
+				"kind": "blog"
+			}
+		]
+	},
+	{
+		"id": "example-test-without-output-comment",
+		"difficulty": "easy",
+		"tags": ["testing", "examples"],
+		"code": "func ExampleReverse() {\n\tfmt.Println(Reverse(\"hello\"))\n}",
+		"question": {
+			"en": "This example function lives in a `_test.go` file and has no `// Output:` comment. What does `go test` do with it?",
+			"pt-BR": "Esta função de exemplo está num arquivo `_test.go` e não tem comentário `// Output:`. O que o `go test` faz com ela?"
+		},
+		"explanation": {
+			"en": "An example is executed only when its last comment starts with `Output:` (or `Unordered output:`); `go test` then compares the captured stdout with that comment. Without such a comment the example is compiled but not executed, which is handy for code that needs the network. An `// Output:` with nothing after it means the example runs and must print nothing.",
+			"pt-BR": "Um example só é executado quando o último comentário começa com `Output:` (ou `Unordered output:`); aí o `go test` compara o stdout capturado com esse comentário. Sem esse comentário o example é compilado, mas não é executado, o que é útil para código que depende de rede. Um `// Output:` vazio significa que o example roda e não pode imprimir nada."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": {
+					"en": "It compiles the example but does not run it",
+					"pt-BR": "Compila o example, mas não o executa"
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "It runs it and passes as long as it does not panic",
+					"pt-BR": "Executa e passa desde que não dê panic"
+				},
+				"why": {
+					"en": "Without an output comment the example is never executed, so a panic inside it would not be noticed.",
+					"pt-BR": "Sem comentário de saída o example nunca é executado, então um panic dentro dele nem seria percebido."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "It fails, because every example must declare its expected output",
+					"pt-BR": "Falha, porque todo example precisa declarar a saída esperada"
+				},
+				"why": {
+					"en": "Examples without output are explicitly allowed; they still document usage and are guaranteed to compile.",
+					"pt-BR": "Examples sem saída são explicitamente permitidos; continuam documentando o uso e têm garantia de que compilam."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It runs it and only shows the printed text in the test log",
+					"pt-BR": "Executa e só mostra o texto impresso no log do teste"
+				},
+				"why": {
+					"en": "Nothing is printed because the function is not executed at all without the `Output:` comment.",
+					"pt-BR": "Nada é impresso porque a função nem é executada sem o comentário `Output:`."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It ignores it completely; the function is not even compiled",
+					"pt-BR": "Ignora completamente; a função nem é compilada"
+				},
+				"why": {
+					"en": "It is compiled as part of the test binary, so a compile error in an example still breaks `go test`.",
+					"pt-BR": "Ela é compilada junto com o binário de teste, então um erro de compilação num example ainda quebra o `go test`."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Blog: Testable Examples in Go",
+				"url": "https://go.dev/blog/examples",
+				"kind": "blog"
+			},
+			{
+				"title": "testing package: Examples",
+				"url": "https://pkg.go.dev/testing#hdr-Examples",
+				"kind": "doc"
+			}
+		]
+	},
+	{
+		"id": "go-test-run-subtest-pattern",
+		"difficulty": "easy",
+		"tags": ["testing", "subtests"],
+		"code": "func TestParse(t *testing.T) {\n\tt.Run(\"empty\", func(t *testing.T) { /* ... */ })\n\tt.Run(\"unicode\", func(t *testing.T) { /* ... */ })\n}",
+		"question": {
+			"en": "Which command runs only the `unicode` subtest of `TestParse`?",
+			"pt-BR": "Qual comando roda apenas o subtest `unicode` de `TestParse`?"
+		},
+		"explanation": {
+			"en": "A subtest's name is the parent's name and the `t.Run` name joined by a slash: `TestParse/unicode`. The `-run` pattern is split on unbracketed slashes and each part is an unanchored regular expression matched against the corresponding name element, so `TestParse/unicode` selects the top-level test and then only the matching subtest.",
+			"pt-BR": "O nome de um subtest é o nome do pai e o nome passado ao `t.Run` unidos por barra: `TestParse/unicode`. O padrão do `-run` é dividido nas barras (fora de colchetes) e cada parte é uma expressão regular não ancorada aplicada ao elemento correspondente do nome; assim `TestParse/unicode` seleciona o teste de topo e depois só o subtest que casa."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "`go test -run unicode`",
+					"pt-BR": "`go test -run unicode`"
+				},
+				"why": {
+					"en": "A pattern without a slash is matched against top-level test names only; no top-level test contains `unicode`, so nothing runs.",
+					"pt-BR": "Um padrão sem barra é comparado só com os nomes dos testes de topo; nenhum contém `unicode`, então nada roda."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "`go test -run TestParse -sub unicode`",
+					"pt-BR": "`go test -run TestParse -sub unicode`"
+				},
+				"why": {
+					"en": "There is no `-sub` flag; subtests are selected through the slash-separated `-run` pattern.",
+					"pt-BR": "Não existe flag `-sub`; subtests são selecionados pelo padrão do `-run` separado por barras."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": {
+					"en": "`go test -run 'TestParse/unicode'`",
+					"pt-BR": "`go test -run 'TestParse/unicode'`"
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "`go test -run 'TestParse.unicode'`",
+					"pt-BR": "`go test -run 'TestParse.unicode'`"
+				},
+				"why": {
+					"en": "Without a slash the whole regexp is applied to the top-level name `TestParse`, which it does not match, so no test runs.",
+					"pt-BR": "Sem barra, a regexp inteira é aplicada ao nome de topo `TestParse`, que não casa, então nenhum teste roda."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "`go test -run TestParse`",
+					"pt-BR": "`go test -run TestParse`"
+				},
+				"why": {
+					"en": "Selecting the parent runs all of its subtests, `empty` included.",
+					"pt-BR": "Selecionar o pai roda todos os subtests dele, inclusive `empty`."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "testing package: Subtests and Sub-benchmarks",
+				"url": "https://pkg.go.dev/testing#hdr-Subtests_and_Sub_benchmarks",
+				"kind": "doc"
+			},
+			{
+				"title": "The Go Blog: Using Subtests and Sub-benchmarks",
+				"url": "https://go.dev/blog/subtests",
+				"kind": "blog"
+			}
+		]
+	},
+	{
+		"id": "benchmark-report-allocs",
+		"difficulty": "easy",
+		"tags": ["testing", "benchmarks"],
+		"code": "func BenchmarkEncode(b *testing.B) {\n\tb.ReportAllocs()\n\tfor b.Loop() {\n\t\tencode(payload)\n\t}\n}",
+		"question": {
+			"en": "What does `b.ReportAllocs()` add to this benchmark's result?",
+			"pt-BR": "O que `b.ReportAllocs()` acrescenta ao resultado deste benchmark?"
+		},
+		"explanation": {
+			"en": "`ReportAllocs` enables malloc statistics for the benchmark that calls it, so the result line gains `B/op` (bytes allocated per iteration) and `allocs/op` (heap allocations per iteration) next to `ns/op`. It is equivalent to running with `-benchmem`, except that it only affects this one benchmark.",
+			"pt-BR": "`ReportAllocs` liga as estatísticas de alocação no benchmark que o chama, então a linha de resultado ganha `B/op` (bytes alocados por iteração) e `allocs/op` (alocações no heap por iteração) ao lado de `ns/op`. É equivalente a rodar com `-benchmem`, só que afeta apenas este benchmark."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "It makes the benchmark fail if the loop allocates at all",
+					"pt-BR": "Faz o benchmark falhar se o loop alocar qualquer coisa"
+				},
+				"why": {
+					"en": "It only reports numbers; asserting on allocations needs your own check, for example with `testing.AllocsPerRun` in a test.",
+					"pt-BR": "Ele só reporta números; para fazer asserção sobre alocações você precisa de uma checagem própria, por exemplo com `testing.AllocsPerRun` num teste."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "It writes a heap profile to `mem.out` for `go tool pprof`",
+					"pt-BR": "Grava um heap profile em `mem.out` para o `go tool pprof`"
+				},
+				"why": {
+					"en": "Profiles are written with flags such as `-memprofile mem.out`; `ReportAllocs` just adds columns to the result line.",
+					"pt-BR": "Profiles são gravados com flags como `-memprofile mem.out`; o `ReportAllocs` só acrescenta colunas à linha de resultado."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "It turns on `-benchmem` for every benchmark in the package",
+					"pt-BR": "Liga o `-benchmem` para todos os benchmarks do pacote"
+				},
+				"why": {
+					"en": "The effect is scoped: it only applies to the benchmark function that calls `ReportAllocs`.",
+					"pt-BR": "O efeito é restrito: vale só para a função de benchmark que chama `ReportAllocs`."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It prints the total heap size of the process when the benchmark ends",
+					"pt-BR": "Imprime o tamanho total do heap do processo quando o benchmark termina"
+				},
+				"why": {
+					"en": "The figures are per-operation averages of what the measured code allocated, not a snapshot of the whole heap.",
+					"pt-BR": "Os números são médias por operação do que o código medido alocou, não um retrato do heap inteiro."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": {
+					"en": "`B/op` and `allocs/op` columns, as `-benchmem` would, but only for this benchmark",
+					"pt-BR": "As colunas `B/op` e `allocs/op`, como faria o `-benchmem`, mas só para este benchmark"
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "testing package: B.ReportAllocs",
+				"url": "https://pkg.go.dev/testing#B.ReportAllocs",
+				"kind": "doc"
+			},
+			{
+				"title": "Dave Cheney: High Performance Go Workshop — Benchmarking allocations",
+				"url": "https://dave.cheney.net/high-performance-go-workshop/dotgo-paris.html#benchmarking_allocations",
+				"kind": "article"
+			}
+		]
+	},
+	{
+		"id": "fuzz-plain-go-test-runs-seed-corpus",
+		"difficulty": "medium",
+		"tags": ["testing", "fuzzing"],
+		"code": "func FuzzParse(f *testing.F) {\n\tf.Add(\"1.2.3\")\n\tf.Add(\"\")\n\tf.Fuzz(func(t *testing.T, s string) {\n\t\tv, err := Parse(s)\n\t\tif err == nil && v.String() != s {\n\t\t\tt.Errorf(\"round trip: %q -> %q\", s, v.String())\n\t\t}\n\t})\n}",
+		"question": {
+			"en": "What does a plain `go test` (without the `-fuzz` flag) do with `FuzzParse`?",
+			"pt-BR": "O que um `go test` simples (sem a flag `-fuzz`) faz com `FuzzParse`?"
+		},
+		"explanation": {
+			"en": "By default a fuzz test runs like a unit test: the fuzz target is called once for each seed corpus entry, which includes the `f.Add` values and the files under `testdata/fuzz/FuzzParse`. Random input generation only starts with `go test -fuzz=FuzzParse`. When fuzzing finds a failure it writes the input to `testdata/fuzz/FuzzParse`, so from then on plain `go test` replays it as a regression test.",
+			"pt-BR": "Por padrão um fuzz test roda como teste unitário: o fuzz target é chamado uma vez para cada entrada do seed corpus, que inclui os valores de `f.Add` e os arquivos em `testdata/fuzz/FuzzParse`. A geração de entradas aleatórias só começa com `go test -fuzz=FuzzParse`. Quando o fuzzing encontra uma falha, ele grava a entrada em `testdata/fuzz/FuzzParse`, e a partir daí o `go test` simples a repete como teste de regressão."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "It skips it: fuzz tests only run when `-fuzz` is given",
+					"pt-BR": "Pula o teste: fuzz tests só rodam quando se passa `-fuzz`"
+				},
+				"why": {
+					"en": "Fuzz tests are run by default, but only against the seed corpus.",
+					"pt-BR": "Fuzz tests rodam por padrão, mas só contra o seed corpus."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": {
+					"en": "It calls the target once per seed corpus entry: the `f.Add` values plus files in `testdata/fuzz/FuzzParse`",
+					"pt-BR": "Chama o target uma vez por entrada do seed corpus: os valores de `f.Add` e os arquivos em `testdata/fuzz/FuzzParse`"
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "It fuzzes with random inputs for a default time budget, then stops",
+					"pt-BR": "Faz fuzzing com entradas aleatórias por um tempo padrão e depois para"
+				},
+				"why": {
+					"en": "Mutated inputs are only generated with `-fuzz`; plain `go test` never fuzzes.",
+					"pt-BR": "Entradas mutadas só são geradas com `-fuzz`; o `go test` simples nunca faz fuzzing."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It runs only the two `f.Add` values and ignores `testdata/fuzz`",
+					"pt-BR": "Roda só os dois valores de `f.Add` e ignora `testdata/fuzz`"
+				},
+				"why": {
+					"en": "Files in `testdata/fuzz/FuzzParse` are part of the seed corpus too; that is how saved failing inputs become regression tests.",
+					"pt-BR": "Os arquivos em `testdata/fuzz/FuzzParse` também fazem parte do seed corpus; é assim que entradas que falharam viram testes de regressão."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It replays every input previously generated in `$GOCACHE/fuzz`",
+					"pt-BR": "Repete todas as entradas geradas antes em `$GOCACHE/fuzz`"
+				},
+				"why": {
+					"en": "The generated corpus in `$GOCACHE/fuzz` is only used while fuzzing, not by a plain `go test` run.",
+					"pt-BR": "O corpus gerado em `$GOCACHE/fuzz` só é usado durante o fuzzing, não num `go test` simples."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "Go Fuzzing: Running fuzz tests",
+				"url": "https://go.dev/doc/security/fuzz/#running-fuzz-tests",
+				"kind": "doc"
+			},
+			{
+				"title": "Tutorial: Getting started with fuzzing",
+				"url": "https://go.dev/doc/tutorial/fuzz",
+				"kind": "doc"
+			},
+			{
+				"title": "Go Time #187: Fuzzing in the standard library (Katie Hockman & Jay Conrod)",
+				"url": "https://changelog.com/gotime/187",
+				"kind": "talk"
+			}
+		]
+	},
+	{
+		"id": "t-parallel-subtests-run-after-parent",
+		"difficulty": "medium",
+		"tags": ["testing", "subtests", "parallel"],
+		"code": "func TestP(t *testing.T) {\n\tfor _, name := range []string{\"a\", \"b\"} {\n\t\tt.Run(name, func(t *testing.T) {\n\t\t\tt.Parallel()\n\t\t\tfmt.Println(\"run\", name)\n\t\t})\n\t}\n\tfmt.Println(\"parent done\")\n}",
+		"question": {
+			"en": "In what order are the lines printed when this test runs (Go 1.27)?",
+			"pt-BR": "Em que ordem as linhas são impressas quando este teste roda (Go 1.27)?"
+		},
+		"explanation": {
+			"en": "Calling `t.Parallel()` pauses the subtest and returns control to `t.Run`, which returns immediately. A parallel test is suspended until its parent's test function returns, so the loop finishes and `parent done` is printed first. Then both subtests resume and run concurrently, so `run a` and `run b` may appear in either order; the parent test only completes after they finish.",
+			"pt-BR": "Chamar `t.Parallel()` pausa o subtest e devolve o controle ao `t.Run`, que retorna na hora. Um teste paralelo fica suspenso até a função do teste pai retornar, então o loop termina e `parent done` é impresso primeiro. Depois os dois subtests continuam em paralelo, então `run a` e `run b` podem aparecer em qualquer ordem; o teste pai só é concluído depois que eles terminam."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "`run a`, `run b`, then `parent done`",
+					"pt-BR": "`run a`, `run b` e depois `parent done`"
+				},
+				"why": {
+					"en": "That would be the order without `t.Parallel()`. Parallel subtests wait for the parent function to return before running.",
+					"pt-BR": "Essa seria a ordem sem `t.Parallel()`. Subtests paralelos esperam a função do pai retornar antes de rodar."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "`run a`, `parent done`, then `run b`",
+					"pt-BR": "`run a`, `parent done` e depois `run b`"
+				},
+				"why": {
+					"en": "Neither subtest gets past `t.Parallel()` until the parent body has returned, so no `run` line can come before `parent done`.",
+					"pt-BR": "Nenhum subtest passa do `t.Parallel()` antes de o corpo do pai retornar, então nenhuma linha `run` vem antes de `parent done`."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "Any interleaving: the parent and both subtests run concurrently",
+					"pt-BR": "Qualquer intercalação: o pai e os dois subtests rodam em paralelo"
+				},
+				"why": {
+					"en": "Parallel subtests are not concurrent with their parent's body; they are released only after it returns.",
+					"pt-BR": "Subtests paralelos não rodam junto com o corpo do pai; só são liberados depois que ele retorna."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": {
+					"en": "`parent done` first, then `run a` and `run b` in either order",
+					"pt-BR": "`parent done` primeiro, depois `run a` e `run b` em qualquer ordem"
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "Only `parent done`: the subtests are dropped once the parent returns",
+					"pt-BR": "Só `parent done`: os subtests são descartados quando o pai retorna"
+				},
+				"why": {
+					"en": "A test does not complete until its function returns and all its subtests have finished, so the paused subtests always run.",
+					"pt-BR": "Um teste só termina quando a função dele retorna e todos os subtests acabam, então os subtests pausados sempre rodam."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Blog: Using Subtests and Sub-benchmarks — Control of Parallelism",
+				"url": "https://go.dev/blog/subtests",
+				"kind": "blog"
+			},
+			{
+				"title": "testing package: T.Parallel",
+				"url": "https://pkg.go.dev/testing#T.Parallel",
+				"kind": "doc"
+			}
+		]
+	},
+	{
+		"id": "testmain-return-exits-with-run-code",
+		"difficulty": "medium",
+		"tags": ["testing", "testmain"],
+		"code": "func TestMain(m *testing.M) {\n\tdb := startTestDB()\n\tm.Run()\n\tdb.Stop()\n}",
+		"question": {
+			"en": "One test in the package fails. With Go 1.27, what happens with this `TestMain`?",
+			"pt-BR": "Um teste do pacote falha. Com Go 1.27, o que acontece com este `TestMain`?"
+		},
+		"explanation": {
+			"en": "`m.Run` runs the tests and returns an exit code instead of exiting, so `db.Stop()` runs afterwards. Since Go 1.15, if `TestMain` returns without calling `os.Exit`, the test wrapper passes the result of `m.Run` to `os.Exit` itself, so the failure still produces a non-zero exit status. Calling `os.Exit(m.Run())` directly would actually skip deferred teardown.",
+			"pt-BR": "`m.Run` roda os testes e devolve um código de saída em vez de encerrar o processo, então o `db.Stop()` roda depois. Desde o Go 1.15, se o `TestMain` retornar sem chamar `os.Exit`, o wrapper de teste passa o resultado de `m.Run` para o `os.Exit` por conta própria, então a falha continua gerando status de saída diferente de zero. Chamar `os.Exit(m.Run())` diretamente, inclusive, pularia um teardown feito com defer."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": {
+					"en": "`db.Stop()` runs and the binary still exits non-zero, using `m.Run`'s result",
+					"pt-BR": "O `db.Stop()` roda e o binário ainda sai com status diferente de zero, usando o resultado de `m.Run`"
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "`db.Stop()` runs, but the binary exits with status 0 because the code was ignored",
+					"pt-BR": "O `db.Stop()` roda, mas o binário sai com status 0 porque o código foi ignorado"
+				},
+				"why": {
+					"en": "That was true before Go 1.15. Now the wrapper calls `os.Exit` with `m.Run`'s result when `TestMain` returns.",
+					"pt-BR": "Isso valia antes do Go 1.15. Hoje o wrapper chama `os.Exit` com o resultado de `m.Run` quando o `TestMain` retorna."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "It does not compile: the result of `m.Run()` must be used",
+					"pt-BR": "Não compila: o resultado de `m.Run()` precisa ser usado"
+				},
+				"why": {
+					"en": "Go allows discarding the results of a function call used as a statement; only some builtins forbid it.",
+					"pt-BR": "Go permite descartar o resultado de uma chamada de função usada como statement; só alguns builtins proíbem isso."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "No test runs, because `TestMain` must call `flag.Parse` before `m.Run`",
+					"pt-BR": "Nenhum teste roda, porque o `TestMain` precisa chamar `flag.Parse` antes de `m.Run`"
+				},
+				"why": {
+					"en": "`flag.Parse` is only needed if `TestMain` itself reads flags; flags are always parsed by the time tests run.",
+					"pt-BR": "O `flag.Parse` só é necessário se o próprio `TestMain` lê flags; as flags sempre estão parseadas quando os testes rodam."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "The binary exits non-zero inside `m.Run`, so `db.Stop()` never runs",
+					"pt-BR": "O binário sai com erro dentro do `m.Run`, então o `db.Stop()` nunca roda"
+				},
+				"why": {
+					"en": "`m.Run` returns the exit code rather than exiting; the process ends only after `TestMain` returns (barring a panic in a test).",
+					"pt-BR": "O `m.Run` devolve o código de saída em vez de encerrar; o processo só termina depois que o `TestMain` retorna (salvo um panic em algum teste)."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "testing package: Main",
+				"url": "https://pkg.go.dev/testing#hdr-Main",
+				"kind": "doc"
+			},
+			{
+				"title": "Redowan Delowar: Lifecycle management in Go tests",
+				"url": "https://rednafi.com/go/lifecycle-management-in-tests/",
+				"kind": "article"
+			}
+		]
+	},
+	{
+		"id": "pprof-blank-import-custom-mux",
+		"difficulty": "hard",
+		"tags": ["profiling", "pprof", "net-http"],
+		"code": "import (\n\t\"net/http\"\n\t_ \"net/http/pprof\"\n)\n\nfunc main() {\n\tmux := http.NewServeMux()\n\tmux.HandleFunc(\"/api\", apiHandler)\n\thttp.ListenAndServe(\"localhost:8080\", mux)\n}",
+		"question": {
+			"en": "You run `go tool pprof http://localhost:8080/debug/pprof/profile?seconds=30` against this server. What happens?",
+			"pt-BR": "Você roda `go tool pprof http://localhost:8080/debug/pprof/profile?seconds=30` contra este servidor. O que acontece?"
+		},
+		"explanation": {
+			"en": "Importing `net/http/pprof` for its side effect registers the `/debug/pprof/` handlers on `http.DefaultServeMux`. This server serves its own `mux`, so those paths are not routed and the request gets a 404. With a custom mux you must register the handlers yourself (`pprof.Index`, `pprof.Profile`, ...). The flip side is the classic leak: serving `DefaultServeMux` on a public address exposes the profiling endpoints to everyone.",
+			"pt-BR": "Importar `net/http/pprof` pelo efeito colateral registra os handlers de `/debug/pprof/` no `http.DefaultServeMux`. Este servidor usa o próprio `mux`, então esses caminhos não são roteados e a requisição recebe 404. Com um mux próprio você precisa registrar os handlers manualmente (`pprof.Index`, `pprof.Profile`, ...). O outro lado é o vazamento clássico: servir o `DefaultServeMux` num endereço público expõe os endpoints de profiling para qualquer um."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "It collects a 30-second CPU profile, as the import registers the routes globally",
+					"pt-BR": "Coleta um CPU profile de 30 segundos, já que o import registra as rotas globalmente"
+				},
+				"why": {
+					"en": "The routes are registered only on `http.DefaultServeMux`, not on every mux; this server never consults the default one.",
+					"pt-BR": "As rotas são registradas só no `http.DefaultServeMux`, não em todo mux; este servidor nunca consulta o mux padrão."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "It returns a heap profile, since CPU profiling must first be enabled with `runtime.SetCPUProfileRate`",
+					"pt-BR": "Devolve um heap profile, já que o CPU profiling precisa antes ser ligado com `runtime.SetCPUProfileRate`"
+				},
+				"why": {
+					"en": "The `/debug/pprof/profile` handler starts CPU profiling on demand; but here the request never reaches it at all.",
+					"pt-BR": "O handler de `/debug/pprof/profile` liga o CPU profiling sob demanda; mas aqui a requisição nem chega nele."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": {
+					"en": "It gets a 404: the handlers were registered on `http.DefaultServeMux`, which this server does not use",
+					"pt-BR": "Recebe 404: os handlers foram registrados no `http.DefaultServeMux`, que este servidor não usa"
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "The program does not compile: blank-importing `net/http/pprof` requires serving `http.DefaultServeMux`",
+					"pt-BR": "O programa não compila: o import em branco de `net/http/pprof` exige servir o `http.DefaultServeMux`"
+				},
+				"why": {
+					"en": "The import compiles fine; it just runs registration code in the package's `init`, regardless of which mux you serve.",
+					"pt-BR": "O import compila normalmente; ele só executa o registro no `init` do pacote, independentemente do mux que você serve."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It works because `http.NewServeMux` copies the routes already in `DefaultServeMux`",
+					"pt-BR": "Funciona porque o `http.NewServeMux` copia as rotas que já estão no `DefaultServeMux`"
+				},
+				"why": {
+					"en": "`NewServeMux` returns an empty mux; nothing is inherited from the default one.",
+					"pt-BR": "O `NewServeMux` devolve um mux vazio; nada é herdado do mux padrão."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "net/http/pprof package documentation",
+				"url": "https://pkg.go.dev/net/http/pprof",
+				"kind": "doc"
+			},
+			{
+				"title": "Michael McLoughlin: Your pprof is showing",
+				"url": "https://mmcloughlin.com/posts/your-pprof-is-showing",
+				"kind": "article"
+			},
+			{
+				"title": "The Go Blog: Profiling Go Programs",
+				"url": "https://go.dev/blog/pprof",
+				"kind": "blog"
+			}
+		]
+	},
+	{
+		"id": "t-context-canceled-before-cleanup",
+		"difficulty": "hard",
+		"tags": ["testing", "context", "cleanup"],
+		"code": "func TestCtx(t *testing.T) {\n\tctx := t.Context()\n\tt.Cleanup(func() { fmt.Println(\"cleanup:\", ctx.Err()) })\n\tfmt.Println(\"body:\", ctx.Err())\n}",
+		"question": {
+			"en": "With Go 1.24 or later, what does this test print?",
+			"pt-BR": "Com Go 1.24 ou posterior, o que este teste imprime?"
+		},
+		"explanation": {
+			"en": "`t.Context()` (Go 1.24) returns a context that is canceled after the test function completes and just before the `Cleanup`-registered functions are called. During the body `ctx.Err()` is `nil`; inside the cleanup it is `context.Canceled`. This lets cleanup functions wait for goroutines that stop on `ctx.Done()` before the test is considered finished.",
+			"pt-BR": "`t.Context()` (Go 1.24) devolve um context que é cancelado depois que a função de teste termina e logo antes de chamar as funções registradas com `Cleanup`. Durante o corpo, `ctx.Err()` é `nil`; dentro do cleanup é `context.Canceled`. Isso permite que as funções de cleanup esperem goroutines que param em `ctx.Done()` antes de o teste ser considerado encerrado."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "`body: <nil>` then `cleanup: <nil>`",
+					"pt-BR": "`body: <nil>` e depois `cleanup: <nil>`"
+				},
+				"why": {
+					"en": "The context is canceled before cleanup functions run, precisely so they can observe the cancellation.",
+					"pt-BR": "O context é cancelado antes das funções de cleanup rodarem, justamente para que elas enxerguem o cancelamento."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "`body: context canceled` then `cleanup: context canceled`",
+					"pt-BR": "`body: context canceled` e depois `cleanup: context canceled`"
+				},
+				"why": {
+					"en": "The context stays live for the whole test body; it is canceled only once the test function has completed.",
+					"pt-BR": "O context fica ativo durante todo o corpo do teste; só é cancelado depois que a função de teste termina."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "`body: <nil>` then `cleanup: context deadline exceeded`",
+					"pt-BR": "`body: <nil>` e depois `cleanup: context deadline exceeded`"
+				},
+				"why": {
+					"en": "The test context has no deadline tied to `-timeout`; it is plainly canceled, so `Err` is `context.Canceled`.",
+					"pt-BR": "O context do teste não tem deadline ligado ao `-timeout`; ele é simplesmente cancelado, então `Err` é `context.Canceled`."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It panics: the test context must not be used inside `t.Cleanup`",
+					"pt-BR": "Dá panic: o context do teste não pode ser usado dentro do `t.Cleanup`"
+				},
+				"why": {
+					"en": "Using it in cleanup is the intended pattern; the docs say cleanups can wait for resources that shut down on `Done`.",
+					"pt-BR": "Usá-lo no cleanup é o padrão pretendido; a documentação diz que cleanups podem esperar recursos que encerram no `Done`."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": {
+					"en": "`body: <nil>` then `cleanup: context canceled`",
+					"pt-BR": "`body: <nil>` e depois `cleanup: context canceled`"
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "testing package: T.Context",
+				"url": "https://pkg.go.dev/testing#T.Context",
+				"kind": "doc"
+			},
+			{
+				"title": "Go 1.24 Release Notes: testing",
+				"url": "https://go.dev/doc/go1.24#testingpkgtesting",
+				"kind": "doc"
+			}
+		]
+	},
+	{
+		"id": "fuzz-target-retains-input",
+		"difficulty": "very-hard",
+		"tags": ["testing", "fuzzing"],
+		"code": "var seen [][]byte\n\nfunc FuzzDecode(f *testing.F) {\n\tf.Add([]byte(\"seed\"))\n\tf.Fuzz(func(t *testing.T, data []byte) {\n\t\tseen = append(seen, data)\n\t\tif err := checkUnique(seen); err != nil {\n\t\t\tt.Fatal(err)\n\t\t}\n\t})\n}",
+		"question": {
+			"en": "According to the `testing.F.Fuzz` contract, what is wrong with this fuzz target?",
+			"pt-BR": "Segundo o contrato de `testing.F.Fuzz`, o que há de errado com este fuzz target?"
+		},
+		"explanation": {
+			"en": "The fuzz function must be fast, deterministic and must not depend on shared state. It also must not retain mutable arguments (or pointers to them) between executions, because the engine may mutate the memory backing them in a later call. Keeping `data` in a global breaks both rules: stored slices can change under you and failures become irreproducible. Copy with `bytes.Clone` if you really need to keep an input, and avoid cross-execution state.",
+			"pt-BR": "A função de fuzz precisa ser rápida, determinística e não pode depender de estado compartilhado. Ela também não pode guardar argumentos mutáveis (ou ponteiros para eles) entre execuções, porque o engine pode alterar a memória por trás deles numa chamada seguinte. Guardar `data` numa global quebra as duas regras: os slices armazenados podem mudar por baixo e as falhas viram irreproduzíveis. Copie com `bytes.Clone` se precisar mesmo guardar uma entrada, e evite estado entre execuções."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "`[]byte` is not an allowed fuzzing argument; it must be `string`",
+					"pt-BR": "`[]byte` não é um tipo de argumento de fuzzing permitido; precisa ser `string`"
+				},
+				"why": {
+					"en": "`[]byte` is the first type in the allowed list, together with `string`, `bool`, the integer and float types.",
+					"pt-BR": "`[]byte` é o primeiro tipo da lista permitida, junto com `string`, `bool` e os tipos inteiros e float."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "Inside the target it must call `f.Fatal`, not `t.Fatal`",
+					"pt-BR": "Dentro do target é preciso chamar `f.Fatal`, não `t.Fatal`"
+				},
+				"why": {
+					"en": "It is the opposite: the target must not call `*F` methods (except `Failed` and `Name`) and should use the `*T` ones.",
+					"pt-BR": "É o contrário: o target não pode chamar métodos de `*F` (exceto `Failed` e `Name`) e deve usar os de `*T`."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "Nothing: the engine allocates a fresh slice for every execution",
+					"pt-BR": "Nada: o engine aloca um slice novo a cada execução"
+				},
+				"why": {
+					"en": "The docs warn the backing memory may be mutated during a subsequent invocation, so retained slices are not safe.",
+					"pt-BR": "A documentação avisa que a memória por trás pode ser alterada numa invocação seguinte, então guardar os slices não é seguro."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": {
+					"en": "It retains `data` across executions and depends on shared state; the engine may reuse and mutate that memory",
+					"pt-BR": "Guarda `data` entre execuções e depende de estado compartilhado; o engine pode reutilizar e alterar essa memória"
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "`f.Add` must be called after `f.Fuzz`, so the seed here is never used",
+					"pt-BR": "`f.Add` precisa ser chamado depois de `f.Fuzz`, então a seed aqui nunca é usada"
+				},
+				"why": {
+					"en": "Seeds are added before calling `f.Fuzz`, exactly as in this code; `f.Fuzz` then runs them.",
+					"pt-BR": "As seeds são adicionadas antes de chamar `f.Fuzz`, exatamente como neste código; depois o `f.Fuzz` as executa."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "testing package: F.Fuzz",
+				"url": "https://pkg.go.dev/testing#F.Fuzz",
+				"kind": "doc"
+			},
+			{
+				"title": "Go Fuzzing",
+				"url": "https://go.dev/doc/security/fuzz/",
+				"kind": "doc"
+			}
+		]
+	},
+	{
+		"id": "cover-binary-panic-loses-counters",
+		"difficulty": "very-hard",
+		"tags": ["tooling", "coverage"],
+		"question": {
+			"en": "For an integration test you build a binary with `go build -cover` and run it with `GOCOVERDIR=covdata`. The run ends with an unrecovered panic in `main`. What happens to the coverage of that run?",
+			"pt-BR": "Para um teste de integração você compila um binário com `go build -cover` e o roda com `GOCOVERDIR=covdata`. A execução termina com um panic não recuperado no `main`. O que acontece com a cobertura dessa execução?"
+		},
+		"explanation": {
+			"en": "A `-cover` binary writes its profile data files (`covmeta.*`, `covcounters.*`) into `GOCOVERDIR` at the end of execution, and complete data is only written if the program calls `os.Exit` or returns normally from `main.main`. On an unrecovered panic or a fatal fault, the counters for statements executed during that run are lost. The files that are written are binary and are read with `go tool covdata` (`percent`, `textfmt`, ...).",
+			"pt-BR": "Um binário `-cover` grava os arquivos de profile (`covmeta.*`, `covcounters.*`) no `GOCOVERDIR` ao fim da execução, e os dados completos só são gravados se o programa chamar `os.Exit` ou retornar normalmente de `main.main`. Num panic não recuperado ou num erro fatal, os contadores dos statements executados naquela execução se perdem. Os arquivos gravados são binários e são lidos com `go tool covdata` (`percent`, `textfmt`, ...)."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "The runtime flushes the counters while the panic unwinds, so coverage is complete up to the crash",
+					"pt-BR": "O runtime grava os contadores enquanto o panic desempilha, então a cobertura fica completa até o crash"
+				},
+				"why": {
+					"en": "No flush happens on an unrecovered panic; the documentation says the data from that run is lost.",
+					"pt-BR": "Não há gravação num panic não recuperado; a documentação diz que os dados daquela execução se perdem."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": {
+					"en": "The counter data for that run is lost: it is only written on `os.Exit` or a normal return from `main.main`",
+					"pt-BR": "Os contadores dessa execução se perdem: só são gravados no `os.Exit` ou num retorno normal de `main.main`"
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "Nothing is lost, because counters are streamed to `GOCOVERDIR` as statements execute",
+					"pt-BR": "Nada se perde, porque os contadores vão sendo gravados no `GOCOVERDIR` conforme os statements executam"
+				},
+				"why": {
+					"en": "Counters live in memory and are written out at the end of execution, not continuously.",
+					"pt-BR": "Os contadores ficam em memória e são gravados no fim da execução, não continuamente."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "A text profile in `-coverprofile` format is written, ready for `go tool cover -html`",
+					"pt-BR": "É gravado um profile texto no formato do `-coverprofile`, pronto para o `go tool cover -html`"
+				},
+				"why": {
+					"en": "Even on success the binary writes binary `covmeta`/`covcounters` files; you convert them with `go tool covdata textfmt`.",
+					"pt-BR": "Mesmo com sucesso o binário grava arquivos binários `covmeta`/`covcounters`; a conversão é feita com `go tool covdata textfmt`."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "The data goes to the current directory, because `GOCOVERDIR` is ignored on abnormal exit",
+					"pt-BR": "Os dados vão para o diretório atual, porque o `GOCOVERDIR` é ignorado numa saída anormal"
+				},
+				"why": {
+					"en": "There is no fallback location; without a normal exit the counter data is simply not written.",
+					"pt-BR": "Não existe local alternativo; sem uma saída normal os contadores simplesmente não são gravados."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "Coverage profiling support for integration tests — FAQ",
+				"url": "https://go.dev/doc/build-cover#FAQ",
+				"kind": "doc"
+			},
+			{
+				"title": "The Go Blog: Code coverage for Go integration tests",
+				"url": "https://go.dev/blog/integration-test-coverage",
+				"kind": "blog"
+			}
+		]
+	}
+]

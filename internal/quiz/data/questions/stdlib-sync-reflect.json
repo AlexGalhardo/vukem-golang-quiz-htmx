@@ -1,0 +1,1028 @@
+[
+	{
+		"id": "sync-once-do-runs-once",
+		"difficulty": "very-easy",
+		"tags": [
+			"sync",
+			"concurrency"
+		],
+		"code": "var once sync.Once\nfor i := 0; i < 3; i++ {\n\tonce.Do(func() { fmt.Println(\"init\", i) })\n}",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "`Once.Do` calls `f` only on the first call for a given `sync.Once` value, even if a different function is passed later. The first iteration prints `init 0`; the next two calls to `Do` return immediately without calling anything. A new `Once` is needed for each function that must run exactly once.",
+			"pt-BR": "`Once.Do` só chama `f` na primeira chamada para um mesmo valor `sync.Once`, mesmo que depois seja passada outra função. A primeira iteração imprime `init 0`; as duas chamadas seguintes a `Do` retornam na hora sem chamar nada. É preciso um `Once` novo para cada função que deve rodar exatamente uma vez."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "`init 0`, `init 1` and `init 2`, one per line",
+					"pt-BR": "`init 0`, `init 1` e `init 2`, um por linha"
+				},
+				"why": {
+					"en": "That is what a plain call would do; `Once` suppresses every call after the first.",
+					"pt-BR": "Isso é o que uma chamada comum faria; o `Once` suprime todas as chamadas depois da primeira."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "`init 2`",
+					"pt-BR": "`init 2`"
+				},
+				"why": {
+					"en": "`Do` runs the first function it receives, not the last one.",
+					"pt-BR": "`Do` executa a primeira função que recebe, não a última."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": {
+					"en": "`init 0`",
+					"pt-BR": "`init 0`"
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "Nothing: `Do` must be called from a separate goroutine",
+					"pt-BR": "Nada: `Do` precisa ser chamado de outra goroutine"
+				},
+				"why": {
+					"en": "`Do` works from any goroutine, including the one that calls it in a loop; it calls `f` synchronously.",
+					"pt-BR": "`Do` funciona em qualquer goroutine, inclusive a que o chama em loop; ele chama `f` de forma síncrona."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It panics on the second call to `Do`",
+					"pt-BR": "Dá panic na segunda chamada a `Do`"
+				},
+				"why": {
+					"en": "Calling `Do` again is the normal use; later calls simply return without calling `f`.",
+					"pt-BR": "Chamar `Do` de novo é o uso normal; as chamadas seguintes apenas retornam sem chamar `f`."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "sync package: func (*Once) Do",
+				"url": "https://pkg.go.dev/sync#Once.Do",
+				"kind": "doc"
+			},
+			{
+				"title": "VictoriaMetrics: Go sync.Once is Simple... Does It Really?",
+				"url": "https://victoriametrics.com/blog/go-sync-once/",
+				"kind": "article"
+			}
+		]
+	},
+	{
+		"id": "maps-keys-returns-iterator",
+		"difficulty": "very-easy",
+		"tags": [
+			"maps",
+			"iterators",
+			"stdlib"
+		],
+		"code": "m := map[string]int{\"b\": 2, \"a\": 1}\nkeys := slices.Sorted(maps.Keys(m))\nfmt.Println(keys)",
+		"question": {
+			"en": "Since Go 1.23, what does `maps.Keys(m)` return, and what does this code print?",
+			"pt-BR": "Desde o Go 1.23, o que `maps.Keys(m)` retorna e o que este código imprime?"
+		},
+		"explanation": {
+			"en": "`maps.Keys` returns an `iter.Seq[K]`, an iterator over the keys in unspecified order, not a slice. `slices.Sorted` consumes that iterator, collects the values into a new slice and sorts it, so the output is `[a b]`. To get an unsorted slice you would use `slices.Collect(maps.Keys(m))`.",
+			"pt-BR": "`maps.Keys` retorna um `iter.Seq[K]`, um iterator sobre as chaves em ordem não especificada, e não um slice. `slices.Sorted` consome esse iterator, coleta os valores num slice novo e o ordena, então a saída é `[a b]`. Para obter um slice sem ordenar, use `slices.Collect(maps.Keys(m))`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": {
+					"en": "An `iter.Seq[string]`; it prints `[a b]`",
+					"pt-BR": "Um `iter.Seq[string]`; imprime `[a b]`"
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "A `[]string`; it prints `[a b]`",
+					"pt-BR": "Um `[]string`; imprime `[a b]`"
+				},
+				"why": {
+					"en": "The slice-returning `Keys` from `x/exp/maps` was not adopted; the standard library version returns an iterator.",
+					"pt-BR": "O `Keys` que retornava slice, do `x/exp/maps`, não foi adotado; a versão da biblioteca padrão retorna um iterator."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "A `[]string`; the order printed is random",
+					"pt-BR": "Um `[]string`; a ordem impressa é aleatória"
+				},
+				"why": {
+					"en": "It is not a slice, and `slices.Sorted` sorts whatever the iterator yields, so the order is deterministic.",
+					"pt-BR": "Não é um slice, e `slices.Sorted` ordena o que o iterator produz, então a ordem é determinística."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "A channel of keys; it prints `[a b]`",
+					"pt-BR": "Um channel de chaves; imprime `[a b]`"
+				},
+				"why": {
+					"en": "Standard iterators are push-style functions (`func(yield func(K) bool)`), not channels.",
+					"pt-BR": "Os iterators padrão são funções no estilo push (`func(yield func(K) bool)`), não channels."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "An `iter.Seq[string]`; it does not compile because `slices.Sorted` needs a slice",
+					"pt-BR": "Um `iter.Seq[string]`; não compila porque `slices.Sorted` exige um slice"
+				},
+				"why": {
+					"en": "`slices.Sorted` takes an `iter.Seq[E]` precisely so it can be fed by `maps.Keys`.",
+					"pt-BR": "`slices.Sorted` recebe um `iter.Seq[E]` justamente para poder ser alimentado por `maps.Keys`."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "maps package: func Keys",
+				"url": "https://pkg.go.dev/maps#Keys",
+				"kind": "doc"
+			},
+			{
+				"title": "slices package: func Sorted",
+				"url": "https://pkg.go.dev/slices#Sorted",
+				"kind": "doc"
+			},
+			{
+				"title": "golang/go #61538: maps: remove Keys and Values for Go 1.21",
+				"url": "https://github.com/golang/go/issues/61538",
+				"kind": "issue"
+			}
+		]
+	},
+	{
+		"id": "reflect-kind-vs-type",
+		"difficulty": "easy",
+		"tags": [
+			"reflect",
+			"types"
+		],
+		"code": "type Celsius float64\n\nfunc main() {\n\tvar c Celsius = 21.5\n\tt := reflect.TypeOf(c)\n\tfmt.Println(t, t.Kind())\n}",
+		"question": {
+			"en": "What does this program print?",
+			"pt-BR": "O que este programa imprime?"
+		},
+		"explanation": {
+			"en": "`reflect.TypeOf` returns the static, named type `main.Celsius`, while `Kind` describes the underlying type, here `float64`. The Kind of a reflection object never reports a user-defined type: it tells you which category of type you are dealing with, which is why code that handles any number usually switches on `Kind()` rather than on `Type`.",
+			"pt-BR": "`reflect.TypeOf` retorna o tipo estático e nomeado `main.Celsius`, enquanto `Kind` descreve o tipo subjacente, aqui `float64`. O Kind de um objeto de reflection nunca informa o tipo definido pelo usuário: ele diz a categoria do tipo, e por isso código que trata qualquer número normalmente faz switch em `Kind()` e não em `Type`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "`float64 float64`",
+					"pt-BR": "`float64 float64`"
+				},
+				"why": {
+					"en": "`TypeOf` keeps the defined type's name; only `Kind` strips it down to the underlying type.",
+					"pt-BR": "`TypeOf` mantém o nome do tipo definido; só o `Kind` reduz ao tipo subjacente."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "`main.Celsius main.Celsius`",
+					"pt-BR": "`main.Celsius main.Celsius`"
+				},
+				"why": {
+					"en": "A `Kind` is one of a fixed set of constants (`Int`, `Float64`, `Struct`...); it can never be a user type.",
+					"pt-BR": "Um `Kind` é uma de um conjunto fixo de constantes (`Int`, `Float64`, `Struct`...); nunca pode ser um tipo do usuário."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "`main.Celsius struct`",
+					"pt-BR": "`main.Celsius struct`"
+				},
+				"why": {
+					"en": "`Celsius` is defined from `float64`, not from a struct, so its kind is `float64`.",
+					"pt-BR": "`Celsius` é definido a partir de `float64`, não de uma struct, então seu kind é `float64`."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": {
+					"en": "`main.Celsius float64`",
+					"pt-BR": "`main.Celsius float64`"
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "`interface {} float64`",
+					"pt-BR": "`interface {} float64`"
+				},
+				"why": {
+					"en": "The argument goes through an `any`, but `TypeOf` unpacks it and reports the dynamic type stored inside.",
+					"pt-BR": "O argumento passa por um `any`, mas `TypeOf` o desempacota e informa o tipo dinâmico guardado nele."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "The Go Blog: The Laws of Reflection",
+				"url": "https://go.dev/blog/laws-of-reflection",
+				"kind": "blog"
+			},
+			{
+				"title": "reflect package: type Kind",
+				"url": "https://pkg.go.dev/reflect#Kind",
+				"kind": "doc"
+			}
+		]
+	},
+	{
+		"id": "slog-default-level-info",
+		"difficulty": "easy",
+		"tags": [
+			"slog",
+			"logging",
+			"stdlib"
+		],
+		"code": "logger := slog.New(slog.NewTextHandler(os.Stdout, nil))\nlogger = logger.With(\"req\", 42)\nlogger.Debug(\"parsing\")\nlogger.Info(\"started\")\nlogger.Warn(\"slow\")",
+		"question": {
+			"en": "Which messages are written to stdout?",
+			"pt-BR": "Quais mensagens são escritas no stdout?"
+		},
+		"explanation": {
+			"en": "With nil `HandlerOptions` (or a nil `Level`), the built-in handlers assume `LevelInfo` as the minimum and discard lower records, so `Debug` is dropped. `With` returns a new `Logger` whose records always carry `req=42`, so both `started` and `slow` lines include it. To see debug output, pass `&slog.HandlerOptions{Level: slog.LevelDebug}` or a `LevelVar`.",
+			"pt-BR": "Com `HandlerOptions` nil (ou `Level` nil), os handlers embutidos assumem `LevelInfo` como mínimo e descartam registros abaixo disso, então o `Debug` é descartado. `With` retorna um novo `Logger` cujos registros sempre levam `req=42`, então as linhas `started` e `slow` o incluem. Para ver debug, passe `&slog.HandlerOptions{Level: slog.LevelDebug}` ou um `LevelVar`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "All three, each with `req=42`",
+					"pt-BR": "As três, cada uma com `req=42`"
+				},
+				"why": {
+					"en": "The handler's default minimum level is Info, so the Debug record is discarded.",
+					"pt-BR": "O nível mínimo padrão do handler é Info, então o registro de Debug é descartado."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": {
+					"en": "Only `started` and `slow`, both with `req=42`",
+					"pt-BR": "Só `started` e `slow`, ambas com `req=42`"
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "Only `started` and `slow`, without `req=42`",
+					"pt-BR": "Só `started` e `slow`, sem `req=42`"
+				},
+				"why": {
+					"en": "The result of `With` was reassigned to `logger`, so every later record includes the attribute.",
+					"pt-BR": "O resultado de `With` foi reatribuído a `logger`, então todo registro seguinte inclui o atributo."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "Only `slow`: the default level is Warn",
+					"pt-BR": "Só `slow`: o nível padrão é Warn"
+				},
+				"why": {
+					"en": "The documented default is `LevelInfo`, not `LevelWarn`.",
+					"pt-BR": "O padrão documentado é `LevelInfo`, não `LevelWarn`."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "Nothing: a nil `HandlerOptions` panics on first use",
+					"pt-BR": "Nada: `HandlerOptions` nil dá panic no primeiro uso"
+				},
+				"why": {
+					"en": "A nil options pointer is valid and means \"use the defaults\".",
+					"pt-BR": "Um ponteiro de opções nil é válido e significa \"use os padrões\"."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "log/slog package: type HandlerOptions",
+				"url": "https://pkg.go.dev/log/slog#HandlerOptions",
+				"kind": "doc"
+			},
+			{
+				"title": "The Go Blog: Structured Logging with slog",
+				"url": "https://go.dev/blog/slog",
+				"kind": "blog"
+			},
+			{
+				"title": "Better Stack: Logging in Go with Slog, the Ultimate Guide",
+				"url": "https://betterstack.com/community/guides/logging/logging-in-go/",
+				"kind": "article"
+			}
+		]
+	},
+	{
+		"id": "errors-astype-generic",
+		"difficulty": "easy",
+		"tags": [
+			"errors",
+			"generics",
+			"stdlib"
+		],
+		"code": "_, err := os.Open(\"missing.txt\")\nerr = fmt.Errorf(\"load config: %w\", err)\n\nif pe, ok := errors.AsType[*fs.PathError](err); ok {\n\tfmt.Println(pe.Op, pe.Path)\n}",
+		"question": {
+			"en": "With Go 1.26 or later, what does this code print?",
+			"pt-BR": "Com Go 1.26 ou mais recente, o que este código imprime?"
+		},
+		"explanation": {
+			"en": "`errors.AsType`, added in Go 1.26, is the generic version of `errors.As`: it walks the error tree (following `Unwrap`) and returns the first error matching type `E` plus `true`. No target pointer is needed, and the result is already typed. The wrapped error is the `*fs.PathError` from `os.Open`, so it prints `open missing.txt`.",
+			"pt-BR": "`errors.AsType`, adicionado no Go 1.26, é a versão genérica de `errors.As`: percorre a árvore de erros (seguindo `Unwrap`) e retorna o primeiro erro do tipo `E` junto com `true`. Não precisa de ponteiro de destino e o resultado já vem tipado. O erro embrulhado é o `*fs.PathError` de `os.Open`, então imprime `open missing.txt`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "Nothing: `AsType` only matches the outermost error, which is a `*fmt.wrapError`",
+					"pt-BR": "Nada: `AsType` só compara o erro mais externo, que é um `*fmt.wrapError`"
+				},
+				"why": {
+					"en": "Like `As`, `AsType` examines the whole tree, unwrapping `%w` wrappers.",
+					"pt-BR": "Assim como `As`, `AsType` examina a árvore inteira, desembrulhando os wrappers de `%w`."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "It does not compile: `errors` has no generic functions",
+					"pt-BR": "Não compila: `errors` não tem funções genéricas"
+				},
+				"why": {
+					"en": "Go 1.26 added `func AsType[E error](err error) (E, bool)` to package `errors`.",
+					"pt-BR": "O Go 1.26 adicionou `func AsType[E error](err error) (E, bool)` ao pacote `errors`."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "It panics because `AsType` needs a non-nil pointer target",
+					"pt-BR": "Dá panic porque `AsType` exige um ponteiro de destino não nil"
+				},
+				"why": {
+					"en": "That requirement belongs to `errors.As`; `AsType` takes the type as a type argument and returns the value.",
+					"pt-BR": "Essa exigência é de `errors.As`; `AsType` recebe o tipo como type argument e retorna o valor."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "`load config: open missing.txt`",
+					"pt-BR": "`load config: open missing.txt`"
+				},
+				"why": {
+					"en": "`pe.Op` and `pe.Path` are fields of the inner `*fs.PathError`; the wrapper's message is not part of them.",
+					"pt-BR": "`pe.Op` e `pe.Path` são campos do `*fs.PathError` interno; a mensagem do wrapper não faz parte deles."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": {
+					"en": "`open missing.txt`",
+					"pt-BR": "`open missing.txt`"
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "errors package: func AsType",
+				"url": "https://pkg.go.dev/errors#AsType",
+				"kind": "doc"
+			},
+			{
+				"title": "Go 1.26 Release Notes: errors",
+				"url": "https://go.dev/doc/go1.26#errorspkgerrors",
+				"kind": "doc"
+			},
+			{
+				"title": "golang/go #51945: errors: AsType (As with type parameters)",
+				"url": "https://github.com/golang/go/issues/51945",
+				"kind": "issue"
+			}
+		]
+	},
+	{
+		"id": "duration-int-multiplication-mismatch",
+		"difficulty": "medium",
+		"tags": [
+			"time",
+			"types"
+		],
+		"code": "func wait(n int) time.Duration {\n\treturn n * time.Second\n}",
+		"question": {
+			"en": "What happens when this function is compiled?",
+			"pt-BR": "O que acontece quando esta função é compilada?"
+		},
+		"explanation": {
+			"en": "`time.Second` is a typed constant of type `time.Duration`, and `n` is a variable of type `int`. Binary operators require identical operand types unless one side is an untyped constant, so the compiler reports `mismatched types int and time.Duration`. The fix is `time.Duration(n) * time.Second`; `5 * time.Second` compiles only because `5` is an untyped constant.",
+			"pt-BR": "`time.Second` é uma constante tipada do tipo `time.Duration`, e `n` é uma variável do tipo `int`. Operadores binários exigem tipos idênticos, a não ser que um dos lados seja uma constante sem tipo, então o compilador reporta `mismatched types int and time.Duration`. A correção é `time.Duration(n) * time.Second`; `5 * time.Second` só compila porque `5` é uma constante sem tipo."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "It compiles and returns `n` seconds",
+					"pt-BR": "Compila e retorna `n` segundos"
+				},
+				"why": {
+					"en": "Go never converts a typed variable implicitly; that only works with untyped constants such as `5 * time.Second`.",
+					"pt-BR": "Go nunca converte implicitamente uma variável tipada; isso só funciona com constantes sem tipo, como `5 * time.Second`."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "It compiles but returns `n` nanoseconds",
+					"pt-BR": "Compila, mas retorna `n` nanossegundos"
+				},
+				"why": {
+					"en": "That is the result of `time.Duration(n)` alone; the multiplication shown here does not compile at all.",
+					"pt-BR": "Esse é o resultado de `time.Duration(n)` sozinho; a multiplicação mostrada nem compila."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": {
+					"en": "Compile error: mismatched types `int` and `time.Duration`",
+					"pt-BR": "Erro de compilação: tipos incompatíveis `int` e `time.Duration`"
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It compiles, but overflows at run time for large `n`",
+					"pt-BR": "Compila, mas dá overflow em tempo de execução para `n` grande"
+				},
+				"why": {
+					"en": "Overflow is a real concern with `Duration` arithmetic, but this code is rejected before it ever runs.",
+					"pt-BR": "Overflow é um risco real em aritmética de `Duration`, mas este código é rejeitado antes de rodar."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "Compile error: `time.Duration` cannot be multiplied at all",
+					"pt-BR": "Erro de compilação: `time.Duration` não pode ser multiplicado"
+				},
+				"why": {
+					"en": "`Duration` is an `int64`-based type, so `Duration * Duration` is valid; only the mixed operand types are the problem.",
+					"pt-BR": "`Duration` é um tipo baseado em `int64`, então `Duration * Duration` é válido; o problema são só os tipos misturados."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "time package: Constants (converting an integer number of units to a Duration)",
+				"url": "https://pkg.go.dev/time#pkg-constants",
+				"kind": "doc"
+			},
+			{
+				"title": "The Go Programming Language Specification: Operators",
+				"url": "https://go.dev/ref/spec#Operators",
+				"kind": "spec"
+			}
+		]
+	},
+	{
+		"id": "strings-builder-copy-panic",
+		"difficulty": "medium",
+		"tags": [
+			"strings",
+			"stdlib"
+		],
+		"code": "var sb strings.Builder\nsb.WriteString(\"hi\")\ncp := sb\ncp.WriteString(\"!\")\nfmt.Println(cp.String())",
+		"question": {
+			"en": "What happens when this code runs?",
+			"pt-BR": "O que acontece quando este código roda?"
+		},
+		"explanation": {
+			"en": "A `strings.Builder` must not be copied once it is non-zero. It records its own address on first write and checks it on every later write; the copy `cp` has a different address but still shares the buffer, so `WriteString` panics with `strings: illegal use of non-zero Builder copied by value`. Pass `*strings.Builder` around instead of copying the value.",
+			"pt-BR": "Um `strings.Builder` não pode ser copiado depois de deixar de ser zero. Ele grava o próprio endereço na primeira escrita e confere em todas as seguintes; a cópia `cp` tem outro endereço, mas ainda compartilha o buffer, então `WriteString` dá panic com `strings: illegal use of non-zero Builder copied by value`. Passe `*strings.Builder` em vez de copiar o valor."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "It prints `hi!`",
+					"pt-BR": "Imprime `hi!`"
+				},
+				"why": {
+					"en": "The copy check runs before any write, so `cp.WriteString` never succeeds.",
+					"pt-BR": "A verificação de cópia roda antes de qualquer escrita, então `cp.WriteString` nunca tem sucesso."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": {
+					"en": "It panics: illegal use of non-zero Builder copied by value",
+					"pt-BR": "Dá panic: illegal use of non-zero Builder copied by value"
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "It prints `!`, because the copy starts empty",
+					"pt-BR": "Imprime `!`, porque a cópia começa vazia"
+				},
+				"why": {
+					"en": "Copying a struct copies its fields, including the internal slice; the copy is not empty, and it panics anyway.",
+					"pt-BR": "Copiar uma struct copia seus campos, inclusive o slice interno; a cópia não está vazia, e dá panic de qualquer jeito."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It does not compile: `strings.Builder` cannot be assigned",
+					"pt-BR": "Não compila: `strings.Builder` não pode ser atribuído"
+				},
+				"why": {
+					"en": "The compiler allows the copy; it is only caught at run time.",
+					"pt-BR": "O compilador permite a cópia; ela só é detectada em tempo de execução."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It prints `hi!` and `sb.String()` also becomes `hi!`",
+					"pt-BR": "Imprime `hi!` e `sb.String()` também vira `hi!`"
+				},
+				"why": {
+					"en": "The Builder is not reference-like; and the write on the copy panics before changing anything.",
+					"pt-BR": "O Builder não se comporta como referência; e a escrita na cópia dá panic antes de mudar qualquer coisa."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "strings package: type Builder",
+				"url": "https://pkg.go.dev/strings#Builder",
+				"kind": "doc"
+			},
+			{
+				"title": "Go source: src/strings/builder.go (copyCheck)",
+				"url": "https://go.googlesource.com/go/+/refs/heads/master/src/strings/builder.go",
+				"kind": "source-code"
+			}
+		]
+	},
+	{
+		"id": "reflect-deepequal-nil-vs-empty-slice",
+		"difficulty": "medium",
+		"tags": [
+			"reflect",
+			"slices",
+			"testing"
+		],
+		"code": "var a []int\nb := []int{}\nfmt.Println(reflect.DeepEqual(a, b), len(a) == len(b))",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "`reflect.DeepEqual` requires slices to be both nil or both non-nil before comparing elements, so a nil slice and a non-nil empty slice are not deeply equal, even though both have length 0. This often breaks test assertions comparing a decoded or built result with a literal. Use `slices.Equal`, which treats them as equal, or normalize the values first.",
+			"pt-BR": "`reflect.DeepEqual` exige que os slices sejam ambos nil ou ambos não nil antes de comparar elementos, então um slice nil e um slice vazio não nil não são deeply equal, mesmo os dois tendo tamanho 0. Isso costuma quebrar asserções de teste que comparam um resultado com um literal. Use `slices.Equal`, que os considera iguais, ou normalize os valores antes."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "`true true`",
+					"pt-BR": "`true true`"
+				},
+				"why": {
+					"en": "Same length and same (zero) elements are not enough: nil-ness is part of DeepEqual's slice rule.",
+					"pt-BR": "Mesmo tamanho e mesmos (zero) elementos não bastam: ser nil faz parte da regra de slices do DeepEqual."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "`false false`",
+					"pt-BR": "`false false`"
+				},
+				"why": {
+					"en": "`len` of a nil slice is 0, the same as an empty slice.",
+					"pt-BR": "O `len` de um slice nil é 0, igual ao de um slice vazio."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "`true false`",
+					"pt-BR": "`true false`"
+				},
+				"why": {
+					"en": "Both lengths are 0, and DeepEqual reports false, not true.",
+					"pt-BR": "Os dois tamanhos são 0, e o DeepEqual retorna false, não true."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It panics: DeepEqual cannot inspect a nil slice",
+					"pt-BR": "Dá panic: DeepEqual não consegue inspecionar um slice nil"
+				},
+				"why": {
+					"en": "DeepEqual handles nil values of any type; it just reports whether they are deeply equal.",
+					"pt-BR": "DeepEqual lida com valores nil de qualquer tipo; ele só informa se são deeply equal."
+				}
+			},
+			{
+				"id": "e",
+				"correct": true,
+				"text": {
+					"en": "`false true`",
+					"pt-BR": "`false true`"
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "reflect package: func DeepEqual",
+				"url": "https://pkg.go.dev/reflect#DeepEqual",
+				"kind": "doc"
+			},
+			{
+				"title": "golang/go #4133: reflect: document that DeepEqual distinguishes nil and empty slice",
+				"url": "https://github.com/golang/go/issues/4133",
+				"kind": "issue"
+			},
+			{
+				"title": "YourBasic Go: 3 ways to compare slices (arrays)",
+				"url": "https://yourbasic.org/golang/compare-slices/",
+				"kind": "article"
+			}
+		]
+	},
+	{
+		"id": "sync-pool-items-may-vanish",
+		"difficulty": "hard",
+		"tags": [
+			"sync",
+			"performance",
+			"gc"
+		],
+		"question": {
+			"en": "Which statement about `sync.Pool` is correct?",
+			"pt-BR": "Qual afirmação sobre `sync.Pool` está correta?"
+		},
+		"explanation": {
+			"en": "A `Pool` caches temporary, interchangeable objects to relieve the garbage collector. Any stored item may be removed automatically at any time without notification, and `Get` may ignore the pool entirely, so callers must not assume any relation between what they `Put` and what `Get` returns. That makes it a fit for scratch buffers (as `fmt` does), not for anything with identity or state, such as connections.",
+			"pt-BR": "Um `Pool` guarda objetos temporários e intercambiáveis para aliviar o garbage collector. Qualquer item guardado pode ser removido automaticamente a qualquer momento sem aviso, e `Get` pode ignorar o pool por completo, então quem chama não pode supor relação entre o que fez `Put` e o que `Get` retorna. Isso serve para buffers temporários (como o `fmt` faz), não para coisas com identidade ou estado, como conexões."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "`Get` returns the most recently `Put` item when the pool is not empty",
+					"pt-BR": "`Get` retorna o último item colocado com `Put` quando o pool não está vazio"
+				},
+				"why": {
+					"en": "The docs say `Get` selects an arbitrary item and may even treat the pool as empty; there is no LIFO guarantee.",
+					"pt-BR": "A documentação diz que `Get` escolhe um item arbitrário e pode até tratar o pool como vazio; não há garantia de LIFO."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "It is a good fit for reusing database connections across requests",
+					"pt-BR": "É uma boa escolha para reaproveitar conexões de banco entre requests"
+				},
+				"why": {
+					"en": "Items can be dropped silently at any GC, which would leak open connections; use a real connection pool such as `database/sql`'s.",
+					"pt-BR": "Itens podem ser descartados em silêncio a qualquer GC, vazando conexões abertas; use um pool de conexões de verdade, como o do `database/sql`."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "Items stay in the pool until the program calls `Get`, so its memory only grows",
+					"pt-BR": "Os itens ficam no pool até alguém chamar `Get`, então a memória só cresce"
+				},
+				"why": {
+					"en": "The pool shrinks on its own when quiescent; the runtime clears it across garbage collections.",
+					"pt-BR": "O pool encolhe sozinho quando ocioso; o runtime o limpa ao longo das coletas de lixo."
+				}
+			},
+			{
+				"id": "d",
+				"correct": true,
+				"text": {
+					"en": "Any stored item may be removed at any time without notification, so `Get` can return a fresh `New()` value right after a `Put`",
+					"pt-BR": "Qualquer item guardado pode ser removido a qualquer momento sem aviso, então `Get` pode retornar um valor novo de `New()` logo depois de um `Put`"
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It is not safe for concurrent use; each goroutine needs its own `Pool`",
+					"pt-BR": "Não é seguro para uso concorrente; cada goroutine precisa do seu próprio `Pool`"
+				},
+				"why": {
+					"en": "A `Pool` is explicitly safe for use by multiple goroutines; sharing one is the intended use.",
+					"pt-BR": "Um `Pool` é explicitamente seguro para várias goroutines; compartilhar um só é o uso pretendido."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "sync package: type Pool",
+				"url": "https://pkg.go.dev/sync#Pool",
+				"kind": "doc"
+			},
+			{
+				"title": "VictoriaMetrics: Go sync.Pool and the Mechanics Behind It",
+				"url": "https://victoriametrics.com/blog/go-sync-pool/",
+				"kind": "article"
+			}
+		]
+	},
+	{
+		"id": "iter-pull-must-call-stop",
+		"difficulty": "hard",
+		"tags": [
+			"iterators",
+			"iter"
+		],
+		"code": "func numbers() iter.Seq[int] {\n\treturn func(yield func(int) bool) {\n\t\tdefer fmt.Println(\"cleanup\")\n\t\tfor i := 1; i <= 3; i++ {\n\t\t\tif !yield(i) {\n\t\t\t\treturn\n\t\t\t}\n\t\t}\n\t}\n}\n\nfunc first() int {\n\tnext, _ := iter.Pull(numbers())\n\tv, _ := next()\n\treturn v\n}\n\nfunc main() {\n\tfmt.Println(first())\n\tfmt.Println(\"done\")\n}",
+		"question": {
+			"en": "What does this program print, and what is wrong with `first`?",
+			"pt-BR": "O que este programa imprime, e o que há de errado em `first`?"
+		},
+		"explanation": {
+			"en": "`iter.Pull` suspends the iterator function between `next` calls. When the caller stops early without exhausting the sequence, it must call `stop`, which makes the pending `yield` return false so the iterator can finish and run its deferred cleanup. Here `stop` is discarded, so the output is `1` then `done`, and `cleanup` never runs: the suspended iterator and its resources leak. The idiom is `next, stop := iter.Pull(seq); defer stop()`.",
+			"pt-BR": "`iter.Pull` suspende a função do iterator entre as chamadas a `next`. Quando quem chama para antes de esgotar a sequência, precisa chamar `stop`, que faz o `yield` pendente retornar false para o iterator terminar e rodar o cleanup do defer. Aqui `stop` é descartado, então a saída é `1` e depois `done`, e `cleanup` nunca roda: o iterator suspenso e seus recursos vazam. O idioma é `next, stop := iter.Pull(seq); defer stop()`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"correct": true,
+				"text": {
+					"en": "`1`, `done`; `cleanup` never runs because `stop` was not called",
+					"pt-BR": "`1`, `done`; `cleanup` nunca roda porque `stop` não foi chamado"
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "`1`, `cleanup`, `done`; `first` is correct",
+					"pt-BR": "`1`, `cleanup`, `done`; `first` está correto"
+				},
+				"why": {
+					"en": "Nothing resumes the suspended iterator after `first` returns; only calling `stop` (or exhausting `next`) lets it finish.",
+					"pt-BR": "Nada retoma o iterator suspenso depois que `first` retorna; só chamar `stop` (ou esgotar `next`) o deixa terminar."
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "`cleanup`, `1`, `done`; the garbage collector stops the iterator when `next` becomes unreachable",
+					"pt-BR": "`cleanup`, `1`, `done`; o garbage collector para o iterator quando `next` fica inalcançável"
+				},
+				"why": {
+					"en": "There is no finalizer-style stop; the docs require the caller to call `stop` explicitly.",
+					"pt-BR": "Não existe stop automático via finalizer; a documentação exige que quem chama chame `stop` explicitamente."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "It deadlocks, because the iterator is still blocked in `yield`",
+					"pt-BR": "Dá deadlock, porque o iterator continua bloqueado em `yield`"
+				},
+				"why": {
+					"en": "The suspended iterator does not block the caller; `main` keeps running and exits normally, just leaking it.",
+					"pt-BR": "O iterator suspenso não bloqueia quem chamou; `main` continua e termina normalmente, só vazando o iterator."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It does not compile: `stop` must be used",
+					"pt-BR": "Não compila: `stop` precisa ser usado"
+				},
+				"why": {
+					"en": "Assigning a result to `_` is always allowed; the compiler does not enforce calling `stop`.",
+					"pt-BR": "Atribuir um resultado a `_` é sempre permitido; o compilador não obriga a chamar `stop`."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "iter package: func Pull",
+				"url": "https://pkg.go.dev/iter#Pull",
+				"kind": "doc"
+			},
+			{
+				"title": "The Go Blog: Range Over Function Types (Pull iterators)",
+				"url": "https://go.dev/blog/range-functions",
+				"kind": "blog"
+			}
+		]
+	},
+	{
+		"id": "reflect-deepequal-same-map-nan",
+		"difficulty": "very-hard",
+		"tags": [
+			"reflect",
+			"maps",
+			"floating-point"
+		],
+		"code": "m := map[string]float64{\"x\": math.NaN()}\nfmt.Println(reflect.DeepEqual(m, m), reflect.DeepEqual(m, maps.Clone(m)))",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "DeepEqual compares `float64` values with `==`, and `NaN != NaN`, so a map holding NaN is not deeply equal to a clone of itself. But DeepEqual has a shortcut: two maps (or slices) that are the same object are deeply equal regardless of content, just as pointers equal under `==` are. So comparing `m` with itself is `true`, while comparing it with an identical copy is `false`.",
+			"pt-BR": "DeepEqual compara valores `float64` com `==`, e `NaN != NaN`, então um map com NaN não é deeply equal a um clone de si mesmo. Mas o DeepEqual tem um atalho: dois maps (ou slices) que são o mesmo objeto são deeply equal independentemente do conteúdo, assim como ponteiros iguais por `==`. Então comparar `m` com ele mesmo dá `true`, e com uma cópia idêntica dá `false`."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "`true true`",
+					"pt-BR": "`true true`"
+				},
+				"why": {
+					"en": "The clone is a different map object, so DeepEqual compares values, and NaN is not equal to NaN.",
+					"pt-BR": "O clone é outro objeto map, então o DeepEqual compara valores, e NaN não é igual a NaN."
+				}
+			},
+			{
+				"id": "b",
+				"text": {
+					"en": "`false false`",
+					"pt-BR": "`false false`"
+				},
+				"why": {
+					"en": "That ignores the same-object shortcut: identical map objects are deeply equal regardless of content.",
+					"pt-BR": "Isso ignora o atalho de mesmo objeto: objetos map idênticos são deeply equal independentemente do conteúdo."
+				}
+			},
+			{
+				"id": "c",
+				"correct": true,
+				"text": {
+					"en": "`true false`",
+					"pt-BR": "`true false`"
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "`false true`",
+					"pt-BR": "`false true`"
+				},
+				"why": {
+					"en": "If the clone compared equal, the original compared with itself would too; the shortcut only ever adds `true` results.",
+					"pt-BR": "Se o clone fosse igual, o original comparado consigo mesmo também seria; o atalho só acrescenta resultados `true`."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "It panics because NaN values are not comparable",
+					"pt-BR": "Dá panic porque valores NaN não são comparáveis"
+				},
+				"why": {
+					"en": "`float64` is comparable; NaN simply compares unequal to everything, without any panic.",
+					"pt-BR": "`float64` é comparável; NaN só é diferente de tudo, sem nenhum panic."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "reflect package: func DeepEqual",
+				"url": "https://pkg.go.dev/reflect#DeepEqual",
+				"kind": "doc"
+			},
+			{
+				"title": "The Go Programming Language Specification: Comparison operators",
+				"url": "https://go.dev/ref/spec#Comparison_operators",
+				"kind": "spec"
+			}
+		]
+	},
+	{
+		"id": "sync-oncefunc-panic-vs-once-do",
+		"difficulty": "very-hard",
+		"tags": [
+			"sync",
+			"panic"
+		],
+		"code": "calls := 0\nf := sync.OnceFunc(func() { calls++; panic(\"boom\") })\n\nvar o sync.Once\ng := func() { o.Do(func() { calls++; panic(\"boom\") }) }\n\ntry := func(fn func()) {\n\tdefer func() { fmt.Print(recover(), \" \") }()\n\tfn()\n}\ntry(f)\ntry(f)\ntry(g)\ntry(g)\nfmt.Println(calls)",
+		"question": {
+			"en": "What does this code print?",
+			"pt-BR": "O que este código imprime?"
+		},
+		"explanation": {
+			"en": "Both wrappers run the function only once, so `calls` ends at 2. They differ when `f` panics: `sync.OnceFunc` (and `OnceValue`/`OnceValues`) remembers the panic and re-panics with the same value on every call, while `Once.Do` treats a panic as \"returned\" and later calls do nothing. So the second `try(f)` recovers `boom` again, but the second `try(g)` recovers `nil`. This makes `OnceFunc` safer: a failed initialization is not silently treated as success.",
+			"pt-BR": "Os dois wrappers executam a função uma só vez, então `calls` termina em 2. A diferença aparece quando a função dá panic: `sync.OnceFunc` (e `OnceValue`/`OnceValues`) guarda o panic e o repete com o mesmo valor a cada chamada, enquanto `Once.Do` trata o panic como \"retornou\" e as chamadas seguintes não fazem nada. Assim, o segundo `try(f)` recupera `boom` de novo, mas o segundo `try(g)` recupera `nil`. Isso torna o `OnceFunc` mais seguro: uma inicialização que falhou não é tratada em silêncio como sucesso."
+		},
+		"alternatives": [
+			{
+				"id": "a",
+				"text": {
+					"en": "`boom <nil> boom <nil> 2`",
+					"pt-BR": "`boom <nil> boom <nil> 2`"
+				},
+				"why": {
+					"en": "`OnceFunc` does not swallow the panic on later calls; it re-panics with the same value every time.",
+					"pt-BR": "O `OnceFunc` não engole o panic nas chamadas seguintes; ele repete o panic com o mesmo valor toda vez."
+				}
+			},
+			{
+				"id": "b",
+				"correct": true,
+				"text": {
+					"en": "`boom boom boom <nil> 2`",
+					"pt-BR": "`boom boom boom <nil> 2`"
+				}
+			},
+			{
+				"id": "c",
+				"text": {
+					"en": "`boom boom boom boom 2`",
+					"pt-BR": "`boom boom boom boom 2`"
+				},
+				"why": {
+					"en": "`Once.Do` considers a panicking `f` to have returned; future calls return without calling `f` or panicking.",
+					"pt-BR": "`Once.Do` considera que um `f` que deu panic retornou; as chamadas seguintes retornam sem chamar `f` nem dar panic."
+				}
+			},
+			{
+				"id": "d",
+				"text": {
+					"en": "`boom boom boom boom 4`",
+					"pt-BR": "`boom boom boom boom 4`"
+				},
+				"why": {
+					"en": "Neither wrapper retries after a panic; each function body runs exactly once, so `calls` is 2.",
+					"pt-BR": "Nenhum dos wrappers tenta de novo depois de um panic; cada corpo de função roda uma única vez, então `calls` é 2."
+				}
+			},
+			{
+				"id": "e",
+				"text": {
+					"en": "`boom <nil> boom boom 3`",
+					"pt-BR": "`boom <nil> boom boom 3`"
+				},
+				"why": {
+					"en": "This swaps the two behaviours: it is `Once.Do` that goes quiet after a panic, not `OnceFunc`.",
+					"pt-BR": "Isso inverte os dois comportamentos: é o `Once.Do` que fica quieto depois de um panic, não o `OnceFunc`."
+				}
+			}
+		],
+		"sources": [
+			{
+				"title": "sync package: func OnceFunc",
+				"url": "https://pkg.go.dev/sync#OnceFunc",
+				"kind": "doc"
+			},
+			{
+				"title": "sync package: func (*Once) Do",
+				"url": "https://pkg.go.dev/sync#Once.Do",
+				"kind": "doc"
+			},
+			{
+				"title": "golang/go #56102: sync: add OnceFunc, OnceValue, OnceValues",
+				"url": "https://github.com/golang/go/issues/56102",
+				"kind": "issue"
+			}
+		]
+	}
+]
