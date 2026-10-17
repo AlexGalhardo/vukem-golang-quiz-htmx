@@ -129,6 +129,8 @@ function shuffle<T>(items: T[]): T[] {
 
 class Quiz {
 	private state = loadState();
+	// The question the latest load asked for; undefined once finished.
+	private wanted: string | undefined;
 	private readonly index = readIndex();
 	// Read at call time: the htmx script is deferred and runs after this
 	// module, so it is not defined yet when the class is constructed.
@@ -252,8 +254,16 @@ class Quiz {
 			return;
 		}
 
+		this.wanted = id;
 		const path = `/questions/${encodeURIComponent(id)}`;
 		void this.htmx.ajax("GET", `${path}?lang=${encodeURIComponent(this.lang)}`, { target: "#quiz", swap: "innerHTML" }).then(() => {
+			// Fast setting changes start overlapping loads that can finish out
+			// of order; whichever lands last must show the latest choice.
+			if (this.wanted !== id) {
+				if (this.wanted === undefined) this.showFinished();
+				else if (this.currentId() !== this.wanted) this.load(this.wanted, "none");
+				return;
+			}
 			if (history === "push") window.history.pushState({ id }, "", `${path}${location.search}`);
 			if (history === "replace") window.history.replaceState({ id }, "", `${path}${location.search}`);
 			document.getElementById("question-title")?.focus({ preventScroll: true });
@@ -262,6 +272,7 @@ class Quiz {
 	}
 
 	private showFinished(): void {
+		this.wanted = undefined;
 		const tpl = document.getElementById("quiz-finished") as HTMLTemplateElement | null;
 		const quiz = document.getElementById("quiz");
 		if (!tpl || !quiz) return;
