@@ -1,0 +1,41 @@
+# yaml-language-server: $schema=https://json.schemastore.org/lefthook.json
+# Git hooks, installed automatically by `bun install` (or `bun run hooks`).
+# Needs Go, golangci-lint v2.15.0 and Bun on PATH.
+output:
+  - summary
+  - failure
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: go fmt
+      glob: "*.go"
+      run: golangci-lint fmt {staged_files}
+      stage_fixed: true
+    - name: go lint
+      glob: "*.go"
+      run: golangci-lint run ./...
+    - name: go mod tidy
+      glob: "{go.mod,go.sum}"
+      run: go mod tidy -diff
+    - name: markdownlint
+      glob: "*.md"
+      exclude:
+        - ".claude/skills/**"
+      run: bunx markdownlint-cli2 {staged_files}
+    - name: typecheck
+      glob: "*.ts"
+      run: bun run typecheck
+
+commit-msg:
+  jobs:
+    - name: conventional commit
+      run: bunx commitlint --edit {1}
+
+pre-push:
+  parallel: true
+  jobs:
+    - name: go vet
+      run: go vet ./...
+    - name: go test
+      run: go test ./...

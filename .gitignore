@@ -1,0 +1,33 @@
+# Environment
+.env
+.env.*.local
+
+# Local Claude Code settings (per developer, never committed)
+.claude/settings.local.json
+
+# Build output and caches
+/bin/
+/dist/
+.vukem/
+coverage.out
+*.test
+
+# Local data
+storage/*
+!storage/.gitkeep
+
+# JS tooling
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/
+
+# Vite: dev server marker and build output
+/resources/public/hot
+/resources/public/build/
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/

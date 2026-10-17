@@ -1,0 +1,9 @@
+* text=auto eol=lf
+*.{bat,cmd,ps1} text eol=crlf
+*.png binary
+*.jpg binary
+*.ico binary
+*.woff2 binary
+go.sum linguist-generated
+bun.lock linguist-generated
+resources/public/js/htmx.min.js -text linguist-vendored
