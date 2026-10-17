@@ -269,3 +269,16 @@ func TestEmbeddedBank(t *testing.T) {
 		t.Fatal("embedded bank is empty")
 	}
 }
+
+func TestValidID(t *testing.T) {
+	t.Parallel()
+
+	for id, want := range map[string]bool{
+		"nil-map-write": true, "a1": true, "": false, "Bad": false, "a--b": false, "-a": false,
+		"<script>": false, strings.Repeat("a", 64): true, strings.Repeat("a", 65): false,
+	} {
+		if got := ValidID(id); got != want {
+			t.Errorf("ValidID(%q) = %v, want %v", id, got, want)
+		}
+	}
+}

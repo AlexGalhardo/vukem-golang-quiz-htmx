@@ -3,6 +3,8 @@ package tests
 import (
 	"encoding/json"
 	"html"
+	"net/http"
+	"net/url"
 	"regexp"
 	"slices"
 	"strings"
@@ -279,4 +281,45 @@ func directive(policy, name string) []string {
 	}
 
 	return nil
+}
+
+func TestReviewList(t *testing.T) {
+	t.Parallel()
+
+	app := vukemtest.New(t, bootstrap.New)
+	all := bank(t).All()
+	q1, q2 := all[0], all[5]
+	wrong1 := "a"
+	if q1.Correct().ID == "a" {
+		wrong1 = "b"
+	}
+
+	res := app.Client(t).
+		HTMX().
+		Get("/review?lang=pt-BR&items=" + q1.ID + ":" + wrong1 + "," + q2.ID + ":" + q2.Correct().ID + ",gone-question:a").
+		AssertOK().
+		AssertFragment().
+		AssertHeaderMissing("Set-Cookie").
+		AssertSee(`data-question-id="` + q1.ID + `"`).
+		AssertSee(`data-question-id="` + q2.ID + `"`).
+		AssertSee(`href="/questions/` + q1.ID + `?lang=pt-BR"`).
+		AssertDontSee("gone-question")
+		// removed questions are skipped
+
+	if n := strings.Count(res.Body(), `data-testid="review-item"`); n != 2 {
+		t.Errorf("review items = %d, want 2", n)
+	}
+
+	if !strings.Contains(res.Body(), html.EscapeString(q1.Alternatives[int(wrong1[0]-'a')].Text.In("pt-BR"))[:10]) {
+		t.Error("review item does not show the chosen answer")
+	}
+
+	app.Client(t).HTMX().Get("/review?items=").AssertOK().AssertDontSee(`data-testid="review-item"`)
+
+	for _, bad := range []string{"x", q1.ID + ":z", q1.ID, "<script>:a", strings.Repeat(q1.ID+":a,", 201)} {
+		res := app.Client(t).HTMX().Get("/review?items=" + url.QueryEscape(bad))
+		if res.Status() != http.StatusBadRequest {
+			t.Errorf("items=%.40q: status %d, want 400", bad, res.Status())
+		}
+	}
 }

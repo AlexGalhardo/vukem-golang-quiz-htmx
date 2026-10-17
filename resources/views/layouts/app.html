@@ -27,9 +27,14 @@
 		<nav class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-4 gap-y-2 px-4 py-3" aria-label="{{t "nav.label"}}">
 			<a href="/?lang={{locale}}" class="font-bold tracking-tight" data-testid="brand">{{t "app.name"}}</a>
 			<div class="flex flex-wrap items-center justify-end gap-2 text-sm">
-				<button type="button" data-action="open-dialog" data-dialog="history" data-testid="history-open" aria-haspopup="dialog" aria-controls="history" aria-label="{{t "nav.history"}}" class="inline-flex min-h-9 items-center gap-1.5 rounded-md px-2 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:hover:bg-zinc-800">
+				<button type="button" data-action="open-dialog" data-dialog="history" data-testid="history-open" aria-haspopup="dialog" aria-controls="history" class="inline-flex min-h-9 items-center gap-1.5 rounded-md px-2 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:hover:bg-zinc-800">
 					<svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
-					<span class="hidden sm:inline">{{t "nav.history"}}</span>
+					<span class="sr-only sm:not-sr-only">{{t "nav.history"}}</span>
+				</button>
+				<button type="button" data-action="open-dialog" data-dialog="review" data-testid="review-open" aria-haspopup="dialog" aria-controls="review" class="inline-flex min-h-9 items-center gap-1.5 rounded-md px-2 hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 dark:hover:bg-zinc-800">
+					<svg aria-hidden="true" class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+					<span class="sr-only sm:not-sr-only">{{t "nav.review"}}</span>
+					<span hidden class="min-w-5 rounded-full bg-red-700 px-1.5 text-center text-xs font-semibold leading-5 text-white" data-testid="review-count"></span>
 				</button>
 				<span class="sr-only">{{t "nav.language"}}</span>
 				<a href="?lang=en" hreflang="en" lang="en" data-lang="en" data-testid="lang-en" class="rounded-md px-2 py-1 {{if eq locale "en"}}bg-zinc-200 font-semibold dark:bg-zinc-800{{else}}hover:bg-zinc-100 dark:hover:bg-zinc-900{{end}}"{{if eq locale "en"}} aria-current="true"{{end}}>EN</a>

@@ -6,7 +6,8 @@
 	"nav": {
 		"label": "Principal",
 		"language": "Idioma",
-		"history": "Histórico"
+		"history": "Histórico",
+		"review": "Revisar"
 	},
 	"toolbar": {
 		"label": "Controles do quiz",
@@ -17,7 +18,6 @@
 		"ordered": "Por dificuldade",
 		"random": "Aleatória",
 		"difficulties": "Dificuldades",
-		"review": "Revisar só as respostas erradas",
 		"stats": "Acertos por dificuldade",
 		"reset": "Zerar progresso",
 		"reset_confirm": "Zerar todo o progresso e as estatísticas?",
@@ -41,7 +41,7 @@
 		"sources": "Fontes",
 		"next": "Próxima pergunta",
 		"finished": "Você respondeu todas as perguntas desta seleção.",
-		"finished_text": "Mude as dificuldades, revise as respostas erradas ou zere o progresso em Configurações."
+		"finished_text": "Mude as dificuldades, refaça seus erros em Revisar ou zere o progresso em Configurações."
 	},
 	"errors": {
 		"not_found": "Página não encontrada.",
@@ -71,5 +71,18 @@
 		"clear": "Limpar histórico",
 		"clear_confirm": "Apagar todas as rodadas salvas? Seu progresso atual é mantido.",
 		"clear_yes": "Sim, limpar"
+	},
+	"review": {
+		"your_answer": "Sua resposta",
+		"correct_answer": "Resposta correta",
+		"open": "Abrir a pergunta",
+		"title": "Revisar",
+		"intro": "Perguntas que você errou nesta sessão do navegador. Refaça até acertar; a pergunta sai da lista quando você acerta.",
+		"empty": "Nada para revisar: nenhum erro nesta sessão.",
+		"start": "Refazer estas perguntas",
+		"banner": "Revisando suas respostas erradas",
+		"exit": "Sair da revisão",
+		"done": "Todos os erros corrigidos!",
+		"done_text": "Saia da revisão para continuar o quiz de onde parou."
 	}
 }

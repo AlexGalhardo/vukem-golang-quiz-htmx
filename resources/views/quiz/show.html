@@ -13,6 +13,10 @@
 		{{t "toolbar.settings"}}
 	</button>
 	<p class="hidden text-zinc-500 md:block dark:text-zinc-400">{{t "quiz.shortcuts"}}</p>
+	<div class="flex w-full items-center justify-between gap-3 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 dark:border-amber-800 dark:bg-amber-950" data-testid="review-banner" hidden role="status">
+		<p class="font-medium">{{t "review.banner"}}</p>
+		<button type="button" data-action="review-exit" data-testid="review-exit" class="inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 min-h-9 border border-amber-400 hover:bg-amber-100 dark:border-amber-700 dark:hover:bg-amber-900">{{t "review.exit"}}</button>
+	</div>
 </section>
 
 {{/* Settings is a modal <dialog>: the browser traps focus, closes it on Escape
@@ -41,7 +45,6 @@ and returns focus to the button. */}}
 				{{end}}
 			</div>
 		</fieldset>
-		<label class="flex min-h-11 cursor-pointer items-center gap-3 rounded-lg border border-zinc-200 px-3 hover:bg-zinc-50 has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50 has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-indigo-500 dark:border-zinc-700 dark:hover:bg-zinc-800 dark:has-[:checked]:bg-indigo-950"><input type="checkbox" class="size-5 accent-indigo-600" data-setting="review" data-testid="review"><span>{{t "toolbar.review"}}</span></label>
 		<div role="group" aria-labelledby="settings-lang">
 			<p id="settings-lang" class="mb-2 text-sm font-semibold uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{t "nav.language"}}</p>
 			<div class="flex gap-1 rounded-lg bg-zinc-100 p-1 dark:bg-zinc-800">
@@ -51,7 +54,7 @@ and returns focus to the button. */}}
 		</div>
 		<div class="border-t border-zinc-200 pt-5 dark:border-zinc-800">
 			<button type="button" data-action="reset" data-testid="reset" class="inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 w-full border border-red-300 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-950">{{t "toolbar.reset"}}</button>
-			<div class="hidden space-y-3 rounded-lg border border-red-300 p-3 dark:border-red-800" data-testid="reset-confirm" role="alertdialog" aria-labelledby="reset-confirm-text">
+			<div class="space-y-3 rounded-lg border border-red-300 p-3 dark:border-red-800" data-testid="reset-confirm" hidden role="alertdialog" aria-labelledby="reset-confirm-text">
 				<p id="reset-confirm-text" class="text-sm">{{t "toolbar.reset_confirm"}}</p>
 				<div class="flex gap-2">
 					<button type="button" data-action="reset-yes" data-testid="reset-yes" class="inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 flex-1 bg-red-600 text-white hover:bg-red-700">{{t "toolbar.reset_yes"}}</button>
@@ -62,6 +65,26 @@ and returns focus to the button. */}}
 	</div>
 </dialog>
 
+<dialog id="review" data-testid="review" aria-labelledby="review-title" class="dialog-panel">
+	<div class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-zinc-200 bg-white px-5 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+		<h2 id="review-title" class="text-lg font-semibold">{{t "review.title"}}</h2>
+		<button type="button" data-action="close-dialog" aria-label="{{t "dialog.close"}}" class="inline-flex size-11 items-center justify-center rounded-full hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:bg-zinc-800">
+			<svg aria-hidden="true" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+		</button>
+	</div>
+	<div class="space-y-4 px-5 py-5">
+		<p class="text-sm text-zinc-600 dark:text-zinc-400">{{t "review.intro"}}</p>
+		<p class="rounded-lg border border-dashed border-zinc-300 p-4 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400" data-testid="review-empty" hidden>{{t "review.empty"}}</p>
+		<button type="button" data-action="review-start" data-testid="review-start" class="inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 w-full bg-indigo-600 text-white hover:bg-indigo-700">{{t "review.start"}}</button>
+		<ol id="review-list" class="space-y-3" data-testid="review-list" aria-live="polite"></ol>
+	</div>
+</dialog>
+<template id="review-finished">
+	<section class="rounded-xl border border-zinc-200 p-6 md:col-span-2 dark:border-zinc-800" data-testid="review-done">
+		<h1 class="text-xl font-semibold" tabindex="-1">{{t "review.done"}}</h1>
+		<p class="mt-2 text-zinc-600 dark:text-zinc-400">{{t "review.done_text"}}</p>
+	</section>
+</template>
 <dialog id="history" data-testid="history" aria-labelledby="history-title" class="dialog-panel">
 	<div class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-zinc-200 bg-white px-5 py-3 dark:border-zinc-800 dark:bg-zinc-900">
 		<h2 id="history-title" class="text-lg font-semibold">{{t "history.title"}}</h2>
@@ -71,11 +94,11 @@ and returns focus to the button. */}}
 	</div>
 	<div class="space-y-4 px-5 py-5">
 		<p class="text-sm text-zinc-600 dark:text-zinc-400">{{t "history.intro"}}</p>
-		<p class="hidden rounded-lg border border-dashed border-zinc-300 p-4 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400" data-testid="history-empty">{{t "history.empty"}}</p>
+		<p class="rounded-lg border border-dashed border-zinc-300 p-4 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400" data-testid="history-empty" hidden>{{t "history.empty"}}</p>
 		<ol class="space-y-3" data-testid="history-list"></ol>
 		<div class="border-t border-zinc-200 pt-4 dark:border-zinc-800" data-testid="history-actions">
 			<button type="button" data-action="history-clear" data-testid="history-clear" class="inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 w-full border border-red-300 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-950">{{t "history.clear"}}</button>
-			<div class="hidden space-y-3 rounded-lg border border-red-300 p-3 dark:border-red-800" data-testid="history-clear-confirm" role="alertdialog" aria-labelledby="history-clear-text">
+			<div class="space-y-3 rounded-lg border border-red-300 p-3 dark:border-red-800" data-testid="history-clear-confirm" hidden role="alertdialog" aria-labelledby="history-clear-text">
 				<p id="history-clear-text" class="text-sm">{{t "history.clear_confirm"}}</p>
 				<div class="flex gap-2">
 					<button type="button" data-action="history-clear-yes" data-testid="history-clear-yes" class="inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 flex-1 bg-red-600 text-white hover:bg-red-700">{{t "history.clear_yes"}}</button>

@@ -43,14 +43,33 @@ for (const theme of themes) {
 				await audit(page, "404");
 			});
 
-			test("finished card", async ({ page }) => {
+			test("finished card, history and review panels", async ({ page }) => {
 				await page.goto(`/?lang=${lang}`);
-				await page.getByTestId("settings-open").click();
-				await page.getByTestId("review").check();
+				const hard = await page.evaluate(() =>
+					(JSON.parse(document.getElementById("quiz-index")?.textContent ?? "[]") as { id: string; difficulty: string }[])
+						.filter((e) => e.difficulty === "hard")
+						.map((e) => e.id),
+				);
+				// Runs after the beforeEach init script, so this state wins.
+				await page.addInitScript(
+					([ids, t, l]) => {
+						const answers = Object.fromEntries(ids.map((id) => [id, { alt: "a", correct: false, difficulty: "hard", at: 1 }]));
+						localStorage.setItem("quiz:v1", JSON.stringify({ settings: { theme: t, lang: l, difficulties: ["hard"] }, answers }));
+						sessionStorage.setItem("quiz:v1:session", JSON.stringify({ wrong: ids.slice(0, 3).map((id) => ({ id, alt: "a" })) }));
+					},
+					[hard, theme, lang] as const,
+				);
+				await page.goto(`/?lang=${lang}`);
 				await expect(page.getByTestId("finished")).toBeVisible();
-				await page.keyboard.press("Escape");
 				await audit(page, "finished");
-			});
-		});
+
+				await page.getByTestId("history-open").click();
+				await audit(page, "history");
+				await page.keyboard.press("Escape");
+
+				await page.getByTestId("review-open").click();
+				await expect(page.getByTestId("review-item")).toHaveCount(3);
+				await audit(page, "review");
+			});		});
 	}
 }

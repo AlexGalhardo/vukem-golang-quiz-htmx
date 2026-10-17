@@ -73,11 +73,75 @@ func (h *Quiz) Answer(c *web.Ctx) error {
 	return h.render(c, q, alt.ID)
 }
 
-func (h *Quiz) render(c *web.Ctx, q quiz.Question, chosen string) error {
+// maxReviewItems caps /review: the session list can't legitimately grow past
+// the bank, and the cap bounds the work per request.
+const maxReviewItems = 200
+
+// Review renders the "wrong answers" list for the Review panel. The client
+// keeps the list (sessionStorage) and sends it as items=id:alt,id:alt; ids
+// no longer in the bank are skipped, malformed input is a 400.
+func (h *Quiz) Review(c *web.Ctx) error {
+	locale := h.locale(c)
+
+	var items []reviewItem
+
+	raw := c.Query("items")
+	if raw != "" {
+		parts := strings.Split(raw, ",")
+		if len(parts) > maxReviewItems {
+			return errs.New(http.StatusBadRequest, "Too many items.")
+		}
+
+		for _, p := range parts {
+			id, alt, ok := strings.Cut(p, ":")
+			if !ok || !quiz.ValidID(id) || len(alt) != 1 || alt[0] < 'a' || alt[0] >= 'a'+quiz.AlternativeCount {
+				return errs.New(http.StatusBadRequest, "Invalid review item.")
+			}
+
+			q, found := h.bank.Get(id)
+			if !found {
+				continue
+			}
+
+			chosen, _ := q.Alternative(alt)
+			items = append(items, reviewItem{
+				ID:       q.ID,
+				Locale:   locale,
+				Question: richText(q.Question.In(locale)),
+				Chosen:   richText(chosen.Text.In(locale)),
+				Correct:  richText(q.Correct().Text.In(locale)),
+			})
+		}
+	}
+
+	c.SetHeader("Cache-Control", "no-store")
+
+	return c.Render("quiz/review", reviewPage{Items: items})
+}
+
+type reviewPage struct {
+	Items []reviewItem
+}
+
+type reviewItem struct {
+	ID       string
+	Locale   string
+	Question template.HTML
+	Chosen   template.HTML
+	Correct  template.HTML
+}
+
+func (h *Quiz) locale(c *web.Ctx) string {
 	locale := i18n.Locale(c.Context())
 	if !slices.Contains(quiz.Locales(), locale) {
-		locale = quiz.DefaultLocale
+		return quiz.DefaultLocale
 	}
+
+	return locale
+}
+
+func (h *Quiz) render(c *web.Ctx, q quiz.Question, chosen string) error {
+	locale := h.locale(c)
 
 	order := parseOrder(c.Query("order"))
 	if order == nil {

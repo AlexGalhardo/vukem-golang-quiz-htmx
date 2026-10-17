@@ -37,7 +37,11 @@ async function next(page: Page): Promise<void> {
 	await expect(page.getByTestId("verdict")).toHaveCount(0);
 	// A slow swap can clear the card before the new question is in place.
 	await expect
-		.poll(async () => (await page.getByTestId("finished").count()) > 0 || ((await currentId(page).catch(() => before)) !== before))
+		.poll(
+			async () =>
+				(await page.locator('[data-testid="finished"], [data-testid="review-done"]').count()) > 0 ||
+				(await currentId(page).catch(() => before)) !== before,
+		)
 		.toBe(true);
 }
 
@@ -254,26 +258,6 @@ test.describe("settings", () => {
 		// The last checked difficulty cannot be unchecked.
 		await page.getByTestId("difficulty-hard").click();
 		await expect(page.getByTestId("difficulty-hard")).toBeChecked();
-	});
-
-	test("review mode replays wrong answers, then shows the finished card", async ({ page, request }) => {
-		await page.goto("/");
-		const idx = await index(page);
-		const wrongId = idx[0]?.id ?? "";
-
-		await answerWrong(page, request);
-		await next(page);
-		await answer(page, await correctAlt(request, await currentId(page)));
-
-		await openSettings(page);
-		await page.getByTestId("review").check();
-		await expect(page.getByTestId("question")).toHaveAttribute("data-question-id", wrongId);
-
-		await closeSettings(page);
-		await answer(page, await correctAlt(request, wrongId));
-		await next(page);
-
-		await expect(page.getByTestId("finished")).toBeVisible();
 	});
 
 	test("settings dialog: large targets, Escape, backdrop and focus return", async ({ page }) => {
@@ -570,5 +554,70 @@ test.describe("history", () => {
 		await expect(run).toHaveAttribute("data-status", "finished");
 		await expect(run.getByTestId("run-accuracy")).toHaveText("100%");
 		await expect(run.getByTestId("run-setup")).toContainText("Hard");
+	});
+});
+
+test.describe("review", () => {
+	test("collects this session's wrong answers and replays them until right", async ({ page, request, context }) => {
+		await page.goto("/");
+		const idx = await index(page);
+		const [q1, q2, q3] = [idx[0]?.id ?? "", idx[1]?.id ?? "", idx[2]?.id ?? ""];
+		const badge = page.getByTestId("review-count");
+		await expect(badge).toBeHidden();
+
+		await answerWrong(page, request);
+		await next(page);
+		await answer(page, await correctAlt(request, q2));
+		await next(page);
+		await answerWrong(page, request);
+		await expect(badge).toHaveText("2");
+
+		await page.getByTestId("review-open").click();
+		const dialog = page.getByTestId("review");
+		await expect(dialog.getByTestId("review-item")).toHaveCount(2);
+		await expect(dialog.getByTestId("review-item").nth(0)).toHaveAttribute("data-question-id", q1);
+		await expect(dialog.getByTestId("review-item").nth(1)).toHaveAttribute("data-question-id", q3);
+		await expect(dialog.getByTestId("review-item").first()).toContainText("Your answer");
+
+		await dialog.getByTestId("review-start").click();
+		await expect(dialog).toBeHidden();
+		await expect(page.getByTestId("review-banner")).toBeVisible();
+		await expect(page.getByTestId("question")).toHaveAttribute("data-question-id", q1);
+
+		await answer(page, await correctAlt(request, q1));
+		await expect(badge).toHaveText("1");
+		await next(page);
+		await expect(page.getByTestId("question")).toHaveAttribute("data-question-id", q3);
+		await answerWrong(page, request);
+		await expect(badge).toHaveText("1");
+		// The last wrong question comes back until it is right.
+		await page.getByTestId("next").click();
+		await expect(page.getByTestId("verdict")).toHaveCount(0);
+		await expect(page.getByTestId("question")).toHaveAttribute("data-question-id", q3);
+		await answer(page, await correctAlt(request, q3));
+		await expect(badge).toBeHidden();
+		await next(page);
+		await expect(page.getByTestId("review-done")).toBeVisible();
+
+		// Replays are not a new history run.
+		await page.getByTestId("history-open").click();
+		await expect(page.getByTestId("history").getByTestId("run-answered").first()).toHaveText("3");
+		await page.keyboard.press("Escape");
+
+		await page.getByTestId("review-exit").click();
+		await expect(page.getByTestId("review-banner")).toBeHidden();
+		await expect(page.getByTestId("question")).toHaveAttribute("data-question-id", idx[3]?.id ?? "");
+
+		// The list belongs to this browser tab's session only.
+		const other = await context.newPage();
+		await other.goto("/");
+		await expect(other.getByTestId("review-count")).toBeHidden();
+	});
+
+	test("an empty review list says so", async ({ page }) => {
+		await page.goto("/");
+		await page.getByTestId("review-open").click();
+		await expect(page.getByTestId("review").getByTestId("review-empty")).toBeVisible();
+		await expect(page.getByTestId("review").getByTestId("review-start")).toBeHidden();
 	});
 });

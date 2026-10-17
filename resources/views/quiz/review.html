@@ -1,0 +1,12 @@
+{{/* layout: none */}}
+{{/* htmx fragment for the Review panel: one card per wrong answer of this session. */}}
+{{range .Items}}
+<li class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800" data-testid="review-item" data-question-id="{{.ID}}">
+	<p class="font-medium leading-snug">{{.Question}}</p>
+	<dl class="mt-3 space-y-2 text-sm">
+		<div class="rounded-lg bg-red-50 p-2 dark:bg-red-950"><dt class="text-xs font-semibold uppercase tracking-wide text-red-800 dark:text-red-200">{{t "review.your_answer"}}</dt><dd class="mt-0.5">{{.Chosen}}</dd></div>
+		<div class="rounded-lg bg-green-50 p-2 dark:bg-green-950"><dt class="text-xs font-semibold uppercase tracking-wide text-green-800 dark:text-green-200">{{t "review.correct_answer"}}</dt><dd class="mt-0.5">{{.Correct}}</dd></div>
+	</dl>
+	<a class="mt-3 inline-flex min-h-11 items-center text-sm font-semibold text-indigo-700 underline hover:no-underline dark:text-indigo-300" href="/questions/{{.ID}}?lang={{.Locale}}">{{t "review.open"}}</a>
+</li>
+{{end}}

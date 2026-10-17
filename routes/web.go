@@ -82,6 +82,7 @@ func Web(bank *quiz.Bank, shuffle quiz.Shuffler) func(r *router.Router, app *vuk
 		r.Get("/", h.Home).Name("quiz")
 		r.Get("/questions/{id}", h.Show).Name("questions.show")
 		r.Get("/questions/{id}/answers/{alt}", h.Answer).Name("questions.answer")
+		r.Get("/review", h.Review).Name("review")
 
 		return nil
 	}

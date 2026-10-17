@@ -16,6 +16,7 @@ import {
 	type Run,
 	saveHistory,
 } from "./history";
+import { emptySession, itemsParam, loadSession, nextInReview, recordAnswer as recordReview, type Session, saveSession } from "./review";
 
 type Theme = "light" | "dark" | "system";
 
@@ -36,7 +37,6 @@ interface Settings {
 	lang?: string;
 	mode: Mode;
 	difficulties: Difficulty[];
-	review: boolean;
 }
 
 interface State {
@@ -64,7 +64,7 @@ const LOCALES = ["en", "pt-BR"];
 
 
 function defaultState(): State {
-	return { settings: { mode: "ordered", difficulties: [...DIFFICULTIES], review: false }, answers: {}, order: [] };
+	return { settings: { mode: "ordered", difficulties: [...DIFFICULTIES] }, answers: {}, order: [] };
 }
 
 // Storage can be missing, full or corrupted (another tab, an old version, a
@@ -92,7 +92,8 @@ function loadState(): State {
 		const ds = s.difficulties.filter(isDifficulty);
 		if (ds.length > 0) state.settings.difficulties = ds;
 	}
-	state.settings.review = s.review === true;
+	// settings.review (the old "review only wrong answers" switch) is gone:
+	// the Review panel replays this session's wrong answers instead.
 
 	if (typeof r.answers === "object" && r.answers !== null) {
 		for (const [id, v] of Object.entries(r.answers as Record<string, unknown>)) {
@@ -143,6 +144,7 @@ function shuffle<T>(items: T[]): T[] {
 
 class Quiz {
 	private state = loadState();
+	private session: Session = loadSession(sessionStore());
 	// The question the latest load asked for; undefined once finished.
 	private wanted: string | undefined;
 	private readonly index = readIndex();
@@ -156,6 +158,7 @@ class Quiz {
 
 		this.syncRandomOrder();
 		this.applyTheme();
+		this.renderReview();
 		this.renderSettings();
 		this.renderStats();
 		this.bindEvents();
@@ -223,10 +226,8 @@ class Quiz {
 	// The queue: unanswered questions of the selection, or the wrong ones in
 	// review mode.
 	private queue(): string[] {
+		if (this.session.reviewing) return this.session.wrong.map((w) => w.id);
 		const sel = this.selection();
-		if (this.state.settings.review) {
-			return sel.filter((e) => this.state.answers[e.id]?.correct === false).map((e) => e.id);
-		}
 		return sel.filter((e) => !this.state.answers[e.id]).map((e) => e.id);
 	}
 
@@ -239,8 +240,9 @@ class Quiz {
 	}
 
 	private nextId(): string | undefined {
-		const queue = this.queue();
 		const current = this.currentId();
+		if (this.session.reviewing) return nextInReview(this.session, current);
+		const queue = this.queue();
 		if (queue.length === 0) return undefined;
 		if (!current) return queue[0];
 
@@ -285,8 +287,8 @@ class Quiz {
 
 	private showFinished(): void {
 		this.wanted = undefined;
-		if (!this.state.settings.review) this.endRun(true);
-		const tpl = document.getElementById("quiz-finished") as HTMLTemplateElement | null;
+		if (!this.session.reviewing) this.endRun(true);
+		const tpl = document.getElementById(this.session.reviewing ? "review-finished" : "quiz-finished") as HTMLTemplateElement | null;
 		const quiz = document.getElementById("quiz");
 		if (!tpl || !quiz) return;
 		quiz.replaceChildren(tpl.content.cloneNode(true));
@@ -323,9 +325,6 @@ class Quiz {
 				case "difficulty":
 					input.checked = s.difficulties.includes(input.value as Difficulty);
 					break;
-				case "review":
-					input.checked = s.review;
-					break;
 			}
 		}
 	}
@@ -347,9 +346,6 @@ class Quiz {
 					s.settings.difficulties = checked;
 					break;
 				}
-				case "review":
-					s.settings.review = input.checked;
-					break;
 			}
 		});
 
@@ -364,23 +360,51 @@ class Quiz {
 	private askReset(ask: boolean, focus = true): void {
 		const button = document.querySelector<HTMLElement>('[data-testid="reset"]');
 		const confirm = document.querySelector<HTMLElement>('[data-testid="reset-confirm"]');
-		button?.classList.toggle("hidden", ask);
-		confirm?.classList.toggle("hidden", !ask);
+		if (button) button.hidden = ask;
+		if (confirm) confirm.hidden = !ask;
 		if (focus) (ask ? confirm?.querySelector<HTMLElement>('[data-action="reset-no"]') : button)?.focus();
 	}
 
 	private reset(): void {
 		this.askReset(false);
 		this.endRun(false);
+		this.setSession(emptySession());
 		this.update((s) => {
 			s.answers = {};
 			s.order = shuffle(this.index.map((e) => e.id));
-			s.settings.review = false;
 		});
 		this.renderSettings();
 		this.renderStats();
 		const first = this.queue()[0];
 		if (first) this.load(first, "push");
+	}
+
+	private setSession(s: Session): void {
+		this.session = s;
+		saveSession(sessionStore(), s);
+		this.renderReview();
+	}
+
+	private renderReview(): void {
+		const n = this.session.wrong.length;
+		const badge = document.querySelector<HTMLElement>('[data-testid="review-count"]');
+		if (badge) {
+			badge.textContent = String(n);
+			badge.hidden = n === 0;
+		}
+		setHidden('[data-testid="review-banner"]', !this.session.reviewing);
+		setHidden('[data-testid="review-empty"]', n > 0);
+		setHidden('[data-testid="review-start"]', n === 0);
+	}
+
+	private loadReviewList(): void {
+		const list = document.getElementById("review-list");
+		if (!list) return;
+		list.replaceChildren();
+		this.renderReview();
+		if (this.session.wrong.length === 0 || !this.htmx) return;
+		const q = new URLSearchParams({ lang: this.lang, items: itemsParam(this.session) });
+		void this.htmx.ajax("GET", `/review?${q.toString()}`, { target: "#review-list", swap: "innerHTML" });
 	}
 
 	// endRun moves the run in progress (if it has answers) to the history.
@@ -443,16 +467,16 @@ class Quiz {
 			}),
 		);
 
-		document.querySelector('[data-testid="history-empty"]')?.classList.toggle("hidden", runs.length > 0);
-		document.querySelector('[data-testid="history-actions"]')?.classList.toggle("hidden", saved.length === 0);
+		setHidden('[data-testid="history-empty"]', runs.length > 0);
+		setHidden('[data-testid="history-actions"]', saved.length === 0);
 		this.askClearHistory(false, false);
 	}
 
 	private askClearHistory(ask: boolean, focus = true): void {
 		const button = document.querySelector<HTMLElement>('[data-testid="history-clear"]');
 		const confirm = document.querySelector<HTMLElement>('[data-testid="history-clear-confirm"]');
-		button?.classList.toggle("hidden", ask);
-		confirm?.classList.toggle("hidden", !ask);
+		if (button) button.hidden = ask;
+		if (confirm) confirm.hidden = !ask;
 		if (focus) (ask ? confirm?.querySelector<HTMLElement>('[data-action="history-clear-no"]') : button)?.focus();
 	}
 
@@ -498,10 +522,11 @@ class Quiz {
 			this.update((s) => {
 				s.answers[d.id] = { alt: d.alt, correct: d.correct === true, difficulty: d.difficulty, at: now };
 				// Replaying wrong answers is not a new run.
-				if (!s.settings.review) {
+				if (!this.session.reviewing) {
 					s.run = recordAnswer(s.run, { mode: s.settings.mode, difficulties: s.settings.difficulties, difficulty: d.difficulty, correct: d.correct === true, now });
 				}
 			});
+			this.setSession(recordReview(this.session, d.id, d.alt, d.correct === true));
 			this.renderStats();
 			document.querySelector<HTMLElement>('[data-action="next"]')?.focus({ preventScroll: true });
 		});
@@ -547,6 +572,15 @@ class Quiz {
 				case "reset-yes":
 					this.reset();
 					break;
+				case "review-start":
+					target.closest("dialog")?.close();
+					this.setSession({ ...this.session, reviewing: true });
+					this.goNext();
+					break;
+				case "review-exit":
+					this.setSession({ ...this.session, reviewing: false });
+					this.goNext();
+					break;
 				case "history-clear":
 					this.askClearHistory(true);
 					break;
@@ -586,6 +620,7 @@ class Quiz {
 		if (!(dialog instanceof HTMLDialogElement) || dialog.open) return;
 		if (id === "settings") this.askReset(false, false);
 		if (id === "history") this.renderHistory();
+		if (id === "review") this.loadReviewList();
 		dialog.showModal();
 	}
 
@@ -629,4 +664,19 @@ function storage(): Storage | undefined {
 	} catch {
 		return undefined;
 	}
+}
+
+function sessionStore(): Storage | undefined {
+	try {
+		return window.sessionStorage;
+	} catch {
+		return undefined;
+	}
+}
+
+// setHidden uses the hidden attribute, which wins over Tailwind display
+// utilities (preflight makes [hidden] display:none !important).
+function setHidden(selector: string, hidden: boolean): void {
+	const el = document.querySelector<HTMLElement>(selector);
+	if (el) el.hidden = hidden;
 }

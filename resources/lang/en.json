@@ -6,7 +6,8 @@
 	"nav": {
 		"label": "Main",
 		"language": "Language",
-		"history": "History"
+		"history": "History",
+		"review": "Review"
 	},
 	"toolbar": {
 		"label": "Quiz controls",
@@ -17,7 +18,6 @@
 		"ordered": "By difficulty",
 		"random": "Random",
 		"difficulties": "Difficulties",
-		"review": "Review only wrong answers",
 		"stats": "Accuracy by difficulty",
 		"reset": "Reset progress",
 		"reset_confirm": "Reset all progress and statistics?",
@@ -41,7 +41,7 @@
 		"sources": "Sources",
 		"next": "Next question",
 		"finished": "You answered every question in this selection.",
-		"finished_text": "Change the difficulties, review your wrong answers, or reset your progress in Settings."
+		"finished_text": "Change the difficulties, redo your wrong answers from Review, or reset your progress in Settings."
 	},
 	"errors": {
 		"not_found": "Page not found.",
@@ -71,5 +71,18 @@
 		"clear": "Clear history",
 		"clear_confirm": "Delete every saved run? Your current progress is kept.",
 		"clear_yes": "Yes, clear"
+	},
+	"review": {
+		"your_answer": "Your answer",
+		"correct_answer": "Correct answer",
+		"open": "Open the question",
+		"title": "Review",
+		"intro": "Questions you answered wrong in this browser session. Redo them until each one is right; a question leaves the list once you get it right.",
+		"empty": "Nothing to review: no wrong answers in this session.",
+		"start": "Redo these questions",
+		"banner": "Reviewing your wrong answers",
+		"exit": "Exit review",
+		"done": "All wrong answers corrected!",
+		"done_text": "Exit review to continue the quiz where you left off."
 	}
 }

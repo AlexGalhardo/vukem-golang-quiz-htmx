@@ -19,6 +19,10 @@ const (
 
 var slugRE = regexp.MustCompile(`^[a-z0-9]+(-[a-z0-9]+)*$`)
 
+// ValidID reports whether id has the shape of a question id (kebab-case, at
+// most 64 characters); handlers use it to reject input before a lookup.
+func ValidID(id string) bool { return len(id) <= maxIDLen && slugRE.MatchString(id) }
+
 // SourceKinds lists the accepted Source.Kind values.
 func SourceKinds() []string {
 	return []string{
@@ -81,7 +85,7 @@ func validateQuestion(q Question) []string {
 
 	add := func(format string, args ...any) { p = append(p, fmt.Sprintf(format, args...)) }
 
-	if !slugRE.MatchString(q.ID) || len(q.ID) > maxIDLen {
+	if !ValidID(q.ID) {
 		add("id must be kebab-case, at most %d characters", maxIDLen)
 	}
 
