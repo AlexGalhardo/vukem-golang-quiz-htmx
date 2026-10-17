@@ -175,8 +175,9 @@ func TestSecurity_HSTS_Production(t *testing.T) {
 	t.Parallel()
 
 	prod := vukemtest.New(t, bootstrap.New, vukemtest.Options{Env: map[string]string{
-		"APP_ENV": "production",
-		"APP_URL": "https://quiz.example",
+		"APP_ENV":    "production",
+		"APP_URL":    "https://quiz.example",
+		"HSTS_FORCE": "true",
 	}})
 
 	// Railway's edge talks plain HTTP to the app; HSTS must still be sent.

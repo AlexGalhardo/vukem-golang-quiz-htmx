@@ -40,6 +40,9 @@ func TestLocale(t *testing.T) {
 		{"unknown falls back", "/?lang=xx", "", "Settings", `lang="en"`},
 	}
 
+	// The locale never comes from a cookie (D20): the app sets none.
+	app.Client(t).WithCookie("lang", "pt-BR").Get("/").AssertOK().AssertSee("Settings")
+
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Parallel()

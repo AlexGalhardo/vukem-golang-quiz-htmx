@@ -2,7 +2,7 @@ module github.com/AlexGalhardo/vukem-golang-quiz-htmx
 
 go 1.27.2
 
-require github.com/AlexGalhardo/vukem v0.24.0
+require github.com/AlexGalhardo/vukem v0.25.0
 
 require (
 	github.com/dustin/go-humanize v1.0.1 // indirect

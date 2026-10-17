@@ -52,13 +52,13 @@ The framework pin moves forward during the project. When the coordinator announc
 | D17 | Since vukem v0.24.0 routes use `vukem.DefaultMiddlewareWith(..., MiddlewareOptions{Stateless: true})` (no sessions/cookies, Origin-only CSRF, maintenance mode, proxy settings from env) with `CSPSources` for the analytics origin, plus static files, rate limit, 16 KiB body cap and gzip | Lead |
 | D18 | Server is stateless. The page embeds a question index (ids + difficulty) as JSON; the client builds the queue (mode, filter, review-wrong) and fetches fragments by id | Lead |
 | D19 | Answer check is `GET` (idempotent, no state change, no CSRF surface) | Lead |
-| D20 | Locale comes from `?lang=` (the client adds it from `localStorage`), then `Accept-Language`, then `en`; no session exists; the framework's i18n middleware may read a `lang` cookie but the app never sets one | Lead |
+| D20 | Locale comes from `?lang=` (the client adds it from `localStorage`), then `Accept-Language`, then `en`; cookie and session sources are off (`MiddlewareOptions.I18n` order query, header) | Lead |
 | D21 | Runtime image `alpine:3.24.2` with a non-root user (UID 65532), so `HEALTHCHECK` can use busybox `wget` | Lead |
 | D22 | Hosting on Railway, Dockerfile builder, healthcheck `/up` (`railway.json`) | Owner |
 | D23 | `.editorconfig`: tabs size 4 everywhere except YAML (spec forbids tabs) and Markdown (markdownlint 2-space lists) | Owner + format constraints |
 | D24 | `.claude/settings.local.json` (`disableAllHooks: true`) is a per-developer file, git-ignored | Owner |
 | D25 | `RATE_LIMIT_PER_MINUTE` (default 120 per IP) so CI e2e/DAST, which share one IP, can raise it | Lead |
-| D28 | `TRUSTED_PROXIES` stays unset on Railway: its edge range is undocumented and the framework logger does not record peer addresses, so it could not be verified. The client IP is the edge address, so the Dockerfile sets `RATE_LIMIT_PER_MINUTE=1200` as a site-wide abuse cap, and HSTS is sent unconditionally in production when `APP_URL` is https (browsers ignore it over HTTP) | Lead, vukem docs deployment/docker-and-railway |
+| D28 | `TRUSTED_PROXIES` stays unset on Railway: its edge range is undocumented and the framework logger does not record peer addresses, so it could not be verified. The client IP is the edge address, so the Dockerfile sets `RATE_LIMIT_PER_MINUTE=1200` as a site-wide abuse cap, and HSTS is forced with `HSTS_FORCE=true` on Railway (vukem v0.25.0; browsers ignore HSTS over HTTP) | Lead, vukem docs deployment/docker-and-railway |
 | D29 | Production binary built with the `vukem_nosqlite` tag from `.buildtags` (no database; 18.1 MB → 14.3 MB) | Lead |
 | D26 | Bank status 2026-10-17: 133 questions in 7 shards (very-easy 24, easy 31, medium 30, hard 24, very-hard 24), all EN + PT-BR; source links checked with `-tags=links`; technical + PT-BR review done (every snippet run on Go 1.27, no correct answer changed, factual fixes noted in the `fix(questions): review …` commits) | Lead |
 | D27 | `@axe-core/playwright` 4.14.0 (dev dependency, owner-approved via the coordinator) gates serious/critical accessibility violations in e2e | Owner |
@@ -68,7 +68,7 @@ The framework pin moves forward during the project. When the coordinator announc
 | Piece | Version | Notes |
 | --- | --- | --- |
 | Go | 1.27.2 | `go.mod` |
-| vukem | v0.24.0 | `go.mod`; CLI in the dev image |
+| vukem | v0.25.0 | `go.mod`; CLI in the dev image |
 | htmx | 4.0.0 | vendored |
 | Tailwind CSS / `@tailwindcss/vite` | 4.3.3 | CSS-first config |
 | Vite | 8.3.4 | |

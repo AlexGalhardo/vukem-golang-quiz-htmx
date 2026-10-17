@@ -27,12 +27,12 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
-- vukem bumped to v0.22.0, v0.23.0, then v0.24.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
+- vukem bumped to v0.22.0, v0.23.0, v0.24.0, then v0.25.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
 
 - The theme bootstrap is inlined with the per-request CSP nonce instead of a render-blocking `/js/theme.js` request; htmx moved to `/vendor/htmx-4.0.0/htmx.min.js` and is cached as immutable.
 
 - The middleware stack is vukem's stateless `DefaultMiddlewareWith` (adds maintenance mode); the analytics origin goes through `CSPSources`; the app's own proxy settings were removed; htmx loads before the Vite entry; development runs without `APP_KEY`; the production binary is built without SQLite (`vukem_nosqlite`).
-- The Docker image no longer trusts `100.0.0.0/8` (undocumented Railway range); HSTS is sent unconditionally in production with an https `APP_URL`.
+- The Docker image no longer trusts `100.0.0.0/8` (undocumented Railway range); HSTS is forced with vukem's `HSTS_FORCE=true` (set on Railway; needs an https `APP_URL`). The locale comes only from `?lang=` and `Accept-Language` (no cookie source).
 
 ### Fixed
 
