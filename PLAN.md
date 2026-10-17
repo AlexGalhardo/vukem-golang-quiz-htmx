@@ -213,7 +213,7 @@ Each item has a test (`tests/security_test.go`, e2e or CI scan) before release.
 
 #### F.5 CI/CD
 
-- [x] F.5.1 `ci.yml`: lint (golangci, mod tidy, markdownlint, typecheck, commitlint), test (race + coverage), govulncheck, build, e2e against the built binary, Docker + smoke + ZAP baseline + Nuclei → verify: `gh run list` green
+- [x] F.5.1 `ci.yml`: lint (golangci, mod tidy, markdownlint, typecheck, commitlint), test (race + coverage), govulncheck, build, e2e against the built binary, Docker + smoke + ZAP baseline (rules in `.zap/rules.tsv`) + Nuclei → verify: `gh run list` green (run 39035362404)
 - [x] F.5.2 `release.yml`: on `v*.*.*` tag push the image to GHCR and create the GitHub release from CHANGELOG → verify: first tag in phase R
 - [x] F.5.3 Dependabot (gomod, bun, actions, docker) → verify: file present
 
@@ -274,6 +274,7 @@ Topics to cover: basics/types, zero values, strings/runes/bytes, slices (len/cap
 - [ ] T.6 `docs/qa-checklist.md`: exploratory QA checklist (browsers, keyboard, screen reader, slow 3G, storage disabled, both languages/themes) and one documented run → verify: checklist committed with results
 - [ ] T.7 Accessibility: axe in Playwright, zero serious/critical → verify: CI
 - [ ] T.8 Lighthouse ≥ 95 performance/accessibility/best practices on mobile → verify: report saved
+- [ ] T.9 Gate DAST results: Nuclei findings (medium+) fail the job (JSONL export + check), revisit the ZAP `90004` COEP rule in `.zap/rules.tsv` → verify: a planted header regression fails CI
 
 ### D — Deploy
 
