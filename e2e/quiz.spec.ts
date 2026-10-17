@@ -502,3 +502,73 @@ test.describe("resilience and layout", () => {
 		expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(375);
 	});
 });
+
+test.describe("history", () => {
+	test("tracks the current run, saves it on reset, survives reloads and clears inline", async ({ page, request }) => {
+		await page.goto("/");
+		await answer(page, await correctAlt(request, await currentId(page)));
+		await next(page);
+		await answerWrong(page, request);
+
+		await page.getByTestId("history-open").click();
+		const dialog = page.getByTestId("history");
+		await expect(dialog).toBeVisible();
+		const runs = dialog.getByTestId("history-run");
+		await expect(runs).toHaveCount(1);
+		await expect(runs.first()).toHaveAttribute("data-status", "progress");
+		await expect(runs.first().getByTestId("run-accuracy")).toHaveText("50%");
+		await expect(runs.first().getByTestId("run-answered")).toHaveText("2");
+		await expect(runs.first().getByTestId("run-correct")).toHaveText("1");
+		await expect(runs.first().getByTestId("run-wrong")).toHaveText("1");
+		await expect(runs.first().locator('[data-difficulty="very-easy"]')).toContainText("50% (1/2)");
+		await page.keyboard.press("Escape");
+
+		// Reset stops the run early and saves it.
+		await openSettings(page);
+		await page.getByTestId("reset").click();
+		await page.getByTestId("reset-yes").click();
+		await closeSettings(page);
+
+		await page.reload();
+		await page.getByTestId("history-open").click();
+		await expect(runs).toHaveCount(1);
+		await expect(runs.first()).toHaveAttribute("data-status", "partial");
+		await expect(runs.first().getByTestId("run-answered")).toHaveText("2");
+
+		page.on("dialog", () => {
+			throw new Error("unexpected browser dialog");
+		});
+		await dialog.getByTestId("history-clear").click();
+		await dialog.getByTestId("history-clear-no").click();
+		await expect(runs).toHaveCount(1);
+		await dialog.getByTestId("history-clear").click();
+		await dialog.getByTestId("history-clear-yes").click();
+		await expect(runs).toHaveCount(0);
+		await expect(dialog.getByTestId("history-empty")).toBeVisible();
+	});
+
+	test("a finished selection is saved as a completed run", async ({ page, request }) => {
+		await page.goto("/");
+		const hard = (await index(page)).filter((e) => e.difficulty === "hard");
+		const last = hard[hard.length - 1]?.id ?? "";
+		// Every hard question but the last is already answered (from an earlier visit).
+		await page.evaluate(
+			([ids, k]) => {
+				const answers = Object.fromEntries(ids.map((id) => [id, { alt: "a", correct: true, difficulty: "hard", at: 1 }]));
+				localStorage.setItem(k, JSON.stringify({ settings: { mode: "ordered", difficulties: ["hard"] }, answers }));
+			},
+			[hard.slice(0, -1).map((e) => e.id), STORAGE_KEY] as const,
+		);
+		await page.goto("/");
+		await expect(page.getByTestId("question")).toHaveAttribute("data-question-id", last);
+		await answer(page, await correctAlt(request, last));
+		await next(page);
+		await expect(page.getByTestId("finished")).toBeVisible();
+
+		await page.getByTestId("history-open").click();
+		const run = page.getByTestId("history").getByTestId("history-run").first();
+		await expect(run).toHaveAttribute("data-status", "finished");
+		await expect(run.getByTestId("run-accuracy")).toHaveText("100%");
+		await expect(run.getByTestId("run-setup")).toContainText("Hard");
+	});
+});

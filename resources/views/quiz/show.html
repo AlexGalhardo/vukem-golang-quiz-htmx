@@ -62,6 +62,51 @@ and returns focus to the button. */}}
 	</div>
 </dialog>
 
+<dialog id="history" data-testid="history" aria-labelledby="history-title" class="dialog-panel">
+	<div class="sticky top-0 z-10 flex items-center justify-between gap-4 border-b border-zinc-200 bg-white px-5 py-3 dark:border-zinc-800 dark:bg-zinc-900">
+		<h2 id="history-title" class="text-lg font-semibold">{{t "history.title"}}</h2>
+		<button type="button" data-action="close-dialog" aria-label="{{t "dialog.close"}}" class="inline-flex size-11 items-center justify-center rounded-full hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-indigo-500 dark:hover:bg-zinc-800">
+			<svg aria-hidden="true" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+		</button>
+	</div>
+	<div class="space-y-4 px-5 py-5">
+		<p class="text-sm text-zinc-600 dark:text-zinc-400">{{t "history.intro"}}</p>
+		<p class="hidden rounded-lg border border-dashed border-zinc-300 p-4 text-center text-zinc-600 dark:border-zinc-700 dark:text-zinc-400" data-testid="history-empty">{{t "history.empty"}}</p>
+		<ol class="space-y-3" data-testid="history-list"></ol>
+		<div class="border-t border-zinc-200 pt-4 dark:border-zinc-800" data-testid="history-actions">
+			<button type="button" data-action="history-clear" data-testid="history-clear" class="inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 w-full border border-red-300 text-red-700 hover:bg-red-50 dark:border-red-800 dark:text-red-300 dark:hover:bg-red-950">{{t "history.clear"}}</button>
+			<div class="hidden space-y-3 rounded-lg border border-red-300 p-3 dark:border-red-800" data-testid="history-clear-confirm" role="alertdialog" aria-labelledby="history-clear-text">
+				<p id="history-clear-text" class="text-sm">{{t "history.clear_confirm"}}</p>
+				<div class="flex gap-2">
+					<button type="button" data-action="history-clear-yes" data-testid="history-clear-yes" class="inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 flex-1 bg-red-600 text-white hover:bg-red-700">{{t "history.clear_yes"}}</button>
+					<button type="button" data-action="history-clear-no" data-testid="history-clear-no" class="inline-flex min-h-11 items-center justify-center rounded-lg px-4 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500 flex-1 border border-zinc-300 hover:bg-zinc-100 dark:border-zinc-700 dark:hover:bg-zinc-800">{{t "dialog.cancel"}}</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</dialog>
+<template id="history-run-tpl">
+	<li class="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800" data-testid="history-run">
+		<div class="flex items-center justify-between gap-2">
+			<time class="text-sm font-medium" data-field="date"></time>
+			<span class="rounded-full px-2 py-0.5 text-xs font-semibold" data-field="status"><span data-status-label="progress">{{t "history.in_progress"}}</span><span data-status-label="finished">{{t "history.finished"}}</span><span data-status-label="partial">{{t "history.partial"}}</span></span>
+		</div>
+		<p class="mt-2 text-3xl font-semibold tabular-nums" data-testid="run-accuracy"></p>
+		<dl class="mt-2 grid grid-cols-2 gap-2 text-sm sm:grid-cols-4">
+			<div><dt class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{t "history.answered"}}</dt><dd class="font-semibold tabular-nums" data-testid="run-answered"></dd></div>
+			<div><dt class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{t "history.correct"}}</dt><dd class="font-semibold tabular-nums text-green-700 dark:text-green-300" data-testid="run-correct"></dd></div>
+			<div><dt class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{t "history.wrong"}}</dt><dd class="font-semibold tabular-nums text-red-700 dark:text-red-300" data-testid="run-wrong"></dd></div>
+			<div><dt class="text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">{{t "history.duration"}}</dt><dd class="font-semibold tabular-nums" data-testid="run-duration"></dd></div>
+		</dl>
+		<p class="mt-2 text-sm text-zinc-600 dark:text-zinc-400" data-testid="run-setup"><span data-mode-label="ordered">{{t "toolbar.ordered"}}</span><span data-mode-label="random">{{t "toolbar.random"}}</span> · <span data-field="difficulties"></span></p>
+		<ul class="mt-2 space-y-1 text-sm">
+			{{range $d := $.Difficulties}}
+			<li class="flex justify-between" data-difficulty="{{$d}}"><span data-difficulty-name>{{t (printf "difficulty.%s" $d)}}</span><span class="tabular-nums" data-field="acc"></span></li>
+			{{end}}
+		</ul>
+	</li>
+</template>
+
 <div id="quiz" class="grid gap-6 md:grid-cols-2" data-testid="quiz-grid">{{block "quiz" .}}
 	<section id="question" class="min-w-0 rounded-xl border border-zinc-200 p-6 dark:border-zinc-800" aria-labelledby="question-title" data-question-id="{{.Q.ID}}" data-difficulty="{{.Q.Difficulty}}" data-testid="question">
 		<p class="mb-3 inline-block rounded-full bg-indigo-50 px-3 py-0.5 text-xs font-semibold uppercase tracking-wide text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300" data-testid="difficulty">{{t (printf "difficulty.%s" .Q.Difficulty)}}</p>

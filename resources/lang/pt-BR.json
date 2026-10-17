@@ -5,7 +5,8 @@
 	},
 	"nav": {
 		"label": "Principal",
-		"language": "Idioma"
+		"language": "Idioma",
+		"history": "Histórico"
 	},
 	"toolbar": {
 		"label": "Controles do quiz",
@@ -55,5 +56,20 @@
 	"dialog": {
 		"close": "Fechar",
 		"cancel": "Cancelar"
+	},
+	"history": {
+		"title": "Histórico",
+		"intro": "Uma entrada por rodada do quiz neste dispositivo: a rodada termina quando você conclui a seleção ou zera o progresso.",
+		"empty": "Nenhuma rodada ainda. Responda uma pergunta para começar.",
+		"in_progress": "Em andamento",
+		"finished": "Concluída",
+		"partial": "Interrompida",
+		"answered": "Respondidas",
+		"correct": "Certas",
+		"wrong": "Erradas",
+		"duration": "Tempo",
+		"clear": "Limpar histórico",
+		"clear_confirm": "Apagar todas as rodadas salvas? Seu progresso atual é mantido.",
+		"clear_yes": "Sim, limpar"
 	}
 }

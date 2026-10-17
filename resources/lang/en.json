@@ -5,7 +5,8 @@
 	},
 	"nav": {
 		"label": "Main",
-		"language": "Language"
+		"language": "Language",
+		"history": "History"
 	},
 	"toolbar": {
 		"label": "Quiz controls",
@@ -55,5 +56,20 @@
 	"dialog": {
 		"close": "Close",
 		"cancel": "Cancel"
+	},
+	"history": {
+		"title": "History",
+		"intro": "One entry per quiz run on this device: a run ends when you finish the selection or reset your progress.",
+		"empty": "No runs yet. Answer a question to start one.",
+		"in_progress": "In progress",
+		"finished": "Completed",
+		"partial": "Stopped early",
+		"answered": "Answered",
+		"correct": "Correct",
+		"wrong": "Wrong",
+		"duration": "Time",
+		"clear": "Clear history",
+		"clear_confirm": "Delete every saved run? Your current progress is kept.",
+		"clear_yes": "Yes, clear"
 	}
 }

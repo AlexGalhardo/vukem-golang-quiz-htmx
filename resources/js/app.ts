@@ -2,8 +2,21 @@
 // and answers as htmx fragments, while progress, statistics and settings
 // live here, in localStorage. Loaded by the layout through Vite.
 
-type Difficulty = "very-easy" | "easy" | "medium" | "hard" | "very-hard";
-type Mode = "ordered" | "random";
+import {
+	addRun,
+	type Difficulty,
+	DIFFICULTIES,
+	formatDuration,
+	isDifficulty,
+	loadHistory,
+	type Mode,
+	parseRun,
+	percent,
+	recordAnswer,
+	type Run,
+	saveHistory,
+} from "./history";
+
 type Theme = "light" | "dark" | "system";
 
 interface IndexEntry {
@@ -31,6 +44,8 @@ interface State {
 	answers: Record<string, Answer>;
 	// Shuffled ids for random mode, kept so the order survives reloads.
 	order: string[];
+	// The run in progress (history), saved to the history when it ends.
+	run?: Run;
 }
 
 interface AnsweredDetail {
@@ -45,10 +60,8 @@ interface Htmx {
 }
 
 const STORAGE_KEY = "quiz:v1";
-const DIFFICULTIES: readonly Difficulty[] = ["very-easy", "easy", "medium", "hard", "very-hard"];
 const LOCALES = ["en", "pt-BR"];
 
-const isDifficulty = (v: unknown): v is Difficulty => typeof v === "string" && (DIFFICULTIES as readonly string[]).includes(v);
 
 function defaultState(): State {
 	return { settings: { mode: "ordered", difficulties: [...DIFFICULTIES], review: false }, answers: {}, order: [] };
@@ -91,6 +104,7 @@ function loadState(): State {
 	}
 
 	if (Array.isArray(r.order)) state.order = r.order.filter((x): x is string => typeof x === "string");
+	state.run = parseRun(r.run);
 
 	return state;
 }
@@ -271,6 +285,7 @@ class Quiz {
 
 	private showFinished(): void {
 		this.wanted = undefined;
+		if (!this.state.settings.review) this.endRun(true);
 		const tpl = document.getElementById("quiz-finished") as HTMLTemplateElement | null;
 		const quiz = document.getElementById("quiz");
 		if (!tpl || !quiz) return;
@@ -356,6 +371,7 @@ class Quiz {
 
 	private reset(): void {
 		this.askReset(false);
+		this.endRun(false);
 		this.update((s) => {
 			s.answers = {};
 			s.order = shuffle(this.index.map((e) => e.id));
@@ -365,6 +381,79 @@ class Quiz {
 		this.renderStats();
 		const first = this.queue()[0];
 		if (first) this.load(first, "push");
+	}
+
+	// endRun moves the run in progress (if it has answers) to the history.
+	private endRun(finished: boolean): void {
+		const run = this.state.run;
+		if (!run || run.answered === 0) return;
+		saveHistory(storage(), addRun(loadHistory(storage()), { ...run, finished }));
+		this.update((s) => delete s.run);
+	}
+
+	private renderHistory(): void {
+		const list = document.querySelector<HTMLElement>('[data-testid="history-list"]');
+		const tpl = document.getElementById("history-run-tpl") as HTMLTemplateElement | null;
+		if (!list || !tpl) return;
+
+		const saved = loadHistory(storage());
+		const runs: { run: Run; status: "progress" | "finished" | "partial" }[] = saved.map((run) => ({ run, status: run.finished ? "finished" : "partial" }));
+		if (this.state.run && this.state.run.answered > 0) runs.unshift({ run: this.state.run, status: "progress" });
+
+		const date = new Intl.DateTimeFormat(this.lang, { dateStyle: "medium", timeStyle: "short" });
+		list.replaceChildren(
+			...runs.map(({ run, status }) => {
+				const li = (tpl.content.firstElementChild as HTMLElement).cloneNode(true) as HTMLElement;
+				const field = (name: string): HTMLElement | null => li.querySelector(`[data-testid="${name}"], [data-field="${name}"]`);
+				li.dataset.status = status;
+				const time = field("date");
+				if (time) {
+					time.textContent = date.format(run.startedAt);
+					time.setAttribute("datetime", new Date(run.startedAt).toISOString());
+				}
+				for (const el of li.querySelectorAll<HTMLElement>("[data-status-label]")) if (el.dataset.statusLabel !== status) el.remove();
+				const badge = field("status");
+				badge?.classList.add(...(status === "progress" ? ["bg-indigo-100", "text-indigo-800", "dark:bg-indigo-950", "dark:text-indigo-200"] : status === "finished" ? ["bg-green-100", "text-green-800", "dark:bg-green-950", "dark:text-green-200"] : ["bg-zinc-100", "text-zinc-700", "dark:bg-zinc-800", "dark:text-zinc-300"]));
+				const set = (name: string, value: string): void => {
+					const el = field(name);
+					if (el) el.textContent = value;
+				};
+				set("run-accuracy", percent(run.correct, run.answered));
+				set("run-answered", String(run.answered));
+				set("run-correct", String(run.correct));
+				set("run-wrong", String(run.answered - run.correct));
+				set("run-duration", formatDuration(run.endedAt - run.startedAt));
+				for (const el of li.querySelectorAll<HTMLElement>("[data-mode-label]")) if (el.dataset.modeLabel !== run.mode) el.remove();
+
+				const names: string[] = [];
+				for (const row of li.querySelectorAll<HTMLElement>("li[data-difficulty]")) {
+					const d = row.dataset.difficulty as Difficulty;
+					const name = row.querySelector("[data-difficulty-name]")?.textContent ?? d;
+					if (run.difficulties.includes(d)) names.push(name);
+					const t = run.byDifficulty[d];
+					if (!t) {
+						row.remove();
+						continue;
+					}
+					const acc = row.querySelector<HTMLElement>('[data-field="acc"]');
+					if (acc) acc.textContent = `${percent(t.correct, t.answered)} (${t.correct}/${t.answered})`;
+				}
+				set("difficulties", names.join(", "));
+				return li;
+			}),
+		);
+
+		document.querySelector('[data-testid="history-empty"]')?.classList.toggle("hidden", runs.length > 0);
+		document.querySelector('[data-testid="history-actions"]')?.classList.toggle("hidden", saved.length === 0);
+		this.askClearHistory(false, false);
+	}
+
+	private askClearHistory(ask: boolean, focus = true): void {
+		const button = document.querySelector<HTMLElement>('[data-testid="history-clear"]');
+		const confirm = document.querySelector<HTMLElement>('[data-testid="history-clear-confirm"]');
+		button?.classList.toggle("hidden", ask);
+		confirm?.classList.toggle("hidden", !ask);
+		if (focus) (ask ? confirm?.querySelector<HTMLElement>('[data-action="history-clear-no"]') : button)?.focus();
 	}
 
 	// "system" (the default) follows prefers-color-scheme, live.
@@ -405,7 +494,14 @@ class Quiz {
 		document.body.addEventListener("quiz:answered", (e) => {
 			const d = (e as CustomEvent<AnsweredDetail>).detail;
 			if (!d || typeof d.id !== "string" || !isDifficulty(d.difficulty)) return;
-			this.update((s) => (s.answers[d.id] = { alt: d.alt, correct: d.correct === true, difficulty: d.difficulty, at: Date.now() }));
+			const now = Date.now();
+			this.update((s) => {
+				s.answers[d.id] = { alt: d.alt, correct: d.correct === true, difficulty: d.difficulty, at: now };
+				// Replaying wrong answers is not a new run.
+				if (!s.settings.review) {
+					s.run = recordAnswer(s.run, { mode: s.settings.mode, difficulties: s.settings.difficulties, difficulty: d.difficulty, correct: d.correct === true, now });
+				}
+			});
 			this.renderStats();
 			document.querySelector<HTMLElement>('[data-action="next"]')?.focus({ preventScroll: true });
 		});
@@ -451,6 +547,17 @@ class Quiz {
 				case "reset-yes":
 					this.reset();
 					break;
+				case "history-clear":
+					this.askClearHistory(true);
+					break;
+				case "history-clear-no":
+					this.askClearHistory(false);
+					break;
+				case "history-clear-yes":
+					saveHistory(storage(), []);
+					this.renderHistory();
+					document.querySelector<HTMLElement>("#history [data-action=close-dialog]")?.focus();
+					break;
 			}
 		});
 
@@ -478,6 +585,7 @@ class Quiz {
 		const dialog = document.getElementById(id);
 		if (!(dialog instanceof HTMLDialogElement) || dialog.open) return;
 		if (id === "settings") this.askReset(false, false);
+		if (id === "history") this.renderHistory();
 		dialog.showModal();
 	}
 
@@ -510,8 +618,15 @@ class Quiz {
 	}
 }
 
-function percent(n: number, total: number): string {
-	return total === 0 ? "–" : `${Math.round((n / total) * 100)}%`;
-}
 
 new Quiz().start();
+
+// storage returns localStorage, or undefined where touching it throws
+// (blocked storage, sandboxed frames).
+function storage(): Storage | undefined {
+	try {
+		return window.localStorage;
+	} catch {
+		return undefined;
+	}
+}
