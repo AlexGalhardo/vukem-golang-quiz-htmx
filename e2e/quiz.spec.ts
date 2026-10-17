@@ -32,8 +32,13 @@ async function answer(page: Page, alt: string): Promise<void> {
 // Next swaps the question in asynchronously; wait until the answered card
 // is gone before reading the new question.
 async function next(page: Page): Promise<void> {
+	const before = await currentId(page);
 	await page.getByTestId("next").click();
 	await expect(page.getByTestId("verdict")).toHaveCount(0);
+	// A slow swap can clear the card before the new question is in place.
+	await expect
+		.poll(async () => (await page.getByTestId("finished").count()) > 0 || ((await currentId(page).catch(() => before)) !== before))
+		.toBe(true);
 }
 
 async function answerWrong(page: Page, request: APIRequestContext): Promise<void> {
