@@ -309,21 +309,45 @@ test.describe("settings", () => {
 });
 
 test.describe("navbar", () => {
-	test("theme toggle switches and persists without a flash", async ({ page }) => {
+	test("theme radiogroup switches light, dark and system and persists without a flash", async ({ page }) => {
 		await page.emulateMedia({ colorScheme: "light" });
 		await page.goto("/");
 		const html = page.locator("html");
+		const radio = (v: string) => page.getByTestId("theme").locator(`[data-theme-choice="${v}"]`);
 		await expect(html).toHaveAttribute("data-theme", "light");
+		await expect(radio("system")).toHaveAttribute("aria-checked", "true");
+		await expect(page.getByTestId("theme").getByRole("radio")).toHaveCount(3);
 
-		await page.getByTestId("theme-toggle").click();
+		await radio("dark").click();
 		await expect(html).toHaveAttribute("data-theme", "dark");
+		await expect(radio("dark")).toHaveAttribute("aria-checked", "true");
+		await expect(radio("system")).toHaveAttribute("aria-checked", "false");
 
 		await page.goto("/", { waitUntil: "commit" });
 		await page.waitForFunction(() => document.documentElement.dataset.theme !== undefined);
 		await expect(html).toHaveAttribute("data-theme", "dark");
 
-		await page.getByTestId("theme-toggle").click();
+		await radio("light").click();
 		await expect(html).toHaveAttribute("data-theme", "light");
+
+		// System follows the OS preference live.
+		await radio("system").click();
+		await expect(html).toHaveAttribute("data-theme", "light");
+		await page.emulateMedia({ colorScheme: "dark" });
+		await expect(html).toHaveAttribute("data-theme", "dark");
+	});
+
+	test("theme radiogroup supports arrow keys", async ({ page }) => {
+		await page.emulateMedia({ colorScheme: "light" });
+		await page.goto("/");
+		const group = page.getByTestId("theme");
+		await group.locator('[aria-checked="true"]').focus();
+		await page.keyboard.press("ArrowLeft"); // system -> dark
+		await expect(group.locator('[data-theme-choice="dark"]')).toHaveAttribute("aria-checked", "true");
+		await expect(group.locator('[data-theme-choice="dark"]')).toBeFocused();
+		await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+		await page.keyboard.press("ArrowRight"); // dark -> system
+		await expect(group.locator('[data-theme-choice="system"]')).toHaveAttribute("aria-checked", "true");
 	});
 
 	test("theme defaults to the OS preference", async ({ page }) => {

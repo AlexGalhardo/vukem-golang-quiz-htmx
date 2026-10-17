@@ -4,7 +4,7 @@
 
 type Difficulty = "very-easy" | "easy" | "medium" | "hard" | "very-hard";
 type Mode = "ordered" | "random";
-type Theme = "light" | "dark";
+type Theme = "light" | "dark" | "system";
 
 interface IndexEntry {
 	id: string;
@@ -72,7 +72,7 @@ function loadState(): State {
 	const r = raw as Record<string, unknown>;
 	const s = (typeof r.settings === "object" && r.settings !== null ? r.settings : {}) as Record<string, unknown>;
 
-	if (s.theme === "light" || s.theme === "dark") state.settings.theme = s.theme;
+	if (s.theme === "light" || s.theme === "dark" || s.theme === "system") state.settings.theme = s.theme;
 	if (typeof s.lang === "string" && LOCALES.includes(s.lang)) state.settings.lang = s.lang;
 	if (s.mode === "random") state.settings.mode = "random";
 	if (Array.isArray(s.difficulties)) {
@@ -141,6 +141,7 @@ class Quiz {
 		if (this.syncLanguage()) return;
 
 		this.syncRandomOrder();
+		this.applyTheme();
 		this.renderSettings();
 		this.renderStats();
 		this.bindEvents();
@@ -358,10 +359,38 @@ class Quiz {
 		if (first) this.load(first, "push");
 	}
 
-	private toggleTheme(): void {
-		const next: Theme = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
-		document.documentElement.dataset.theme = next;
-		this.update((s) => (s.settings.theme = next));
+	// "system" (the default) follows prefers-color-scheme, live.
+	private readonly darkQuery = window.matchMedia("(prefers-color-scheme: dark)");
+
+	private get theme(): Theme {
+		return this.state.settings.theme ?? "system";
+	}
+
+	private applyTheme(): void {
+		const choice = this.theme;
+		const resolved = choice === "system" ? (this.darkQuery.matches ? "dark" : "light") : choice;
+		document.documentElement.dataset.theme = resolved;
+		for (const b of document.querySelectorAll<HTMLElement>("[data-theme-choice]")) {
+			const on = b.dataset.themeChoice === choice;
+			b.setAttribute("aria-checked", String(on));
+			b.tabIndex = on ? 0 : -1;
+		}
+	}
+
+	private setTheme(choice: Theme, focus = false): void {
+		this.update((s) => (s.settings.theme = choice));
+		this.applyTheme();
+		if (focus) document.querySelector<HTMLElement>(`[data-theme-choice="${choice}"]`)?.focus();
+	}
+
+	// Arrow keys move the choice inside the radiogroup (WAI-ARIA radio pattern).
+	private onThemeKey(e: KeyboardEvent, current: HTMLElement): void {
+		const order: Theme[] = ["light", "dark", "system"];
+		const step = e.key === "ArrowRight" || e.key === "ArrowDown" ? 1 : e.key === "ArrowLeft" || e.key === "ArrowUp" ? -1 : 0;
+		if (step === 0) return;
+		e.preventDefault();
+		const i = order.indexOf(current.dataset.themeChoice as Theme);
+		this.setTheme(order[(i + step + order.length) % order.length] ?? "system", true);
 	}
 
 	private bindEvents(): void {
@@ -377,6 +406,12 @@ class Quiz {
 			// The settings panel floats over the question: a click elsewhere closes it.
 			const settings = document.querySelector<HTMLDetailsElement>('[data-testid="settings"]');
 			if (settings?.open && !settings.contains(e.target as Node | null)) settings.open = false;
+
+			const choice = (e.target as Element | null)?.closest<HTMLElement>("[data-theme-choice]");
+			if (choice) {
+				this.setTheme(choice.dataset.themeChoice as Theme);
+				return;
+			}
 
 			const target = (e.target as Element | null)?.closest<HTMLElement>("[data-action], a[data-lang]");
 			if (!target) return;
@@ -394,9 +429,6 @@ class Quiz {
 				case "reset":
 					this.reset(target);
 					break;
-				case "theme":
-					this.toggleTheme();
-					break;
 			}
 		});
 
@@ -405,7 +437,12 @@ class Quiz {
 			if (input?.matches("input[data-setting]")) this.onSettingChange(input);
 		});
 
-		document.addEventListener("keydown", (e) => this.onKey(e));
+		document.addEventListener("keydown", (e) => {
+			const choice = (e.target as Element | null)?.closest<HTMLElement>("[data-theme-choice]");
+			if (choice) this.onThemeKey(e, choice);
+			else this.onKey(e);
+		});
+		this.darkQuery.addEventListener("change", () => this.applyTheme());
 
 		window.addEventListener("popstate", (e) => {
 			const fromState = (e.state as { id?: unknown } | null)?.id;

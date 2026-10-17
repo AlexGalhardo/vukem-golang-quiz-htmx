@@ -5,7 +5,6 @@
 	},
 	"nav": {
 		"label": "Principal",
-		"theme": "Alternar modo escuro",
 		"language": "Idioma"
 	},
 	"toolbar": {
@@ -45,5 +44,11 @@
 	"errors": {
 		"not_found": "Página não encontrada.",
 		"back": "Voltar ao quiz"
+	},
+	"theme": {
+		"label": "Tema de cores",
+		"light": "Tema claro",
+		"dark": "Tema escuro",
+		"system": "Tema do sistema"
 	}
 }

@@ -5,7 +5,6 @@
 	},
 	"nav": {
 		"label": "Main",
-		"theme": "Toggle dark mode",
 		"language": "Language"
 	},
 	"toolbar": {
@@ -45,5 +44,11 @@
 	"errors": {
 		"not_found": "Page not found.",
 		"back": "Back to the quiz"
+	},
+	"theme": {
+		"label": "Color theme",
+		"light": "Light theme",
+		"dark": "Dark theme",
+		"system": "System theme"
 	}
 }
