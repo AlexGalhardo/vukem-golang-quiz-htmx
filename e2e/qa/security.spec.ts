@@ -151,10 +151,7 @@ test("rate limiting answers 429 with RateLimit and Retry-After headers", async (
 
 test("framework error pages respect the CSP (405 from a form POST)", async ({ page }) => {
 	skipIfReadonly();
-	// QA-F2 (framework): vukem's built-in fallback error page uses an inline
-	// style attribute, which its own default CSP blocks. Expected to fail
-	// until vukem fixes it; remove test.fail then.
-	test.fail(true, "QA-F2: vukem fallback error page has inline style=\"\" (framework-feedback/quiz.md)");
+	// QA-F2: fixed in vukem v0.27.0 (the built-in page no longer uses inline styles).
 	await trackCSP(page);
 	await page.goto("/");
 	await page.evaluate(() => {
@@ -171,9 +168,7 @@ test("framework error pages respect the CSP (405 from a form POST)", async ({ pa
 
 test("oversized request headers are rejected well below 1 MiB", async () => {
 	skipIfReadonly();
-	// QA-F3 (framework): vukem leaves http.Server.MaxHeaderBytes at Go's
-	// 1 MiB default and has no setting for it; a 512 KiB header is accepted.
-	test.fail(true, "QA-F3: no MaxHeaderBytes setting in vukem (framework-feedback/quiz.md)");
+	// QA-F3: fixed in vukem v0.27.0 (HTTP_MAX_HEADER_BYTES, default 64 KiB).
 	const res = await fetch("http://127.0.0.1:3870/", { headers: { "X-Big": "a".repeat(512 * 1024) } });
 	expect(res.status).toBe(431);
 });

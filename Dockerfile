@@ -14,7 +14,7 @@ RUN bun run build
 
 # --- dev: Go toolchain + vukem CLI for `vukem serve` (compose) -----------
 FROM ${GO_IMAGE} AS dev
-ARG VUKEM_VERSION=v0.26.0
+ARG VUKEM_VERSION=v0.27.0
 RUN go install github.com/AlexGalhardo/vukem/cmd/vukem@${VUKEM_VERSION}
 WORKDIR /app
 COPY go.mod go.sum ./
