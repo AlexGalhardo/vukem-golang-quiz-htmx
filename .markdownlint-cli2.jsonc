@@ -11,7 +11,7 @@
     "MD013": false,
     // Keep a Changelog repeats "### Added" under each release
     "MD024": { "siblings_only": true },
-    "MD033": { "allowed_elements": ["details", "summary", "br", "kbd", "sup"] },
+    "MD033": { "allowed_elements": ["h1", "details", "summary", "br", "img", "a", "p", "kbd", "sup"] },
     "MD041": false,
     "MD046": { "style": "fenced" },
     "MD060": false
