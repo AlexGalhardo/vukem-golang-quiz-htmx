@@ -72,7 +72,7 @@ Exploratory checks that complement the automated suites (`go test ./...`, `bun r
 - Flows (`flows.spec.ts`, local only): full ordered runs of each difficulty and a random run (each question once, finished card, history entry), reset mid-run, back/forward, reload mid-question, double clicks and key mashing, corrupted and blocked `localStorage`/`sessionStorage`, very long and odd query strings, unknown routes and traversal paths.
 - Security (`security.spec.ts`): headers on pages, fragments, static files, errors and `/up` (CSP with a fresh nonce and no `unsafe-*`, `frame-ancestors 'none'`, HSTS on https, nosniff, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`, no cookies, no stack-revealing `Server`); marker payloads in query strings and storage never execute or reflect raw; quiz routes answer 405 to POST/PUT/PATCH/DELETE, cross-origin and with `_method`; 429 with `Retry-After` and `RateLimit-*`, `/up` exempt.
 
-Checks for open framework bugs use `test.fail(...)`: they pass while the bug exists and fail once vukem fixes it, which is the signal to drop the marker.
+Checks for open framework bugs use `test.fail(...)`: they pass while the bug exists and fail once vukem fixes it, which is the signal to drop the marker (QA-F2 and QA-F3 were dropped with vukem v0.27.0).
 
 ### 2026-10-17 run
 
@@ -84,7 +84,7 @@ Checks for open framework bugs use `test.fail(...)`: they pass while the bug exi
 | ID | Severity | Kind | Finding | Status |
 | --- | --- | --- | --- | --- |
 | QA-F1 | serious (a11y) | app | On phones the `<pre>` code sample scrolls horizontally but is not keyboard-focusable (axe `scrollable-region-focusable`, WCAG 2.1.1), e.g. `/questions/loop-variable-per-iteration-go122` on Pixel 7, both themes and languages. Evidence: `test-results/qa/crawler-*-crawl-*-mobile/`. | Fixed: the block is a focusable, labelled region with a focus ring |
-| QA-F2 | low | framework | `POST /` gets vukem's fallback 405 page, whose `<body style="…">` is blocked by vukem's own `style-src` nonce CSP (unstyled page, console CSP violation). `security.spec.ts` "framework error pages respect the CSP" (`test.fail`). | Open, in `framework-feedback/quiz.md` |
-| QA-F3 | low (hardening) | framework | A 512 KiB (even 900 KiB) request header gets 200; vukem has no `MaxHeaderBytes` setting, so only Go's 1 MiB default applies. `security.spec.ts` "oversized request headers…" (`test.fail`). | Open, in `framework-feedback/quiz.md` |
+| QA-F2 | low | framework | `POST /` gets vukem's fallback 405 page, whose `<body style="…">` is blocked by vukem's own `style-src` nonce CSP (unstyled page, console CSP violation). `security.spec.ts` "framework error pages respect the CSP" (`test.fail`). | Fixed in vukem v0.27.0; now a normal check |
+| QA-F3 | low (hardening) | framework | A 512 KiB (even 900 KiB) request header gets 200; vukem has no `MaxHeaderBytes` setting, so only Go's 1 MiB default applies. `security.spec.ts` "oversized request headers…" (`test.fail`). | Fixed in vukem v0.27.0 (`HTTP_MAX_HEADER_BYTES`, 64 KiB default); now a normal check |
 | QA-F4 | low | app | A key pressed a few milliseconds after Next (between the htmx swap and the new buttons being wired) was ignored once in 155 scripted runs. | Open; the flows retry the key like a user would. Fix idea: answer through `htmx.ajax` from the key handler |
 | QA-F5 | info | platform | Production responses carry `Server: railway-hikari` from Railway's edge; the app itself sends no `Server` header. | Accepted; the check asserts it never names the stack |

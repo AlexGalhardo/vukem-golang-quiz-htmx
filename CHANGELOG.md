@@ -35,7 +35,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Changed
 
-- vukem bumped to v0.22.0, v0.23.0, v0.24.0, v0.25.0, then v0.26.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
+- vukem bumped to v0.22.0, v0.23.0, v0.24.0, v0.25.0, v0.26.0, then v0.27.0; tests use `AssertHeaderContains` / `AssertHeaderMissing`.
 
 - The theme bootstrap is inlined with the per-request CSP nonce instead of a render-blocking `/js/theme.js` request; htmx moved to `/vendor/htmx-4.0.0/htmx.min.js` and is cached as immutable.
 
