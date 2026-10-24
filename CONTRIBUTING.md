@@ -4,7 +4,7 @@ Thanks for helping! Question fixes (a wrong answer, a broken link, a better PT-B
 
 ## Setup
 
-Requirements: Go 1.27.2, Bun 1.4.3, golangci-lint v2.15.0, Docker (optional).
+Requirements: Go 1.27.3, Bun 1.4.3, golangci-lint v2.15.0, Docker (optional).
 
 ```sh
 bun install                 # JS deps + git hooks (lefthook)

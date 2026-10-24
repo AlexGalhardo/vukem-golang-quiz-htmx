@@ -73,7 +73,7 @@ All GIFs are recorded against <https://quiz.vukem.dev> (read-only: progress live
 
 | Layer | Choice |
 | --- | --- |
-| Backend | Go 1.27.2, Vukem v0.28.0 (`html/template` views, i18n, rate limit, secure headers) |
+| Backend | Go 1.27.3, Vukem v0.28.0 (`html/template` views, i18n, rate limit, secure headers) |
 | Frontend | htmx 4.0.0 (vendored), Tailwind CSS 4.3.3, TypeScript 7.0.2, Vite 8.3.4 |
 | Data | None: questions are JSON shards embedded in the binary, progress lives in the browser |
 | Tooling | Bun 1.4.3, Playwright 1.64.1, axe, golangci-lint v2.15.0, govulncheck v1.9.0, lefthook, commitlint, markdownlint-cli2 |
@@ -81,7 +81,7 @@ All GIFs are recorded against <https://quiz.vukem.dev> (read-only: progress live
 
 ## Quick start
 
-Requirements: Go 1.27.2, Bun 1.4.3 and Docker (optional).
+Requirements: Go 1.27.3, Bun 1.4.3 and Docker (optional).
 
 ```sh
 bun install                  # JS deps + git hooks

@@ -67,7 +67,7 @@ The framework pin moves forward during the project. When the coordinator announc
 
 | Piece | Version | Notes |
 | --- | --- | --- |
-| Go | 1.27.2 | `go.mod` |
+| Go | 1.27.3 | `go.mod` |
 | vukem | v0.28.0 | `go.mod`; CLI in the dev image |
 | htmx | 4.0.0 | vendored |
 | Tailwind CSS / `@tailwindcss/vite` | 4.3.3 | CSS-first config |
@@ -80,7 +80,7 @@ The framework pin moves forward during the project. When the coordinator announc
 | lefthook | 2.2.2 | npm package |
 | markdownlint-cli2 | 0.23.3 | |
 | commitlint | 21.2.3 | cli + config-conventional |
-| Docker images | `golang:1.27.2-alpine3.24`, `oven/bun:1.4.3-alpine`, `alpine:3.24.2`, `zaproxy/zap-stable:2.17.0` | never `latest` |
+| Docker images | `golang:1.27.3-alpine3.24`, `oven/bun:1.4.3-alpine`, `alpine:3.24.2`, `zaproxy/zap-stable:2.17.0` | never `latest` |
 | Nuclei | v3.11.1 | `projectdiscovery/nuclei-action@v3.1.0` |
 | GitHub Actions | checkout v7.0.1, setup-go v7.0.0, setup-bun v2.2.0, golangci-lint-action v9.3.0, upload-artifact v7.0.2, download-artifact v8.0.2, setup-buildx v4.4.1, build-push v7.4.0, login v4.6.0, metadata v6.2.0, zap baseline v0.15.0, action-gh-release v3.0.3 | |
 

@@ -1,5 +1,5 @@
 # Multi-stage build. Every base image is pinned to an exact version.
-ARG GO_IMAGE=golang:1.27.2-alpine3.24
+ARG GO_IMAGE=golang:1.27.3-alpine3.24
 ARG BUN_IMAGE=oven/bun:1.4.3-alpine
 ARG RUNTIME_IMAGE=alpine:3.24.2
 
