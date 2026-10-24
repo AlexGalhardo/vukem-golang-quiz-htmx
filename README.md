@@ -8,9 +8,45 @@
   <a href="LICENSE"><img src="https://img.shields.io/github/license/AlexGalhardo/vukem-golang-quiz-htmx" alt="License"></a>
 </p>
 
+<p align="center">
+  <img src="docs/media/answer-with-explanation.gif" alt="Answering a question and reading the explanation of every alternative" width="720">
+</p>
+
 ## Introduction
 
 Go Interview Quiz is an open-source, interactive quiz of Go (Golang) interview questions, from very easy to very hard. Every question has five alternatives, an explanation of each option and links to its sources, in English and Brazilian Portuguese. It is built with the [Vukem](https://github.com/AlexGalhardo/vukem) Go framework, htmx 4 and Tailwind CSS v4, runs in production at <https://quiz.vukem.dev> and is one of the battle tests for Vukem 1.0.
+
+## See it working
+
+### Answer and learn
+
+Pick an alternative (or press `1`–`5`) to lock the options and see why each one is right or wrong, with sources.
+
+![Answering a question and reading the explanation](docs/media/answer-with-explanation.gif)
+
+### Progress and accuracy
+
+Progress X/N and accuracy overall and per difficulty, kept in `localStorage`.
+
+![Answering three questions and opening the stats](docs/media/progress-and-stats.gif)
+
+### Difficulty filter
+
+![Filtering the queue to hard questions in the settings dialog](docs/media/difficulty-filter.gif)
+
+### English and Brazilian Portuguese
+
+![Switching between EN and PT-BR](docs/media/language-switch.gif)
+
+### Dark and light themes
+
+![Switching to the dark theme and back](docs/media/dark-mode.gif)
+
+### Mobile
+
+![Answering a question on a phone-sized screen](docs/media/mobile-view.gif)
+
+All GIFs are recorded against <https://quiz.vukem.dev> (read-only: progress lives in the browser).
 
 ## Summary
 
