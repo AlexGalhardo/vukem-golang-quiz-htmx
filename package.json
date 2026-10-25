@@ -24,6 +24,6 @@
 		"markdownlint-cli2": "0.23.3",
 		"tailwindcss": "4.3.3",
 		"typescript": "7.0.2",
-		"vite": "8.3.4"
+		"vite": "8.3.5"
 	}
 }
