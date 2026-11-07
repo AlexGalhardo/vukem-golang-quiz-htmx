@@ -1,0 +1,182 @@
+[
+  {
+    "verdict": "confirmed",
+    "fingerprint": "vukem-quiz:ci:actions-pinned-by-tag",
+    "title": "Third-party GitHub Actions are pinned by mutable tag",
+    "description": "Workflows reference actions by version tag, which the action owner can move. A compromised tag would run attacker code with the job token and secrets.",
+    "root_cause": "uses: owner/action@vX.Y.Z instead of a full commit SHA.",
+    "intended_behavior": "Third-party actions are pinned to a 40-character commit SHA with the version in a trailing comment, as in security-audit.yml.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": ".github/workflows/ci.yml",
+        "line": 26,
+        "scope": "jobs",
+        "description": "Workflow runs resolve the tag at run time."
+      },
+      {
+        "kind": "sink",
+        "file": ".github/workflows/ci.yml",
+        "line": 26,
+        "scope": "uses step",
+        "description": "The resolved code runs with the job token and secrets."
+      }
+    ],
+    "evidence": [
+      {
+        "file": ".github/workflows/ci.yml",
+        "line": 26,
+        "description": "The step is pinned by tag, not SHA."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "environmental_dependency",
+        "description": "Needs the upstream action tag to be moved or its repository compromised."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Compromised upstream action maintainer or tag.",
+      "payloads": [
+        "none"
+      ],
+      "instructions": [
+        "Inspect the workflows: uses lines end in a version tag."
+      ],
+      "observed_result": "The action code is resolved from a movable tag."
+    },
+    "remediation": {
+      "strategy": "Pin every action to its commit SHA, keeping the version in a comment.",
+      "code_changes": []
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Needs an upstream compromise."
+      },
+      "impact": {
+        "score": "low",
+        "reason": "Release workflows hold packages write and registry credentials."
+      },
+      "overall_severity": "low"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Visible in the repository files."
+    }
+  },
+  {
+    "verdict": "confirmed",
+    "fingerprint": "vukem-quiz:ci:checkout-persists-credentials",
+    "title": "Workflow checkouts keep the GitHub token in the local git config",
+    "description": "The workflows check out the repository without persist-credentials: false, so the job token stays in .git/config for later steps, including steps that run repository code.",
+    "root_cause": "actions/checkout default persist-credentials: true.",
+    "intended_behavior": "Every checkout sets persist-credentials: false, as scorecard.yml and security-audit.yml do.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": ".github/workflows/ci.yml",
+        "line": 26,
+        "scope": "jobs",
+        "description": "Push and pull_request runs execute the checkout steps."
+      },
+      {
+        "kind": "sink",
+        "file": ".github/workflows/ci.yml",
+        "line": 26,
+        "scope": "checkout step",
+        "description": "Token is written to the workspace git config and stays readable by later steps."
+      }
+    ],
+    "evidence": [
+      {
+        "file": ".github/workflows/ci.yml",
+        "line": 26,
+        "description": "The checkout step has no persist-credentials setting."
+      }
+    ],
+    "conditions": [
+      {
+        "kind": "environmental_dependency",
+        "description": "Needs untrusted code running in a later step; the token is limited by the workflow permissions."
+      }
+    ],
+    "execution": {
+      "attacker_perspective": "Pull request author whose code runs in a later step.",
+      "payloads": [
+        "none"
+      ],
+      "instructions": [
+        "Inspect the workflows: the checkout steps lack persist-credentials: false."
+      ],
+      "observed_result": "Token remains available in .git/config for subsequent steps."
+    },
+    "remediation": {
+      "strategy": "Add with: persist-credentials: false to every checkout step.",
+      "code_changes": []
+    },
+    "severity": {
+      "likelihood": {
+        "score": "low",
+        "reason": "Fork pull requests get a read-only token and same-repo authors already have write access."
+      },
+      "impact": {
+        "score": "informational",
+        "reason": "Token scope is limited by the permissions blocks."
+      },
+      "overall_severity": "informational"
+    },
+    "confidence": {
+      "score": "high",
+      "reason": "Visible in the repository files."
+    }
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "vukem-quiz:review:html-injection",
+    "title": "Review page injects markup from the query string",
+    "description": "GET /review?items= renders question text as template.HTML.",
+    "claimed_root_cause": "GET /review?items= renders question text as template.HTML.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "app/controllers/quiz.go",
+        "line": 283,
+        "scope": "richText",
+        "description": "Query parameter items."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "app/controllers/quiz.go",
+        "line": 283,
+        "description": "Items are validated to bank ids and one letter; the HTML comes from the bank text, escaped before only <code> is added."
+      }
+    ],
+    "reason": "No request input reaches the markup."
+  },
+  {
+    "verdict": "rejected",
+    "fingerprint": "vukem-quiz:review:resource-exhaustion",
+    "title": "Review or order parameters exhaust the server",
+    "description": "items and order are parsed from the URL.",
+    "claimed_root_cause": "items and order are parsed from the URL.",
+    "trace": [
+      {
+        "kind": "entrypoint",
+        "file": "app/controllers/quiz.go",
+        "line": 91,
+        "scope": "Review",
+        "description": "Query parameters."
+      }
+    ],
+    "evidence": [
+      {
+        "file": "app/controllers/quiz.go",
+        "line": 91,
+        "description": "items is capped at maxReviewItems, order must be a permutation of the alternatives, and a per-IP limit and body cap apply."
+      }
+    ],
+    "reason": "Bounded work per request."
+  }
+]

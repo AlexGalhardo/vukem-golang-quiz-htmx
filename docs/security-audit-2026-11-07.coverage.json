@@ -1,0 +1,178 @@
+[
+  {
+    "coverage_id": ".github%2Fworkflows%2Fci.yml%23checkout::.github%2Fworkflows%2Fci.yml%23permissions::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Obvious%20things",
+    "canonical_refs": {
+      "surface": ".github/workflows/ci.yml#checkout",
+      "boundary": ".github/workflows/ci.yml#permissions",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Obvious things"
+    },
+    "surface": ".github/workflows/ci.yml#checkout",
+    "boundary": ".github/workflows/ci.yml#permissions",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Obvious things",
+    "starting_paths": [
+      ".github/workflows/ci.yml",
+      ".github/workflows/lighthouse.yml",
+      ".github/workflows/release.yml"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Obvious things",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "candidate",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      ".github/workflows/ci.yml",
+      ".github/workflows/lighthouse.yml",
+      ".github/workflows/release.yml"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          ".github/workflows/ci.yml",
+          ".github/workflows/lighthouse.yml",
+          ".github/workflows/release.yml"
+        ],
+        "invariant": "Workflows use least privilege, pinned actions and non-persisted credentials.",
+        "method": "source",
+        "result": "Checkouts persisted credentials and actions were tag-pinned.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [
+      "vukem-quiz:ci:checkout-persists-credentials",
+      "vukem-quiz:ci:actions-pinned-by-tag"
+    ],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "app%2Fcontrollers%2Fquiz.go%23Review::app%2Fcontrollers%2Fquiz.go%23richText::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Injection",
+    "canonical_refs": {
+      "surface": "app/controllers/quiz.go#Review",
+      "boundary": "app/controllers/quiz.go#richText",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Injection"
+    },
+    "surface": "app/controllers/quiz.go#Review",
+    "boundary": "app/controllers/quiz.go#richText",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Injection",
+    "starting_paths": [
+      "app/controllers/quiz.go"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Injection",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "app/controllers/quiz.go"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "app/controllers/quiz.go"
+        ],
+        "invariant": "Request input never reaches HTML unescaped.",
+        "method": "source",
+        "result": "Validated ids; escaped text.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "routes%2Fweb.go%23middleware::routes%2Fweb.go%23SecureHeaders::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Feature%20abuse%20and%20data%20leakage",
+    "canonical_refs": {
+      "surface": "routes/web.go#middleware",
+      "boundary": "routes/web.go#SecureHeaders",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Feature abuse and data leakage"
+    },
+    "surface": "routes/web.go#middleware",
+    "boundary": "routes/web.go#SecureHeaders",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    "starting_paths": [
+      "routes/web.go",
+      "Dockerfile"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Feature abuse and data leakage",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "routes/web.go",
+      "Dockerfile"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "routes/web.go",
+          "Dockerfile"
+        ],
+        "invariant": "Stateless stack, CSP, no cookies, proxy trust from environment only.",
+        "method": "source",
+        "result": "Present.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  },
+  {
+    "coverage_id": "routes%2Fweb.go%23rate-limit::routes%2Fweb.go%23BodyLimit::profile%2Fquick%2Fall-in-scope-subsystems::ATTACK-CLASSES.md%23Resource%20and%20file%20handling",
+    "canonical_refs": {
+      "surface": "routes/web.go#rate-limit",
+      "boundary": "routes/web.go#BodyLimit",
+      "subsystem": "profile/quick/all-in-scope-subsystems",
+      "attack_class": "ATTACK-CLASSES.md#Resource and file handling"
+    },
+    "surface": "routes/web.go#rate-limit",
+    "boundary": "routes/web.go#BodyLimit",
+    "subsystem": "profile/quick/all-in-scope-subsystems",
+    "attack_class": "ATTACK-CLASSES.md#Resource and file handling",
+    "starting_paths": [
+      "routes/web.go"
+    ],
+    "ordinary_attack_class_block": "ATTACK-CLASSES.md#Resource and file handling",
+    "selected_companion_blocks": [],
+    "excluded_blocks": [],
+    "prior_status": "none",
+    "attempts": [],
+    "wave": 1,
+    "status": "covered",
+    "agent_id": "hunter-main",
+    "reviewed_paths": [
+      "routes/web.go"
+    ],
+    "local_checks": [
+      {
+        "agent_id": "hunter-main",
+        "reviewed_paths": [
+          "routes/web.go"
+        ],
+        "invariant": "Per-IP limit, body cap and bounded parameters.",
+        "method": "source",
+        "result": "Present.",
+        "artifact": null
+      }
+    ],
+    "result_fingerprints": [],
+    "unresolved": []
+  }
+]
