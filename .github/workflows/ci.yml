@@ -23,19 +23,19 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-go@v7.0.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
-      - uses: golangci/golangci-lint-action@v9.3.0
+      - uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
       - name: go mod tidy
         run: go mod tidy -diff
-      - uses: oven-sh/setup-bun@v2.2.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: ${{ env.BUN_VERSION }}
       - run: bun install --frozen-lockfile
@@ -62,10 +62,10 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-go@v7.0.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
       - run: go vet ./...
@@ -81,10 +81,10 @@ jobs:
   vuln:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-go@v7.0.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
       - name: govulncheck
@@ -93,13 +93,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-go@v7.0.0
+      - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
         with:
           go-version-file: go.mod
-      - uses: oven-sh/setup-bun@v2.2.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: ${{ env.BUN_VERSION }}
       - run: bun install --frozen-lockfile
@@ -108,7 +108,7 @@ jobs:
         run: |
           tags="$(sed 's/#.*//' .buildtags | tr -s ', \t\r\n' ',' | sed 's/^,//; s/,$//')"
           CGO_ENABLED=0 go build -tags "$tags" -trimpath -ldflags="-s -w" -o bin/app ./cmd/app
-      - uses: actions/upload-artifact@v7.0.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: app-linux-amd64
           path: bin/app
@@ -124,14 +124,14 @@ jobs:
       # The whole suite shares one client IP.
       RATE_LIMIT_PER_MINUTE: "10000"
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: oven-sh/setup-bun@v2.2.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: ${{ env.BUN_VERSION }}
       - run: bun install --frozen-lockfile
-      - uses: actions/download-artifact@v8.0.2
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: app-linux-amd64
           path: bin
@@ -145,7 +145,7 @@ jobs:
       - run: bun run test:e2e
       - if: failure()
         run: cat app.log
-      - uses: actions/upload-artifact@v7.0.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: playwright-report
@@ -160,14 +160,14 @@ jobs:
       # tiny rate limit for the 429 check).
       QA_APP_CMD: bin/app
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: oven-sh/setup-bun@v2.2.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: ${{ env.BUN_VERSION }}
       - run: bun install --frozen-lockfile
-      - uses: actions/download-artifact@v8.0.2
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: app-linux-amd64
           path: bin
@@ -175,7 +175,7 @@ jobs:
       - run: bunx playwright install --with-deps chromium
       - name: QA suite (crawler, human-like flows, security checks)
         run: bun run test:qa
-      - uses: actions/upload-artifact@v7.0.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: failure()
         with:
           name: playwright-report-qa
@@ -190,11 +190,11 @@ jobs:
       contents: read
       issues: write
     steps:
-      - uses: actions/checkout@v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: docker/setup-buildx-action@v4.4.1
-      - uses: docker/build-push-action@v7.4.0
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           target: runtime
@@ -210,7 +210,7 @@ jobs:
           curl -fsS -o /dev/null http://localhost:8080/vendor/htmx-4.0.0/htmx.min.js
           test "$(docker inspect -f '{{.Config.User}}' vukem-quiz:ci)" = "65532:65532"
       - name: ZAP baseline
-        uses: zaproxy/action-baseline@v0.15.0
+        uses: zaproxy/action-baseline@de8ad967d3548d44ef623df22cf95c3b0baf8b25 # v0.15.0
         with:
           target: http://localhost:8080
           docker_name: zaproxy/zap-stable:2.17.0
@@ -220,7 +220,7 @@ jobs:
           fail_action: true
           artifact_name: zap-baseline
       - name: nuclei
-        uses: projectdiscovery/nuclei-action@v3.1.0
+        uses: projectdiscovery/nuclei-action@32a91c0da7be14c07b0ade6c14fa0f6e78d97c9c # v3.1.0
         with:
           version: v3.11.1
           args: -u http://localhost:8080 -severity medium,high,critical -exclude-tags dos,fuzz -silent -no-interactsh -jsonl-export nuclei.jsonl

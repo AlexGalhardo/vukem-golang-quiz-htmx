@@ -25,7 +25,7 @@ jobs:
   lighthouse:
     runs-on: ubuntu-latest
     steps:
-      - uses: oven-sh/setup-bun@v2.2.0
+      - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
         with:
           bun-version: ${{ env.BUN_VERSION }}
       - name: audit
@@ -41,7 +41,7 @@ jobs:
               --chrome-flags="--headless=new --no-sandbox" --quiet
             jq -r --arg i "$i" '"run \($i): " + ([.categories | to_entries[] | "\(.key)=\(.value.score*100|round)"] | join(" ")) + " | FCP " + .audits["first-contentful-paint"].displayValue + " LCP " + .audits["largest-contentful-paint"].displayValue + " TBT " + .audits["total-blocking-time"].displayValue + " CLS " + .audits["cumulative-layout-shift"].displayValue' "reports/run-$i.report.json" | tee -a "$GITHUB_STEP_SUMMARY"
           done
-      - uses: actions/upload-artifact@v7.0.2
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: lighthouse
           path: reports
