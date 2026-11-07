@@ -24,7 +24,6 @@ Not reviewed in depth: the question bank content, the Vue-free client scripts un
 | Informational | 1 | - | - |
 | Unrated | - | 0 | 2 |
 
-
 ## Findings
 
 ### SA-001 Workflow checkouts persist the GitHub token (informational)
